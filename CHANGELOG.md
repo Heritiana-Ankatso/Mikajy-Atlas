@@ -6,6 +6,7 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 ## [Unreleased]
 
 ### Added
+- **Research branch licensing:** `research/noncommercial` is under PolyForm Noncommercial 1.0.0 (code) and CC BY-NC-SA 4.0 (research weights) so it can be trained on non-commercial datasets and shared free of charge; see `docs/RESEARCH_BRANCH.md`.
 - **Stroke-sequence recogniser** (default; Settings → Recogniser, Classic still available): a transformer reads all the strokes of a line and emits LaTeX tokens — late additions, extended lines, multiple lines, exponents, denominators, matrices, complex numbers and `mod` are read without grouping rules. Ink stays on the board with the typeset reading and answer below it. `web/seq-core.js`, `web/model/seq1.json`, `training/{strokefeat,seqmodel,gen_corpus,train_seq,eval_seq,pack_seq,parity_seq}.py`, `tests/seq-core.test.cjs`, `tests/browser_seq.py`. Trained on synthetic strokes only.
 - `training/eval_app.py --rec`, a recorded-clock replay and a viewport that contains all the ink.
 - **ℝ / ℂ number domain** (Settings → Numbers): complex arithmetic with exact Gaussian rationals, all complex roots of polynomial and rational-function equations (`complexRoots` in `poly-core.js`), `tests/complex.test.cjs`.
