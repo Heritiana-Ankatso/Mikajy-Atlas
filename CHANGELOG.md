@@ -6,6 +6,11 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 ## [Unreleased]
 
 ### Added (6.1, in progress)
+- **Functions:** `f(x) = x² + 1`, then `f(3)`, `f(1/2)`, `f(g(2))`; a line sees the definitions above it. **Probability:** `X ~ B(n, p)` / `N` / `P` / `G` / `U` / `E`, then `P(X = k)`, `P(X ≤ k)`, `P(a ≤ X ≤ b)`, `E(X)`, `V(X)`, `C(n, k)` — exact (binomial, geometric, uniform, and Poisson / exponential as `q + c·e^(−λ)`), the normal distribution marked `≈`. `web/board-core.js`, `web/prob-core.js`.
+- **Differential equations:** first-order linear and separable, second-order with constant coefficients and forcing, initial conditions, `y'`, `y''`, `dy/dx`; every solution is substituted back before it is shown. `web/ode-core.js`.
+- **Complex numbers:** conjugate (`\overline z`), argument (a multiple of π when it is one), exact `e^(iπk/2)`; `e^(iπ)` is now exactly `−1`.
+- **Answers are typeset:** integer fractions are stacked, exponents raised, and `√2/2` no longer shows a `÷`. The board draws `~ ≤ ≥ ≠`, the prime and a bar over a conjugate.
+- **Recogniser training data:** new notation, a 9 written from the top and an x written as `)(`.
 - **Matrices** (exact): `det`, `|A|`, `A⁻¹`, `Aᵀ`, `Aⁿ`, `A+B`, `AB`, `kA`; singular or mismatched matrices are refused. **Modular arithmetic**: `a mod m`, `aᵇ mod m` without forming `aᵇ`, `gcd`, `lcm`; **congruences**: `a ≡ b (mod m)` → True/False, `ax ≡ b (mod m)` → `x ≡ r (mod m')`, or `S=∅`. `web/linalg-core.js`, `web/modular-core.js`, `web/latex-eval.js`, `tests/latex-eval.test.cjs`.
 - **Matrices look like they do on paper:** a bracketed grid (square, round or bars) whose brackets grow with the entries, entries aligned in columns and rows, stacked fractions allowed inside entries; answers are drawn the same way. Matrix readings no longer print their environment name (`bmatrix`) on the board.
 
