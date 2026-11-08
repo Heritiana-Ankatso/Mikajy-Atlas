@@ -16,7 +16,7 @@ always marked `≈`; unsupported beats a plausible wrong answer.
 2. **Defining and evaluating functions.** `f(x) = x² + 1` on one line, then `f(3)`, `f(1/2)`, `f(g(2))` on others; redefinition replaces.
    Shares the board's variable store with probability.
 3. **Matrices:** ~~determinant, inverse, transpose, products, sums, powers~~ **done on `max-6.1`** (`web/linalg-core.js`, `web/latex-eval.js`, exact rationals,
-   3-line cap `MAX_DIM = 6`). Still to do: solving linear systems, a real matrix grid layout on the board (it prints `[1,2;3,4]` for now), rank / eigenvalues.
+   size cap `MAX_DIM = 6`). Matrices are drawn as a bracketed grid, on paper style, for readings and answers. Still to do: solving linear systems, rank / eigenvalues.
 4. **Modular arithmetic:** ~~`a mod m`, `a ≡ b (mod m)`, `ax ≡ b (mod m)`, `aᵇ mod m` (BigInt), gcd / lcm~~ **done on `max-6.1`** (`web/modular-core.js`). Still to do: modular inverse as notation (`a⁻¹ mod m`), systems of congruences (CRT).
 5. **Complex numbers:** extend the existing ℂ mode (exact Gaussian rationals): polar form, conjugate, modulus, argument, roots of unity.
 6. **Differential equations:** first-order separable / linear, second-order linear with constant coefficients, with initial conditions

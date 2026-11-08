@@ -7,7 +7,7 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 
 ### Added (6.1, in progress)
 - **Matrices** (exact): `det`, `|A|`, `A⁻¹`, `Aᵀ`, `Aⁿ`, `A+B`, `AB`, `kA`; singular or mismatched matrices are refused. **Modular arithmetic**: `a mod m`, `aᵇ mod m` without forming `aᵇ`, `gcd`, `lcm`; **congruences**: `a ≡ b (mod m)` → True/False, `ax ≡ b (mod m)` → `x ≡ r (mod m')`, or `S=∅`. `web/linalg-core.js`, `web/modular-core.js`, `web/latex-eval.js`, `tests/latex-eval.test.cjs`.
-- A matrix reading no longer prints its environment name (`bmatrix`) on the board.
+- **Matrices look like they do on paper:** a bracketed grid (square, round or bars) whose brackets grow with the entries, entries aligned in columns and rows, stacked fractions allowed inside entries; answers are drawn the same way. Matrix readings no longer print their environment name (`bmatrix`) on the board.
 
 ## [6.0] - 2026-11-08 — Mikajy Free
 
