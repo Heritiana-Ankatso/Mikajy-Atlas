@@ -15,9 +15,9 @@ always marked `≈`; unsupported beats a plausible wrong answer.
    Also `C(n,k)` / `P(n,k)` (nCr, nPr) notation. Needs: uppercase `X B N P`, `~`, `≤ ≥ < >`, `μ σ`.
 2. **Defining and evaluating functions.** `f(x) = x² + 1` on one line, then `f(3)`, `f(1/2)`, `f(g(2))` on others; redefinition replaces.
    Shares the board's variable store with probability.
-3. **Matrices:** determinant, inverse, transpose, products, powers, solving linear systems (exact rationals). The recogniser already
-   reads matrix layout; the engine does not evaluate them yet.
-4. **Modular arithmetic:** `a mod m`, `a ≡ b (mod m)`, modular inverse, powers mod m (BigInt), gcd / lcm. The recogniser already emits `mod`.
+3. **Matrices:** ~~determinant, inverse, transpose, products, sums, powers~~ **done on `max-6.1`** (`web/linalg-core.js`, `web/latex-eval.js`, exact rationals,
+   3-line cap `MAX_DIM = 6`). Still to do: solving linear systems, a real matrix grid layout on the board (it prints `[1,2;3,4]` for now), rank / eigenvalues.
+4. **Modular arithmetic:** ~~`a mod m`, `a ≡ b (mod m)`, `ax ≡ b (mod m)`, `aᵇ mod m` (BigInt), gcd / lcm~~ **done on `max-6.1`** (`web/modular-core.js`). Still to do: modular inverse as notation (`a⁻¹ mod m`), systems of congruences (CRT).
 5. **Complex numbers:** extend the existing ℂ mode (exact Gaussian rationals): polar form, conjugate, modulus, argument, roots of unity.
 6. **Differential equations:** first-order separable / linear, second-order linear with constant coefficients, with initial conditions
    (`y' + 2y = e^x, y(0) = 1`), using the bundled Nerdamer plus `web/calculus.js`'s rule: a solution is shown only after substituting it
