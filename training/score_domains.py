@@ -24,7 +24,7 @@ print(os.path.basename(os.path.dirname(ckpt)) or ckpt)
 held = load(f'{root}/{data}/held.npz')
 synth = [h for h in held if h['dom'] != 'mathwriting']; mw = [h for h in held if h['dom'] == 'mathwriting']
 if mw: show('MathWriting test (human ink)', mw)
-show('synthetic, unseen fonts (all)', synth)
+if synth: show('synthetic, unseen fonts (all)', synth)
 doms = collections.defaultdict(list)
 for h in synth: doms[h['dom']].append(h)
 for d in sorted(doms):

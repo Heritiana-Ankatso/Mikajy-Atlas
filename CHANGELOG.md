@@ -5,7 +5,13 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 
 ## [Unreleased]
 
-### Added (6.1, in progress)
+## [6.1] - 2026-11-09
+
+### Added
+- **Answers are typeset like paper:** fractions stacked, roots with the bar over the whole radicand, raised exponents, constants first (`1 − √6`); `arg` answers too.
+- **Your handwriting is replaced by the reading, in place** (as in 5.0); the ink fades and the view follows the answer.
+- **Scribble to erase** works over finished readings. **Tap a symbol to correct it**: the model's runner-up readings are offered one tap at a time.
+- **Retrained recogniser** (MathWriting human ink + synthetic strokes from 57 OFL fonts + habits: a 1 with a long flag, crossed 7, open 4, a 9 from the top, x as `)(`; stroke-order augmentation). On 29 finger-written samples: **31.0 % read exactly right** (token error 32.1 %), up from 27.6 % (43.8 %) in 6.0 and 3.4 % for the shipped Mikajy 5.1 model. On MathWriting test ink: 53.3 % exact (token error 9.9 %) on the expanded set that includes the new domains.
 - **Functions:** `f(x) = x² + 1`, then `f(3)`, `f(1/2)`, `f(g(2))`; a line sees the definitions above it. **Probability:** `X ~ B(n, p)` / `N` / `P` / `G` / `U` / `E`, then `P(X = k)`, `P(X ≤ k)`, `P(a ≤ X ≤ b)`, `E(X)`, `V(X)`, `C(n, k)` — exact (binomial, geometric, uniform, and Poisson / exponential as `q + c·e^(−λ)`), the normal distribution marked `≈`. `web/board-core.js`, `web/prob-core.js`.
 - **Differential equations:** first-order linear and separable, second-order with constant coefficients and forcing, initial conditions, `y'`, `y''`, `dy/dx`; every solution is substituted back before it is shown. `web/ode-core.js`.
 - **Complex numbers:** conjugate (`\overline z`), argument (a multiple of π when it is one), exact `e^(iπk/2)`; `e^(iπ)` is now exactly `−1`.

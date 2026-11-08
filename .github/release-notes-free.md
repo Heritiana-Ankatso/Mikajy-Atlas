@@ -7,6 +7,6 @@ Credits: the handwriting recogniser was trained with **MathWriting** (Google LLC
 **Wikipedia** contributors (CC BY-SA 4.0), and with synthetic strokes from SIL OFL handwriting fonts. Calculus by **Nerdamer** (Apache-2.0)
 and decimal.js (MIT). Full texts: `LICENSE`, `licenses/`, `THIRD_PARTY_NOTICES.md`.
 
-**Accuracy, honestly:** about 6 in 10 expressions written with a stylus are read exactly right; with a finger the recogniser is still weak (about 3 in 10 on a small test of 29 samples). Tap a symbol to correct it.
+**Accuracy, honestly:** about 5 in 10 expressions written with a stylus are read exactly right (MathWriting test ink: 53.3 %); with a finger it is 31 % on a small test of 29 samples, so expect misreads. Tap a symbol to correct it, scribble over a line to erase it.
 
 ---
