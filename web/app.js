@@ -193,7 +193,7 @@ function revs(v,amp){let d=0,ext=v[0],n=0;for(const x of v){if(d==0){if(Math.abs
 function scribStats(s){const b=bb(s),m=Math.max(b.w,b.h);let len=0;for(let i=1;i<s.length;i++)len+=Math.hypot(s[i][0]-s[i-1][0],s[i][1]-s[i-1][1]);
  const pts=resamp(s,6);return{m,ratio:len/Math.max(m,1),c:cusps(s),over:allBoxes().some(q=>coverage(pts,q)>=.15)}}
 function isScribble(s){if(s.length<8)return false;const k=scribStats(s);if(k.m<18)return false;
- if(seqOn()){if(!((k.c>=5&&k.ratio>=3.5)||(k.c>=4&&k.ratio>=7)))return false;const pts=resamp(s,6);return allBoxes().some(q=>coverage(pts,q)>=.4)}   // ink stays on the board: only a real wiggle over existing ink erases (a looped 2 or a cursive x overlaps a neighbour)
+ if(seqOn()){const strict=(k.c>=8&&k.ratio>=1.8)||(k.c>=5&&k.ratio>=3.5)||(k.c>=4&&k.ratio>=7),loose=k.c>=3&&k.ratio>=7;if(!strict&&!loose)return false;const pts=resamp(s,6);return allBoxes().some(q=>coverage(pts,q)>=(strict?.4:.7))}   // a looser wiggle must cover a whole reading to erase it   // ink stays on the board: only a real wiggle over existing ink erases (a looped 2 or a cursive x overlaps a neighbour)
  return k.over?((k.c>=3&&k.ratio>=2.2)||(k.c>=2&&k.ratio>=2.6)||k.ratio>=4.2):((k.c>=4&&k.ratio>=3.5)||k.ratio>=6)}
 function scribble(s){const now=performance.now();ghosts.push({pts:s,t0:now});const pts=resamp(s,6),cov=(b,r)=>coverage(pts,b,r),cg=g=>ch(g)=='§'?cov(gbox(g),6)*(.22/.45):cov(gbox(g),18);
  for(const L of lines.slice()){const nIn=L.ink.length;L.ink=L.ink.filter(t=>{const q=bb(t);if(cov({x0:q.x0-8,y0:q.y0-8,x1:q.x1+8,y1:q.y1+8})>=.22){ghosts.push({pts:t,t0:now});return false}return true});
