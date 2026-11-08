@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.mikajy.app"
-    android:versionCode="15"
-    android:versionName="5.0">
+    package="com.mikajy.app.max"
+    android:versionCode="16"
+    android:versionName="6.0">
 
-    <!-- Everything runs on the device. INTERNET is used only by UpdateChecker (one GET to GitHub's
+    <!-- Mikajy Max: its own application id (com.mikajy.app.max), so it installs next to Mikajy and never replaces it. The Java classes keep
+         the package com.mikajy.app, hence the fully qualified names below. Everything runs on the device. INTERNET is used only by UpdateChecker (one GET to GitHub's
          releases API, optional, switchable off in Settings); the WebView itself has network loads blocked. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="true" />
 
     <application
-        android:label="Mikajy"
+        android:label="Mikajy Max"
         android:icon="@drawable/icon"
         android:theme="@android:style/Theme.Material.NoActionBar"
         android:allowBackup="false"
@@ -20,7 +21,7 @@
         <!-- Every configuration change is handled in-place so that a system
              dark-mode switch, fold/unfold or font-scale change never destroys the canvas. -->
         <activity
-            android:name=".MainActivity"
+            android:name="com.mikajy.app.MainActivity"
             android:exported="true"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|uiMode|keyboard|keyboardHidden|layoutDirection|fontScale">
             <intent-filter>
@@ -30,8 +31,8 @@
         </activity>
 
         <provider
-            android:name=".ShareProvider"
-            android:authorities="com.mikajy.app.share"
+            android:name="com.mikajy.app.ShareProvider"
+            android:authorities="com.mikajy.app.max.share"
             android:exported="false"
             android:grantUriPermissions="true" />
     </application>

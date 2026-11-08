@@ -1,9 +1,9 @@
-name: Mikajy signed release
+name: Mikajy Max signed release
 
 on:
   push:
     tags:
-      - 'v*'
+      - 'max-v*'
 
 permissions:
   contents: read
@@ -36,12 +36,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          [[ "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+(\.[0-9]+)?$ ]] || {
-            echo "::error::Release tag must be vMAJOR.MINOR or vMAJOR.MINOR.PATCH"
+          [[ "$GITHUB_REF_NAME" =~ ^max-v[0-9]+\.[0-9]+(\.[0-9]+)?$ ]] || {
+            echo "::error::Release tag must be max-vMAJOR.MINOR or max-vMAJOR.MINOR.PATCH"
             exit 1
           }
           version="$(python3 -c 'import xml.etree.ElementTree as ET; root=ET.parse("android/AndroidManifest.xml").getroot(); print(root.attrib["{http://schemas.android.com/apk/res/android}versionName"])')"
-          if [[ "$GITHUB_REF_NAME" != "v$version" ]]; then
+          if [[ "$GITHUB_REF_NAME" != "max-v$version" ]]; then
             echo "::error::Tag $GITHUB_REF_NAME does not match Android versionName $version"
             exit 1
           fi
@@ -75,7 +75,7 @@ jobs:
           (umask 077; printf '%s' "$MIKAJY_KEYSTORE_B64" | base64 --decode > "$MIKAJY_KEYSTORE")
           unset MIKAJY_KEYSTORE_B64
           ./build_apk.sh
-          apksigner verify --verbose Mikajy.apk
+          apksigner verify --verbose Mikajy-Max.apk
 
           # The one-time Codespaces setup stores the new public SHA-256 fingerprint
           # as a protected release-environment variable. Refuse accidental key rotation.
@@ -85,7 +85,7 @@ jobs:
             echo "::error::Missing/invalid release environment variable MIKAJY_CERT_SHA256."
             exit 1
           fi
-          actual="$(apksigner verify --print-certs Mikajy.apk |
+          actual="$(apksigner verify --print-certs Mikajy-Max.apk |
             sed -n 's/^Signer #1 certificate SHA-256 digest: //p' |
             tr -d ':' | tr '[:lower:]' '[:upper:]')"
           if [[ "$actual" != "$expected" ]]; then
@@ -98,8 +98,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          apk="Mikajy-${GITHUB_REF_NAME#v}.apk"
-          mv Mikajy.apk "$apk"
+          apk="Mikajy-Max-${GITHUB_REF_NAME#max-v}.apk"
+          mv Mikajy-Max.apk "$apk"
           sha256sum "$apk" > SHA256SUMS.txt
 
       - name: Publish signed APK and checksum to GitHub Releases
@@ -108,6 +108,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          apk="Mikajy-${GITHUB_REF_NAME#v}.apk"
+          apk="Mikajy-Max-${GITHUB_REF_NAME#max-v}.apk"
           gh release create "$GITHUB_REF_NAME" "$apk" SHA256SUMS.txt \
-            --verify-tag --generate-notes --title "Mikajy ${GITHUB_REF_NAME#v}"
+            --verify-tag --prerelease --notes-file .github/release-notes-max.md --generate-notes \
+            --title "Mikajy Max ${GITHUB_REF_NAME#max-v}"

@@ -47,7 +47,7 @@ zipalign -f 4 out/unsigned.apk out/aligned.apk
 
 # Structural sanity checks on the package we are about to ship.
 badging="$(aapt dump badging out/aligned.apk)"
-grep -q "^package: name='com.mikajy.app'" <<<"$badging" || { echo "Unexpected package id" >&2; exit 1; }
+grep -q "^package: name='com.mikajy.app.max'" <<<"$badging" || { echo "Unexpected package id" >&2; exit 1; }
 # INTERNET is the only permission Mikajy may request (the optional update check).
 extra_permissions="$(grep "uses-permission" <<<"$badging" | grep -v "android.permission.INTERNET" || true)"
 if [[ -n "$extra_permissions" ]]; then echo "The app may only request android.permission.INTERNET" >&2; exit 1; fi
@@ -68,7 +68,7 @@ command -v apksigner >/dev/null || { echo "Missing apksigner" >&2; exit 1; }
 : "${MIKAJY_KEYPASS:?Set MIKAJY_KEYPASS to the key password}"
 apksigner sign --ks "$MIKAJY_KEYSTORE" --ks-key-alias "$MIKAJY_ALIAS" \
   --ks-pass "env:MIKAJY_STOREPASS" --key-pass "env:MIKAJY_KEYPASS" \
-  --out ../Mikajy.apk out/aligned.apk
-rm -f ../Mikajy.apk.idsig
-apksigner verify ../Mikajy.apk
-echo "Built signed Mikajy.apk"
+  --out ../Mikajy-Max.apk out/aligned.apk
+rm -f ../Mikajy-Max.apk.idsig
+apksigner verify ../Mikajy-Max.apk
+echo "Built signed Mikajy-Max.apk"

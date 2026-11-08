@@ -15,18 +15,19 @@ import java.util.regex.Pattern;
 import javax.net.ssl.HttpsURLConnection;
 
 /**
- * The only network code in Mikajy. It asks GitHub for the newest published release and returns
- * a small JSON string for the page to interpret: {"ok":true,"tag":"v5.1","url":"...","apk":"..."}
+ * The only network code in Mikajy Max. It asks GitHub for the newest published *Max* release (tags "max-vX.Y", published as
+ * pre-releases so that plain Mikajy's "latest release" check never sees them) and returns
+ * a small JSON string for the page to interpret: {"ok":true,"tag":"max-v6.1","url":"...","apk":"..."}
  * or {"ok":false,"reason":"offline"|"error"}. Nothing about the user or the device is sent, and
  * the WebView itself never touches the network. Every returned URL stays inside this project's
  * GitHub releases.
  */
 final class UpdateChecker {
   static final String RELEASES = "https://github.com/ARHeritiana/Mikajy/releases/";
-  private static final String LATEST = "https://api.github.com/repos/ARHeritiana/Mikajy/releases/latest";
+  private static final String LIST = "https://api.github.com/repos/ARHeritiana/Mikajy/releases?per_page=30";
   private static final int TIMEOUT_MS = 8000;
   private static final int MAX_BYTES = 512 * 1024;
-  private static final Pattern TAG = Pattern.compile("^v[0-9]{1,4}(\\.[0-9]{1,4}){1,2}$");
+  private static final Pattern TAG = Pattern.compile("^max-v[0-9]{1,4}(\\.[0-9]{1,4}){1,2}$");
 
   private UpdateChecker() {}
 
@@ -39,7 +40,7 @@ final class UpdateChecker {
   static String check() {
     HttpsURLConnection http = null;
     try {
-      URL url = new URL(LATEST);
+      URL url = new URL(LIST);
       HttpURLConnection raw = (HttpURLConnection) url.openConnection();
       if (!(raw instanceof HttpsURLConnection)) return failure("error");
       http = (HttpsURLConnection) raw;
@@ -72,28 +73,41 @@ final class UpdateChecker {
     }
   }
 
-  /** Visible for tests: turns GitHub's release JSON into the small answer handed to the page. */
+  /** Visible for tests: turns GitHub's answer (a list of releases, or a single release object) into the small answer handed to the page. */
   static String parse(String body) {
     try {
-      JSONObject release = new JSONObject(body);
-      String tag = release.optString("tag_name", "");
-      if (!TAG.matcher(tag).matches() || release.optBoolean("draft") || release.optBoolean("prerelease")) {
+      String trimmed = body == null ? "" : body.trim();
+      if (trimmed.startsWith("[")) {
+        JSONArray list = new JSONArray(trimmed);
+        for (int i = 0; i < list.length(); i++) {          // newest first: the first valid Max release wins
+          JSONObject answer = one(list.optJSONObject(i));
+          if (answer != null) return answer.toString();
+        }
         return failure("error");
       }
-      String page = release.optString("html_url", "");
-      if (!isReleaseUrl(page)) page = RELEASES + "latest";
-      String apk = "";
-      JSONArray assets = release.optJSONArray("assets");
-      for (int i = 0; assets != null && i < assets.length(); i++) {
-        JSONObject asset = assets.optJSONObject(i);
-        if (asset == null) continue;
-        String link = asset.optString("browser_download_url", "");
-        if (asset.optString("name", "").endsWith(".apk") && isReleaseUrl(link)) { apk = link; break; }
-      }
-      return new JSONObject().put("ok", true).put("tag", tag).put("url", page).put("apk", apk).toString();
+      JSONObject answer = one(new JSONObject(trimmed));
+      return answer != null ? answer.toString() : failure("error");
     } catch (JSONException e) {
       return failure("error");
     }
+  }
+
+  /** One release -> answer, or null when it is not a published Max release (wrong tag, draft). Pre-releases are expected: that is how Max is published. */
+  private static JSONObject one(JSONObject release) throws JSONException {
+    if (release == null) return null;
+    String tag = release.optString("tag_name", "");
+    if (!TAG.matcher(tag).matches() || release.optBoolean("draft")) return null;
+    String page = release.optString("html_url", "");
+    if (!isReleaseUrl(page)) page = RELEASES;
+    String apk = "";
+    JSONArray assets = release.optJSONArray("assets");
+    for (int i = 0; assets != null && i < assets.length(); i++) {
+      JSONObject asset = assets.optJSONObject(i);
+      if (asset == null) continue;
+      String link = asset.optString("browser_download_url", "");
+      if (asset.optString("name", "").endsWith(".apk") && isReleaseUrl(link)) { apk = link; break; }
+    }
+    return new JSONObject().put("ok", true).put("tag", tag).put("url", page).put("apk", apk);
   }
 
   private static String failure(String reason) {

@@ -19,9 +19,9 @@ against this licence first. This is engineering guidance, not legal advice.
 ## Rules
 1. **One-way flow.** Code fixes may be cherry-picked from this branch to `main`. Weights, training caches, converted
    datasets and anything derived from them must never be merged into `main`.
-2. **Releases from here are free releases only.** Use ordinary `vMAJOR.MINOR` tags (the release workflow and the in-app
-   updater only accept that form), and put "Non-commercial use only" plus the dataset credits at the top of every release
-   note. The updater follows the repository's `latest` release, so an installed MIT build will offer this one as an update.
+2. **Releases from here are free releases only.** Use `max-vMAJOR.MINOR` tags (the release workflow and Mikajy Max's updater only accept
+   that form) and publish them as **pre-releases**; `.github/release-notes-max.md` puts "Non-commercial use only" and the credits at the top
+   of every release note. Mikajy Max is a separate app (`com.mikajy.app.max`): plain Mikajy's "latest release" check never sees these releases.
 3. **Record every dataset** in the register below before training on it: name, URL, licence as read from the licence text
    (not from memory), date checked, and which weights it contributed to.
 4. **Keep trained weights separate** (`*-research*` naming) so they can't be copied into a `main` build by accident.

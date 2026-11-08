@@ -1,4 +1,6 @@
-# Releasing Mikajy
+# Releasing Mikajy Max (branch `max-edition`)
+
+> This branch is the separate app **Mikajy Max** (`com.mikajy.app.max`). Tags are `max-vMAJOR.MINOR` (not `v…`) and the release is published as a **pre-release**, which hides it from plain Mikajy's update check. `release.yml` on this branch only reacts to `max-v*`. The APK is `Mikajy-Max-X.Y.apk`; you may also commit it to `releases/`. The text below was written for plain Mikajy: read `v5.1` as `max-v6.1`.
 
 Releases are built, tested, **signed and published by GitHub Actions** from a version tag.
 The app's built-in update check (Settings → *Check for updates*, and once a day when online)

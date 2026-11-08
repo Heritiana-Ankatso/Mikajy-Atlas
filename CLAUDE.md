@@ -22,10 +22,10 @@ stop and ask the owner (ARHeritiana).
    never relicense anything. Sole authorship is what lets the owner choose licences: do not merge code from others
    without their written agreement (CLA/DCO).
 7. **Never publish secrets or private data:** signing keys (`release-key-backup/`, `*.jks`), `training/real_data/`,
-   tokens. Check `git status` before every commit; never `git add` ignored paths with `-f`.
+   tokens. Check `git status` before every commit; never `git add` ignored paths with `-f` (signed release APKs go in `releases/`, which `.gitignore` allows; nothing else).
 
 ## Always
-* Every release (`vMAJOR.MINOR` tag) says "Non-commercial use only" at the top of its notes and credits MathWriting
+* Every release (`max-vMAJOR.MINOR` tag, published as a pre-release; Mikajy Max is a separate app with its own id and update channel, never mix them) says "Non-commercial use only" at the top of its notes and credits MathWriting
   (Google LLC, CC BY-NC-SA 4.0) and the Wikipedia contributors (CC BY-SA 4.0), plus any dataset added since.
 * Add a new dependency's name, version, licence (from its own LICENSE file) and size to `THIRD_PARTY_NOTICES.md` in the same commit.
 * Keep trained weights in files named `*-research*` / under a model directory the register names, so they are never copied by accident.

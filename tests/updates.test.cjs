@@ -27,8 +27,8 @@ test('shell answers are interpreted conservatively', () => {
   assert.equal(Updates.interpret({ok: true, tag: 'nightly'}, '5.0').status, 'error');
   // Links pointing anywhere but this project's releases are replaced, never followed.
   const evil = Updates.interpret({...ok, url: 'https://evil.example/x', apk: 'javascript:alert(1)'}, '5.0');
-  assert.equal(evil.url, R + 'latest'); assert.equal(evil.apk, '');
-  assert.equal(Updates.interpret({...ok, url: R + '../../evil'}, '5.0').url, R + 'latest');
+  assert.equal(evil.url, R); assert.equal(evil.apk, '');
+  assert.equal(Updates.interpret({...ok, url: R + '../../evil'}, '5.0').url, R);
 });
 
 test('stored state is validated and automatic checks are rate limited', () => {
@@ -48,4 +48,15 @@ test('stored state is validated and automatic checks are rate limited', () => {
   assert.equal(Updates.pending(st, '5.1'), null);                                    // installed: banner disappears
   assert.deepEqual(Updates.record(st, {status: 'current', version: '5.1'}, 456), {checked: 456, version: '', url: '', apk: ''});
   storage.d.inkupd = '{broken'; assert.equal(Updates.load(storage).checked, 0);
+});
+
+test('Max tags: max-vX.Y is read as a version, shown without the prefix, and compared with the installed versionName', () => {
+  assert.deepEqual(Updates.parseVersion('max-v6.1'), [6, 1, 0]);
+  assert.equal(Updates.parseVersion('max-6.1'), null);
+  assert.equal(Updates.isNewer('max-v6.1', '6.0'), true);
+  assert.equal(Updates.isNewer('max-v6.0', '6.0'), false);
+  const R = Updates.RELEASES;
+  const a = Updates.interpret({ok: true, tag: 'max-v6.1', url: R + 'tag/max-v6.1', apk: R + 'download/max-v6.1/Mikajy-Max-6.1.apk'}, '6.0');
+  assert.equal(a.status, 'available'); assert.equal(a.version, '6.1');
+  assert.equal(Updates.interpret({ok: true, tag: 'max-v6.1', url: 'https://evil.example/x', apk: ''}, '6.0').url, R);   // never falls back to plain Mikajy's "latest"
 });

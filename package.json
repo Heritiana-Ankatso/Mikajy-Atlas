@@ -1,6 +1,6 @@
 {
-  "name": "mikajy",
-  "version": "5.0.0",
+  "name": "mikajy-max",
+  "version": "6.0.0",
   "private": true,
   "description": "Offline handwriting calculator for Android (HTML5 canvas in a WebView shell).",
   "license": "SEE LICENSE IN LICENSE",

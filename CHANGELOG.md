@@ -5,6 +5,10 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 
 ## [Unreleased]
 
+### Mikajy Max (this branch is a separate app)
+- **Own identity:** name *Mikajy Max*, application id `com.mikajy.app.max` (share authority `com.mikajy.app.max.share`), new logo (`branding/make_max_icon.py`), version 6.0 (code 16). It installs next to Mikajy and never replaces it.
+- **Own update channel:** releases are tagged `max-vX.Y` and published as **pre-releases**, so plain Mikajy's "latest release" check never sees them; Max lists the releases and takes the newest `max-v` tag (`UpdateChecker`, `web/updates.js`, `release.yml`). Release notes start with the non-commercial notice and credits (`.github/release-notes-max.md`). Signed APKs may be committed under `releases/`.
+
 ### Added
 - **Menu in three tabs** — *Actions* (history, copy, share, memory, clear), *Math* (results exact/decimal, angles, ℝ/ℂ, instant/on demand) and *App* (language, theme, updates) — instead of one long sheet. The rarely useful *Mixed* result format and the *Classic* recogniser are hidden unless they were already selected.
 - **English / Français** (App → Language; follows the device language until chosen): the whole interface, toasts, the update texts and calculator words (`True/Vrai`, `unsupported/non géré`, `undefined/indéfini`). `web/i18n.js`, `tests/i18n.test.cjs`.
