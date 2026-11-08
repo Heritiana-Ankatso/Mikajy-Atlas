@@ -10,9 +10,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from strokefeat import featurise, tokenize, TOKEN_RE
 
 NS = '{http://www.w3.org/2003/InkML}'
-SINGLE = set('0123456789abcdefghijklmnopqrstuvwxyz+-=.,!%/')
-WORDS = {r'\times', r'\div', r'\pi', r'\sin', r'\cos', r'\tan', r'\ln', r'\log', r'\exp'}
-SCRIPT1 = set('0123456789abcdefghijklmnopqrstuvwxyz')
+SINGLE = set('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+-=.,!%/<>')
+WORDS = {r'\times', r'\div', r'\pi', r'\sin', r'\cos', r'\tan', r'\ln', r'\log', r'\exp', r'\sim', r'\le', r'\ge', r'\prime'}
+SCRIPT1 = set('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
 OPEN = {'(': ')', '[': ']'}
 CLOSE = {v: k for k, v in OPEN.items()}
 MAXS, MAXTOK = 160, 120
@@ -53,6 +53,9 @@ def parse_atom(tk, i):
     if t == r'\frac':
         a, j = parse_group(tk, i + 1); b, j = parse_group(tk, j)
         return [r'\frac', '{'] + a + ['}', '{'] + b + ['}'], j
+    if t == r'\overline':
+        a, j = parse_group(tk, i + 1)
+        return [r'\overline', '{'] + a + ['}'], j
     if t == r'\sqrt':
         a, j = parse_group(tk, i + 1)
         return [r'\sqrt', '{'] + a + ['}'], j
