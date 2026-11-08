@@ -6,7 +6,7 @@ from pathlib import Path
 from playwright.async_api import async_playwright
 
 PAGE = (Path(__file__).resolve().parents[1] / "android/assets/index.html").as_uri()
-R = "https://github.com/ARHeritiana/Mikajy/releases/"
+R = "https://github.com/Heritiana-Ankatso/Mikajy-Free/releases/"
 BRIDGE = """
   window.__calls = [];
   window.__answer = %s;
@@ -41,14 +41,14 @@ async def main():
         await page.click("#mb")
         await page.click("button[data-tab=app]")
         text = await page.inner_text("#panel")
-        assert "Updates" in text and "Check for updates" in text and "Mikajy Max 5.0" in text, text
+        assert "Updates" in text and "Check for updates" in text and "Mikajy Free 5.0" in text, text
         await page.click("button[data-a=upd]")
         for _ in range(20):   # the page's CSP forbids eval, so poll instead of wait_for_function(string)
             if await page.evaluate("() => document.getElementById('mb').classList.contains('upd')"):
                 break
             await page.wait_for_timeout(100)
         text = await page.inner_text("#panel")
-        assert "Get Mikajy Max 5.1" in text and "version 5.1 is available" in text, text
+        assert "Get Mikajy Free 5.1" in text and "version 5.1 is available" in text, text
         await page.click("button[data-a=getupd]")
         calls = await page.evaluate("window.__calls")
         assert calls == ["check", "open:" + available["apk"]], calls

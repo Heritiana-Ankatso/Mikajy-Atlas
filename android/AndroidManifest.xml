@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.mikajy.app.max"
+    package="com.mikajy.app.free"
     android:versionCode="16"
     android:versionName="6.0">
 
-    <!-- Mikajy Max: its own application id (com.mikajy.app.max), so it installs next to Mikajy and never replaces it. The Java classes keep
+    <!-- Mikajy Free: its own application id (com.mikajy.app.free), so it installs next to Mikajy and never replaces it. The Java classes keep
          the package com.mikajy.app, hence the fully qualified names below. Everything runs on the device. INTERNET is used only by UpdateChecker (one GET to GitHub's
          releases API, optional, switchable off in Settings); the WebView itself has network loads blocked. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="true" />
 
     <application
-        android:label="Mikajy Max"
+        android:label="Mikajy Free"
         android:icon="@drawable/icon"
         android:theme="@android:style/Theme.Material.NoActionBar"
         android:allowBackup="false"
@@ -32,7 +32,7 @@
 
         <provider
             android:name="com.mikajy.app.ShareProvider"
-            android:authorities="com.mikajy.app.max.share"
+            android:authorities="com.mikajy.app.free.share"
             android:exported="false"
             android:grantUriPermissions="true" />
     </application>

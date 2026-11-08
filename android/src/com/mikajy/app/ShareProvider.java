@@ -14,7 +14,7 @@ import java.io.FileNotFoundException;
 
 /** Serves exactly one read-only file (the canvas PNG) to the share sheet. Not exported. */
 public class ShareProvider extends ContentProvider {
-  static final String AUTHORITY = "com.mikajy.app.max.share";
+  static final String AUTHORITY = "com.mikajy.app.free.share";
   static final String FILE_NAME = "mikajy.png";
   private static final String DIR_NAME = "share";
 

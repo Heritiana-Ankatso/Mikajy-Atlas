@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Draws the Mikajy Max logo: the Mikajy mark (white M on a black / red rounded square with a diagonal sweep), pushed harder:
-heavier forward-leaning M with a hard shadow and red glow, a layered double sweep, speed stripes and a slanted MAX plaque.
-Writes branding/logo-max-512.png, branding/logo-max-1024.png and the 192 px launcher icon android/res/drawable/icon.png.
-The MAX lettering uses Noto Sans Black Italic (SIL OFL) when installed; only the rendered PNGs are shipped."""
+"""Draws the Mikajy Free logo: the Mikajy mark (white M on a black / red rounded square with a diagonal sweep), pushed harder:
+heavier forward-leaning M with a hard shadow and red glow, a layered double sweep, speed stripes and a slanted FREE plaque.
+Writes branding/logo-free-512.png, branding/logo-free-1024.png and the 192 px launcher icon android/res/drawable/icon.png.
+The FREE lettering uses Noto Sans Black Italic (SIL OFL) when installed; only the rendered PNGs are shipped."""
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageChops
 S = 2048                                  # draw big, shrink for smooth edges
@@ -19,7 +19,7 @@ d = ImageDraw.Draw(img)
 # red field: everything right of / below the sweep (same sweep as the Mikajy logo, from the top edge down to the left edge)
 sweep = bezier((430, 0), (150, 170), (0, 560))
 d.polygon(P(sweep + [(0, 1000), (1000, 1000), (1000, 0)]), fill=RED)
-# Max: a second, darker sweep below it and a bright edge light, so the split reads as layered steel plates
+# a second, darker sweep below it and a bright edge light, so the split reads as layered steel plates
 sweep2 = bezier((560, 0), (260, 230), (0, 760))
 d.polygon(P(sweep2 + [(0, 1000), (1000, 1000), (1000, 0)]), fill=RED_D)
 sweep3 = bezier((500, 0), (190, 200), (0, 650))
@@ -48,7 +48,7 @@ d.polygon(P(Mp), fill=(255, 255, 255))
 d.polygon(P([lean(x, y) for x, y in [(150, 520), (300, 520), (300, 700), (150, 700)]]), fill=(214, 214, 214))
 d.polygon(P([lean(x, y) for x, y in [(700, 520), (850, 520), (850, 700), (700, 700)]]), fill=(214, 214, 214))
 
-# MAX plaque: slanted black plate with a red edge and three chevrons
+# FREE plaque: slanted black plate with a red edge and three chevrons
 plate = [(95, 745), (905, 745), (865, 905), (55, 905)]
 d.polygon(P([(x + 14, y + 16) for x, y in plate]), fill=(0, 0, 0))
 d.polygon(P(plate), fill=RED_L)
@@ -57,10 +57,10 @@ d.polygon(P(inner), fill=INK)
 font = None
 for f in ('/usr/share/fonts/google-noto/NotoSans-BlackItalic.ttf', '/usr/share/fonts/dejavu-sans-fonts/DejaVuSans-BoldOblique.ttf'):
     if Path(f).exists():
-        font = ImageFont.truetype(f, int(122 * U)); break
+        font = ImageFont.truetype(f, int(100 * U)); break
 if font:
-    tw = d.textlength('MAX', font=font)
-    d.text(((560 - tw / 2 + 25) * U - 0, 758 * U), 'MAX', font=font, fill=(255, 255, 255))
+    tw = d.textlength('FREE', font=font)
+    d.text(((545 - tw / 2 / U + 30) * U, 770 * U), 'FREE', font=font, fill=(255, 255, 255))
 for k in range(3):                         # chevrons in the plaque's left end
     x = 140 + k * 46
     d.polygon(P([(x, 790), (x + 28, 790), (x + 52, 825), (x + 28, 860), (x, 860), (x + 24, 825)]), fill=RED if k < 2 else RED_L)
@@ -69,9 +69,9 @@ for k in range(3):                         # chevrons in the plaque's left end
 mask = Image.new('L', (S, S), 0)
 ImageDraw.Draw(mask).rounded_rectangle([0, 0, S - 1, S - 1], radius=int(S * 0.2), fill=255)
 out = Image.new('RGBA', (S, S), (0, 0, 0, 0)); out.paste(img.convert('RGBA'), (0, 0), mask)
-for size, path in ((1024, here / 'logo-max-1024.png'), (512, here / 'logo-max-512.png')):
+for size, path in ((1024, here / 'logo-free-1024.png'), (512, here / 'logo-free-512.png')):
     out.resize((size, size), Image.Resampling.LANCZOS).save(path, optimize=True)
 # Android 5 launchers expect a square legacy icon; the original is RGB on a black corner, keep that convention
 flat = Image.new('RGB', (S, S), (0, 0, 0)); flat.paste(out, (0, 0), out)
 flat.resize((192, 192), Image.Resampling.LANCZOS).save(here.parent / 'android/res/drawable/icon.png', optimize=True)
-print('Mikajy Max logo written')
+print('Mikajy Free logo written')

@@ -1,6 +1,6 @@
 # Roadmap
 
-## 6.0 (Mikajy Max, current)
+## 6.0 (Mikajy Free, current; first published as Mikajy Max)
 Own app id and update channel, three-tab menu, English / Français, symbolic-first results, `True`/`False` for constant statements,
 periodic equations, audited calculus engine (API only), stacked nested fractions, recogniser retrained on MathWriting.
 

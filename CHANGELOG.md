@@ -5,16 +5,16 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 
 ## [Unreleased]
 
-## [6.0] - 2026-11-08 — Mikajy Max
+## [6.0] - 2026-11-08 — Mikajy Free
 
 ### Recogniser (retrained)
 - The stroke-sequence model was retrained on synthetic font strokes plus **MathWriting** human ink (CC BY-NC-SA 4.0; 45k expressions filtered to what the calculator understands; weights `web/model/seq1-research.json`, CC BY-NC-SA 4.0).
   Measured on 1,037 held-out MathWriting expressions (tablet / stylus ink): **60.0 % read exactly right** (token error 8.2 %), up from 49.3 % for the first MathWriting run on the same set; fractions 62.7 %, fractions inside fractions 53.3 %.
 - **Honest limit:** on 29 of the owner's own finger-written samples only **27.6 % are read exactly right** (token error 43.8 %). The model reads stylus ink much better than finger ink; a 30-minute finger-style fine-tune was tried and did not clearly help (31.0 % on those 29, but worse on MathWriting), so it is not shipped. Expect misreads with finger writing; tap a symbol to correct it.
 
-### Mikajy Max (this branch is a separate app)
-- **Own identity:** name *Mikajy Max*, application id `com.mikajy.app.max` (share authority `com.mikajy.app.max.share`), new logo (`branding/make_max_icon.py`), version 6.0 (code 16). It installs next to Mikajy and never replaces it.
-- **Own update channel:** releases are tagged `max-vX.Y` and published as **pre-releases**, so plain Mikajy's "latest release" check never sees them; Max lists the releases and takes the newest `max-v` tag (`UpdateChecker`, `web/updates.js`, `release.yml`). Release notes start with the non-commercial notice and credits (`.github/release-notes-max.md`). Signed APKs may be committed under `releases/`.
+### Mikajy Free is now its own project
+- **Moved and renamed.** What was *Mikajy Max* (branch `max-edition` of ARHeritiana/Mikajy, tags `max-vX.Y`) is now **Mikajy Free**, repository Heritiana-Ankatso/Mikajy-Free. New name, new logo (`branding/make_free_icon.py`, a FREE plaque), new application id `com.mikajy.app.free` (share authority `com.mikajy.app.free.share`); it still installs next to Mikajy and never replaces it. The licence (PolyForm Noncommercial 1.0.0; weights CC BY-NC-SA 4.0) and the whole history came along.
+- **Updates** now follow this repository's *latest release* (plain `vX.Y` tags), as in Mikajy; the `max-v` pre-release channel is gone. Release notes start with the non-commercial notice and credits (`.github/release-notes-free.md`). Signed APKs may be committed under `releases/`.
 
 ### Added
 - **Menu in three tabs** — *Actions* (history, copy, share, memory, clear), *Math* (results exact/decimal, angles, ℝ/ℂ, instant/on demand) and *App* (language, theme, updates) — instead of one long sheet. The rarely useful *Mixed* result format and the *Classic* recogniser are hidden unless they were already selected.
@@ -25,7 +25,7 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 - **Periodic equations:** `sin x = 0` → `x = nπ, n ∈ ℤ`; every family is verified by substituting several integers `n`.
 - **Calculus engine** (`web/calculus.js`, bundled Nerdamer, Apache-2.0): derivatives, antiderivatives, definite integrals and limits, each audited against an independent numeric check of the original expression (finite differences, differentiating the answer back, Gauss–Legendre quadrature with a divergence guard, one-sided limits). The recogniser does not emit `∫`/`lim` yet, so this is an API (`Calculus.*`, `Calculator`) without handwriting input.
 - `tests/calculus.test.cjs`.
-- **Research branch licensing:** `max-edition` is under PolyForm Noncommercial 1.0.0 (code) and CC BY-NC-SA 4.0 (research weights) so it can be trained on non-commercial datasets and shared free of charge; see `docs/MAX_EDITION.md`.
+- **Research licensing:** this project is under PolyForm Noncommercial 1.0.0 (code) and CC BY-NC-SA 4.0 (research weights) so it can be trained on non-commercial datasets and shared free of charge; see `docs/FREE.md`.
 - **Stroke-sequence recogniser** (default; Settings → Recogniser, Classic still available): a transformer reads all the strokes of a line and emits LaTeX tokens — late additions, extended lines, multiple lines, exponents, denominators, matrices, complex numbers and `mod` are read without grouping rules. Ink stays on the board with the typeset reading and answer below it. `web/seq-core.js`, `web/model/seq1.json`, `training/{strokefeat,seqmodel,gen_corpus,train_seq,eval_seq,pack_seq,parity_seq}.py`, `tests/seq-core.test.cjs`, `tests/browser_seq.py`. Trained on synthetic strokes only.
 - `training/eval_app.py --rec`, a recorded-clock replay and a viewport that contains all the ink.
 - **ℝ / ℂ number domain** (Settings → Numbers): complex arithmetic with exact Gaussian rationals, all complex roots of polynomial and rational-function equations (`complexRoots` in `poly-core.js`), `tests/complex.test.cjs`.
@@ -70,7 +70,7 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
   rule never allowed.
 
 ### Security
-- The release-link guard exists twice (Java and JavaScript) and accepts only `https://github.com/ARHeritiana/Mikajy/releases/…`.
+- The release-link guard exists twice (Java and JavaScript) and accepts only `https://github.com/Heritiana-Ankatso/Mikajy-Free/releases/…`.
 - Update answers and the stored update record are re-validated field by field before use.
 
 ## [4.5] - 2026-11-07

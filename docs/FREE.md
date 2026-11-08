@@ -1,10 +1,10 @@
-# Max edition branch (`max-edition`)
+# Mikajy Free: licence, data and release rules
 
-This branch lets the recogniser be trained on datasets whose licences forbid commercial use, and it can be **shared for
-free** (source on GitHub, signed APKs from GitHub releases). It can **not** be sold or used commercially. `main` keeps the
-MIT licence and the clean-data rules in [LICENSING.md](LICENSING.md); the two must not be mixed.
+Mikajy Free lets the recogniser be trained on datasets whose licences forbid commercial use, and it can be **shared for
+free** (source on GitHub, signed APKs from GitHub releases). It can **not** be sold or used commercially. Its sibling
+[Mikajy](https://github.com/ARHeritiana/Mikajy) keeps the MIT licence and the clean-data rules in [LICENSING.md](LICENSING.md); the two must not be mixed.
 
-## Licences on this branch
+## Licences here
 * **Code:** PolyForm Noncommercial 1.0.0 ([LICENSE](../LICENSE)).
 * **Research model weights:** CC BY-NC-SA 4.0 (the share-alike terms of the datasets below plausibly extend to them).
   Anyone who shares or adapts the weights must credit the datasets and keep the same licence.
@@ -17,15 +17,15 @@ listings. Donation links are a grey area: keep them out of the app. If you want 
 against this licence first. This is engineering guidance, not legal advice.
 
 ## Rules
-1. **One-way flow.** Code fixes may be cherry-picked from this branch to `main`. Weights, training caches, converted
-   datasets and anything derived from them must never be merged into `main`.
-2. **Releases from here are free releases only.** Use `max-vMAJOR.MINOR` tags (the release workflow and Mikajy Max's updater only accept
-   that form) and publish them as **pre-releases**; `.github/release-notes-max.md` puts "Non-commercial use only" and the credits at the top
-   of every release note. Mikajy Max is a separate app (`com.mikajy.app.max`): plain Mikajy's "latest release" check never sees these releases.
+1. **One-way flow.** Plain code (features, fixes, tests, docs) may be ported to the MIT sibling Mikajy by cherry-pick or hand edit, never by
+   merge. Weights, training caches, converted datasets and anything derived from them must never go to the sibling.
+2. **Releases from here are free releases only.** Tags are `vMAJOR.MINOR`; `.github/release-notes-free.md` puts "Non-commercial use only" and the
+   credits at the top of every release note. Mikajy Free is a separate app (`com.mikajy.app.free`) with its own repository, so its updater
+   (`releases/latest`) only ever sees Free releases.
 3. **Record every dataset** in the register below before training on it: name, URL, licence as read from the licence text
    (not from memory), date checked, and which weights it contributed to.
-4. **Keep trained weights separate** (`*-research*` naming) so they can't be copied into a `main` build by accident.
-5. Releases already published under MIT stay MIT; this branch does not revoke them.
+4. **Keep trained weights separate** (`*-research*` naming) so they can't be copied into the MIT sibling by accident.
+5. Releases of the MIT sibling stay MIT; nothing here revokes them.
 
 ## Dataset register
 Checked 2026-11-08 against the licence text shipped with each download.
@@ -37,6 +37,6 @@ Checked 2026-11-08 against the licence text shipped with each download.
 | Pendigits (UCI) | no licence text in the archive; 8-point resampled digits only | — | downloaded, **not used** (too coarse; source terms unconfirmed) |
 | CROHME 2011–2023 | research terms | benchmark / train | not obtained |
 | Google QuickDraw | CC BY 4.0 (believed) | stroke-encoder pre-training | not used |
-| MNIST | unclear | CNN digits | allowed on this branch, not used for the sequence model |
+| MNIST | unclear | CNN digits | allowed here, not used for the sequence model |
 
 Credits to ship with any release: MathWriting (Google LLC, CC BY-NC-SA 4.0) and Wikipedia contributors (LaTeX expressions, CC BY-SA 4.0).

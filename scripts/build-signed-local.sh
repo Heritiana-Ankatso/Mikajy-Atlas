@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build and sign Mikajy-Max.apk on this machine with the owner's local keystore backup (release-key-backup/, gitignored).
+# Build and sign Mikajy-Free.apk on this machine with the owner's local keystore backup (release-key-backup/, gitignored).
 # Reads the alias and password from PASSWORD.txt into the environment only; nothing secret is printed or written anywhere else.
 # Needs the Android SDK (default ~/Android/Sdk). The published release is still built and signed by GitHub Actions (release.yml);
 # this is for local builds and for checking that the backup key matches the certificate GitHub pins.
@@ -15,5 +15,5 @@ export MIKAJY_STOREPASS="$pw" MIKAJY_KEYPASS="$pw"; unset pw
 export ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-$HOME/Android/Sdk}"
 bash build_apk.sh
 TOOLS="$(find "$ANDROID_SDK_ROOT/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
-echo "Signing certificate SHA-256: $("$TOOLS/apksigner" verify --print-certs Mikajy-Max.apk | sed -n 's/^Signer #1 certificate SHA-256 digest: //p')"
-echo "Package: $("$TOOLS/aapt" dump badging Mikajy-Max.apk | sed -n "s/^package: name='\([^']*\)' versionCode='\([^']*\)' versionName='\([^']*\)'.*/\1 \3 (code \2)/p")"
+echo "Signing certificate SHA-256: $("$TOOLS/apksigner" verify --print-certs Mikajy-Free.apk | sed -n 's/^Signer #1 certificate SHA-256 digest: //p')"
+echo "Package: $("$TOOLS/aapt" dump badging Mikajy-Free.apk | sed -n "s/^package: name='\([^']*\)' versionCode='\([^']*\)' versionName='\([^']*\)'.*/\1 \3 (code \2)/p")"

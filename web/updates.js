@@ -4,10 +4,10 @@ const Updates = (() => {
   'use strict';
   const KEY = 'inkupd';
   const INTERVAL_MS = 24 * 60 * 60 * 1000;
-  const RELEASES = 'https://github.com/ARHeritiana/Mikajy/releases/';
-  const TAG = /^(?:max-v|v)?(\d{1,4})\.(\d{1,4})(?:\.(\d{1,4}))?$/;
+  const RELEASES = 'https://github.com/Heritiana-Ankatso/Mikajy-Free/releases/';
+  const TAG = /^v?(\d{1,4})\.(\d{1,4})(?:\.(\d{1,4}))?$/;
 
-  /** "max-v6.1" / "v5.1" / "5.1.2" -> [6, 1, 0] / [5, 1, 0] / [5, 1, 2]; anything else -> null. */
+  /** "v5.1" / "5.1.2" -> [5, 1, 0] / [5, 1, 2]; anything else -> null. */
   function parseVersion(text) {
     const m = TAG.exec(String(text || '').trim());
     return m ? [+m[1], +m[2], +(m[3] || 0)] : null;
@@ -27,9 +27,9 @@ const Updates = (() => {
     if (!answer || typeof answer !== 'object') return {status: 'error'};
     if (answer.ok !== true) return {status: answer.reason === 'offline' ? 'offline' : 'error'};
     if (!parseVersion(answer.tag) || !parseVersion(localVersion)) return {status: 'error'};
-    const version = answer.tag.replace(/^(?:max-)?v/, '');
+    const version = answer.tag.replace(/^v/, '');
     if (!isNewer(answer.tag, localVersion)) return {status: 'current', version};
-    return {status: 'available', version, url: safeUrl(answer.url) ? answer.url : RELEASES, apk: safeUrl(answer.apk) ? answer.apk : ''};
+    return {status: 'available', version, url: safeUrl(answer.url) ? answer.url : RELEASES + 'latest', apk: safeUrl(answer.apk) ? answer.apk : ''};
   }
 
   const EMPTY = Object.freeze({checked: 0, version: '', url: '', apk: ''});

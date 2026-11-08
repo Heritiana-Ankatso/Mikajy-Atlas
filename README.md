@@ -1,7 +1,9 @@
-# Mikajy — handwriting calculator for Android
+# Mikajy Free — handwriting calculator for Android
 
-[![Checks](https://github.com/ARHeritiana/Mikajy/actions/workflows/checks.yml/badge.svg)](https://github.com/ARHeritiana/Mikajy/actions/workflows/checks.yml)
-[![Latest release](https://img.shields.io/github/v/release/ARHeritiana/Mikajy)](https://github.com/ARHeritiana/Mikajy/releases/latest)
+*The free-for-non-commercial-use sibling of [Mikajy](https://github.com/ARHeritiana/Mikajy) (MIT): same engine and interface, plus a handwriting recogniser trained on non-commercial data.*
+
+[![Checks](https://github.com/Heritiana-Ankatso/Mikajy-Free/actions/workflows/checks.yml/badge.svg)](https://github.com/Heritiana-Ankatso/Mikajy-Free/actions/workflows/checks.yml)
+[![Latest release](https://img.shields.io/github/v/release/Heritiana-Ankatso/Mikajy-Free)](https://github.com/Heritiana-Ankatso/Mikajy-Free/releases/latest)
 [![License: PolyForm Noncommercial](https://img.shields.io/badge/license-PolyForm%20NC%201.0.0-orange.svg)](LICENSE)
 
 A blank screen: write maths with your finger, it turns into a handwritten-style typeset line and the
@@ -10,7 +12,7 @@ app. When the phone happens to be online it checks GitHub (at most once a day, o
 tells you.
 
 ## Install and update
-1. Download `Mikajy-x.y.apk` from the [latest release](https://github.com/ARHeritiana/Mikajy/releases/latest) and open it
+1. Download `Mikajy-x.y.apk` from the [latest release](https://github.com/Heritiana-Ankatso/Mikajy-Free/releases/latest) and open it
    (allow installing from your browser when Android asks). Check it with `SHA256SUMS.txt` if you like.
 2. Later versions announce themselves: a red dot appears on the menu button and Settings shows **Get Mikajy x.y**.
    *Settings → Updates → Off* disables the automatic check; *Check for updates* does it on demand.
@@ -87,8 +89,8 @@ are prefixed `≈`; fraction/mixed display is used only for known exact rational
 
 ## Look
 Black-red-white identity with a **Dark / Light** option in Settings, saved locally. Dark mode shows white handwriting on a black canvas; Light mode shows black handwriting on a white canvas. Answers, active controls and selection rings remain red in both.
-Logo: **Mikajy Max** is the Mikajy mark (white **M** on a black-and-red rounded square, `branding/logo-512.png`) pushed harder — heavier forward-leaning M, double sweep, speed stripes and a MAX plaque — drawn by `branding/make_max_icon.py` into `branding/logo-max-512.png` / `logo-max-1024.png` and the launcher icon.
-Package id is `com.mikajy.app.max`, so it installs next to Mikajy (`com.mikajy.app`) and never replaces it.
+Logo: **Mikajy Free** is the Mikajy mark (white **M** on a black-and-red rounded square, `branding/logo-512.png`) pushed harder — heavier forward-leaning M, double sweep, speed stripes and a FREE plaque — drawn by `branding/make_free_icon.py` into `branding/logo-free-512.png` / `logo-free-1024.png` and the launcher icon.
+Package id is `com.mikajy.app.free`, so it installs next to Mikajy (`com.mikajy.app`) and never replaces it. Its updates come only from this repository's releases.
 
 
 ## Repository layout
@@ -239,13 +241,13 @@ See [docs/AUDIT.md](docs/AUDIT.md) for the full review and the remaining known d
 * No physical-device benchmark or Android APK build is claimed by the Node test suite. The CNN fallback may run on the main thread when workers are unavailable; performance and battery use require device testing.
 
 ## Licences / data
-> **Free for non-commercial use only.** This branch (`max-edition`) is licensed under PolyForm Noncommercial 1.0.0
+> **Free for non-commercial use only.** Mikajy Free is licensed under PolyForm Noncommercial 1.0.0
 > and its model weights are trained on non-commercial datasets (weights: CC BY-NC-SA 4.0). You may use, share and modify it,
-> but not sell it or use it commercially. See [docs/MAX_EDITION.md](docs/MAX_EDITION.md). `main` stays MIT.
+> but not sell it or use it commercially. See [docs/FREE.md](docs/FREE.md). The sibling project [Mikajy](https://github.com/ARHeritiana/Mikajy) is MIT.
 
 The app ships no third-party code; the only third-party asset is the Caveat font (SIL OFL 1.1, text in `licenses/`).
-On this branch Mikajy's code is under the PolyForm Noncommercial licence (LICENSE) and the trained weights under CC BY-NC-SA 4.0.
-See [docs/MAX_EDITION.md](docs/MAX_EDITION.md) for what is allowed and [docs/LICENSING.md](docs/LICENSING.md) for the history (`main` is MIT).
+Mikajy Free's code is under the PolyForm Noncommercial licence (LICENSE) and the trained weights under CC BY-NC-SA 4.0.
+See [docs/FREE.md](docs/FREE.md) for what is allowed and [docs/LICENSING.md](docs/LICENSING.md) for the history (the sibling Mikajy is MIT).
 See also [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 

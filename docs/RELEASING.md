@@ -1,6 +1,6 @@
-# Releasing Mikajy Max (branch `max-edition`)
+# Releasing Mikajy Free
 
-> This branch is the separate app **Mikajy Max** (`com.mikajy.app.max`). Tags are `max-vMAJOR.MINOR` (not `v…`) and the release is published as a **pre-release**, which hides it from plain Mikajy's update check. `release.yml` on this branch only reacts to `max-v*`. The APK is `Mikajy-Max-X.Y.apk`; you may also commit it to `releases/`. The text below was written for plain Mikajy: read `v5.1` as `max-v6.1`.
+> Mikajy Free (`com.mikajy.app.free`) lives in its own repository, so tags are plain `vMAJOR.MINOR` and releases are ordinary (non-pre-release) GitHub releases. Until the `release` environment has its signing secrets (an admin of the repository adds them with `scripts/setup-release-signing.sh` or `scripts/import-release-signing.sh`), `release.yml` only reports that signing is unavailable: build and sign locally with `scripts/build-signed-local.sh`, then `gh release create vX.Y Mikajy-Free-X.Y.apk SHA256SUMS.txt --notes-file .github/release-notes-free.md`. The text below was written for the original Mikajy.
 
 Releases are built, tested, **signed and published by GitHub Actions** from a version tag.
 The app's built-in update check (Settings → *Check for updates*, and once a day when online)
@@ -36,7 +36,7 @@ verifies the pinned public certificate fingerprint and publishes the APK with
 signed with this key cannot ordinarily update an installed 4.5 APK in place.
 Uninstalling the old app may erase its locally saved history and training data.
 
-1. On [Mikajy](https://github.com/ARHeritiana/Mikajy), choose **Code →
+1. On [Mikajy](https://github.com/Heritiana-Ankatso/Mikajy-Free), choose **Code →
    Codespaces → Create codespace on main**.
 2. In the Codespaces terminal, run:
    ```bash
@@ -66,7 +66,7 @@ Uninstalling the old app may erase its locally saved history and training data.
    file is sensitive; never paste it into issues, commits or chat.
    GitHub Actions secrets cannot be read back in plaintext if lost.
 5. Consider requiring approval and protecting the release tags using
-   [GitHub's release environment settings](https://github.com/ARHeritiana/Mikajy/settings/environments).
+   [GitHub's release environment settings](https://github.com/Heritiana-Ankatso/Mikajy-Free/settings/environments).
    The script will not silently reset any existing environment rules.
 
 The setup creates:
@@ -107,7 +107,7 @@ Increment `android:versionCode` above 15 and update
 `android/AndroidManifest.xml`. After merging and testing the changes,
 push the matching tag (e.g. `v5.1`). GitHub Actions then verifies, signs,
 and publishes `Mikajy-5.1.apk` and its SHA-256 checksum to
-[GitHub Releases](https://github.com/ARHeritiana/Mikajy/releases).
+[GitHub Releases](https://github.com/Heritiana-Ankatso/Mikajy-Free/releases).
 
 **Do not rerun the setup in a fresh Codespace to make ordinary releases.**
 That could create a different identity. The encrypted secrets persist across
