@@ -65,11 +65,35 @@ def parse_atom(tk, i):
     raise Skip(t)
 
 
+FUNC_WORDS = ('sin', 'cos', 'tan', 'cot', 'sec', 'csc', 'log', 'exp', 'ln')
+DROP_RUNS = ('sqrt', 'min', 'max', 'arrow', 'lim', 'det', 'mod')   # spelled-out words whose structure differs from the corpus' conventions
+
+
+def fix_words(out):
+    """MathWriting often spells functions as plain letters (l o g x): rewrite them as \\log x like the synthetic corpus; drop labels with other spelled-out words."""
+    res, i = [], 0
+    while i < len(out):
+        if len(out[i]) == 1 and out[i].isalpha() and out[i].islower():
+            j = i
+            while j < len(out) and len(out[j]) == 1 and out[j].isalpha() and out[j].islower(): j += 1
+            run = ''.join(out[i:j])
+            if any(w in run for w in DROP_RUNS): raise Skip('word')
+            k = 0
+            while k < len(run):
+                w = next((w for w in FUNC_WORDS if run.startswith(w, k)), None)
+                if w: res.append('\\' + w); k += len(w)
+                else: res.append(run[k]); k += 1
+            i = j
+        else:
+            res.append(out[i]); i += 1
+    return res
+
+
 def convert(label):
     """-> LaTeX tokens in the synthetic corpus' conventions, or raises Skip"""
     tk = TOKEN_RE.findall(label.replace(r'\left', '').replace(r'\right', ''))
     out, _ = parse_seq(tk, 0, None)
-    return out
+    return fix_words(out)
 
 
 def read_inkml(path):
