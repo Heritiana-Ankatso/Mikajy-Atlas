@@ -1,4 +1,4 @@
-# Research branch (`research/noncommercial`)
+# Free edition branch (`free-edition`)
 
 This branch lets the recogniser be trained on datasets whose licences forbid commercial use, and it can be **shared for
 free** (source on GitHub, signed APKs from GitHub releases). It can **not** be sold or used commercially. `main` keeps the

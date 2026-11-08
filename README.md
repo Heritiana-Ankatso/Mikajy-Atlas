@@ -235,13 +235,13 @@ See [docs/AUDIT.md](docs/AUDIT.md) for the full review and the remaining known d
 * No physical-device benchmark or Android APK build is claimed by the Node test suite. The CNN fallback may run on the main thread when workers are unavailable; performance and battery use require device testing.
 
 ## Licences / data
-> **Free for non-commercial use only.** This branch (`research/noncommercial`) is licensed under PolyForm Noncommercial 1.0.0
+> **Free for non-commercial use only.** This branch (`free-edition`) is licensed under PolyForm Noncommercial 1.0.0
 > and its model weights are trained on non-commercial datasets (weights: CC BY-NC-SA 4.0). You may use, share and modify it,
-> but not sell it or use it commercially. See [docs/RESEARCH_BRANCH.md](docs/RESEARCH_BRANCH.md). `main` stays MIT.
+> but not sell it or use it commercially. See [docs/FREE_EDITION.md](docs/FREE_EDITION.md). `main` stays MIT.
 
 The app ships no third-party code; the only third-party asset is the Caveat font (SIL OFL 1.1, text in `licenses/`).
 On this branch Mikajy's code is under the PolyForm Noncommercial licence (LICENSE) and the trained weights under CC BY-NC-SA 4.0.
-See [docs/RESEARCH_BRANCH.md](docs/RESEARCH_BRANCH.md) for what is allowed and [docs/LICENSING.md](docs/LICENSING.md) for the history (`main` is MIT).
+See [docs/FREE_EDITION.md](docs/FREE_EDITION.md) for what is allowed and [docs/LICENSING.md](docs/LICENSING.md) for the history (`main` is MIT).
 See also [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 
