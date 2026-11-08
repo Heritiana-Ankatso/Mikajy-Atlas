@@ -9,7 +9,9 @@ import base64, json, os
 here = os.path.dirname(os.path.abspath(__file__))
 rd = lambda p: open(os.path.join(here, p), encoding='utf-8').read()
 model = rd('model/model4.f16.json')
-seq_path = os.path.join(here, 'model/seq1.json')
+# Research-trained weights (MathWriting, CC BY-NC-SA) are named *-research* so they can never be mistaken for the clean seq1.json; the Max build prefers them.
+seq_path = os.path.join(here, 'model/seq1-research.json')
+if not os.path.exists(seq_path): seq_path = os.path.join(here, 'model/seq1.json')
 seq_model = open(seq_path, encoding='utf-8').read() if os.path.exists(seq_path) else None
 cls = json.dumps(json.loads(model)['cls'])
 font = base64.b64encode(open(os.path.join(here, 'fonts/hand.woff2'), 'rb').read()).decode()

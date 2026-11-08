@@ -32,7 +32,7 @@ Checked 2026-11-08 against the licence text shipped with each download.
 
 | Dataset | Licence (as read) | Used for | Status |
 |---------|-------------------|----------|--------|
-| [MathWriting 2024](https://storage.googleapis.com/mathwriting_data/mathwriting-2024.tgz) (Google) | Archive: CC BY-NC-SA 4.0. LaTeX labels taken from Wikipedia: CC BY-SA 4.0 (`readme.md`, "Licensing Information") | `training/mathwriting_to_npz.py`: human train/valid/test splits, filtered to the calculator's symbols (45.6k train, 1.9k valid, 1.1k test expressions); synthetic split not used | in training (`combined1`) |
+| [MathWriting 2024](https://storage.googleapis.com/mathwriting_data/mathwriting-2024.tgz) (Google) | Archive: CC BY-NC-SA 4.0. LaTeX labels taken from Wikipedia: CC BY-SA 4.0 (`readme.md`, "Licensing Information") | `training/mathwriting_to_npz.py`: human train/valid/test splits, filtered to the calculator's symbols (45.6k train, 1.9k valid, 1.1k test expressions); synthetic split not used | shipped: weights `web/model/seq1-research.json` (run `combined2`, 2026-11-08) |
 | OFL handwriting fonts (`fetch_assets.sh`) | SIL OFL 1.1 | synthetic strokes | in use |
 | Pendigits (UCI) | no licence text in the archive; 8-point resampled digits only | — | downloaded, **not used** (too coarse; source terms unconfirmed) |
 | CROHME 2011–2023 | research terms | benchmark / train | not obtained |

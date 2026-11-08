@@ -5,6 +5,13 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 
 ## [Unreleased]
 
+## [6.0] - 2026-11-08 — Mikajy Max
+
+### Recogniser (retrained)
+- The stroke-sequence model was retrained on synthetic font strokes plus **MathWriting** human ink (CC BY-NC-SA 4.0; 45k expressions filtered to what the calculator understands; weights `web/model/seq1-research.json`, CC BY-NC-SA 4.0).
+  Measured on 1,037 held-out MathWriting expressions (tablet / stylus ink): **60.0 % read exactly right** (token error 8.2 %), up from 49.3 % for the first MathWriting run on the same set; fractions 62.7 %, fractions inside fractions 53.3 %.
+- **Honest limit:** on 29 of the owner's own finger-written samples only **27.6 % are read exactly right** (token error 43.8 %). The model reads stylus ink much better than finger ink; a 30-minute finger-style fine-tune was tried and did not clearly help (31.0 % on those 29, but worse on MathWriting), so it is not shipped. Expect misreads with finger writing; tap a symbol to correct it.
+
 ### Mikajy Max (this branch is a separate app)
 - **Own identity:** name *Mikajy Max*, application id `com.mikajy.app.max` (share authority `com.mikajy.app.max.share`), new logo (`branding/make_max_icon.py`), version 6.0 (code 16). It installs next to Mikajy and never replaces it.
 - **Own update channel:** releases are tagged `max-vX.Y` and published as **pre-releases**, so plain Mikajy's "latest release" check never sees them; Max lists the releases and takes the newest `max-v` tag (`UpdateChecker`, `web/updates.js`, `release.yml`). Release notes start with the non-commercial notice and credits (`.github/release-notes-max.md`). Signed APKs may be committed under `releases/`.
