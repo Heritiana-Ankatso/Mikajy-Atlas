@@ -5,9 +5,9 @@
 # this is for local builds and for checking that the backup key matches the certificate GitHub pins.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-K=release-key-backup
-[[ -f $K/mikajy-release.jks && -f $K/PASSWORD.txt ]] || { echo "Missing $K/mikajy-release.jks or PASSWORD.txt" >&2; exit 1; }
-export MIKAJY_KEYSTORE="$PWD/$K/mikajy-release.jks"
+K="${MIKAJY_KEY_DIR:-release-key-backup}"
+[[ -f "$K/mikajy-release.jks" && -f "$K/PASSWORD.txt" ]] || { echo "Missing $K/mikajy-release.jks or PASSWORD.txt (set MIKAJY_KEY_DIR)" >&2; exit 1; }
+export MIKAJY_KEYSTORE="$(cd "$K" && pwd)/mikajy-release.jks"
 export MIKAJY_ALIAS="$(sed -n 's/^Alias:[[:space:]]*//p' "$K/PASSWORD.txt" | head -1)"
 pw="$(sed -n 's/^Store\/key password:[[:space:]]*//p' "$K/PASSWORD.txt" | head -1)"
 export MIKAJY_STOREPASS="$pw" MIKAJY_KEYPASS="$pw"; unset pw
