@@ -71,9 +71,13 @@ solutions, are refused. An equation that is true everywhere *except* at excluded
 calculations use a finite real-number domain. Division by zero, invalid roots/logarithms,
 `0^0` and undefined trigonometric values are rejected.
 
-**Removed:** derivative/antiderivative calculation, definite and improper integration,
-limits, infinite series, symbolic factorisation, unconstrained root scanning and
-non-polynomial equation-solving. Their former numerical heuristics were not sound.
+**Calculus (engine only):** derivatives, antiderivatives, definite integrals and limits run through the bundled Nerdamer CAS in `web/calculus.js`,
+but an answer is shown only when an independent numeric check of your original expression agrees; the recogniser cannot read `∫`/`lim` yet.
+**Symbolic first:** exact closed forms (`2√2`, `√2/2`, `±√2`) lead and the decimal follows; `True`/`False` for statements about constants;
+periodic equations as `x = nπ, n ∈ ℤ`.
+
+**Removed:** infinite series, symbolic factorisation, unconstrained root scanning and
+unverified non-polynomial equation-solving. Their former numerical heuristics were not sound.
 Legacy recogniser glyph classes for these operations are filtered out; their syntax is
 not supported. We prefer **unsupported** to a convincing but invalid answer.
 
