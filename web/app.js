@@ -143,15 +143,15 @@ function storeFor(L){let st=BoardCore.empty();const order=lines.filter(M=>M.rt).
  return st}
 let boardBusy=false;
 function boardChanged(src){if(boardBusy)return;boardBusy=true;try{for(const M of lines)if(M!==src&&M.rt){M.at='\0';updateAns(M)}}finally{boardBusy=false}}
-/* Keep what a line shows (reading + answer) on screen: pan left when the answer runs off the right edge, zoom out only when the whole line cannot fit. */
+/* Keep what a line shows (reading + answer) on screen: pan, never zoom. The answer's end is brought in, but not so far that the start of the line leaves the screen. */
 let viewTo=null;
 function reveal(L){if(ptrs.size||gest)return;const gs=L.syms.concat(L.ans).filter(g=>!isPart(g)&&!g.pfid);if(!gs.length)return;
  const x0=Math.min(...gs.map(g=>g.tx)),x1=Math.max(...gs.map(g=>g.tx+Math.max(g.w||0,g.bwt||0))),m=22;
  const k0=viewTo?viewTo.k:V.k,vx0=viewTo?viewTo.x:V.x,vy=viewTo?viewTo.y:V.y;
  let k=k0,vx=vx0;const sx0=vx+k*x0,sx1=vx+k*x1;
  if(sx1<=SW-m&&sx0>=m)return;                                   // already in view
- if((x1-x0)*k>SW-2*m){k=Math.max(ZMIN,(SW-2*m)/(x1-x0));vx=m-k*x0}   // wider than the screen: zoom out to fit
- else vx=sx1>SW-m?vx-(sx1-(SW-m)):vx+(m-sx0);                  // otherwise just slide
+ if(sx1>SW-m)vx=Math.max(vx-(sx1-(SW-m)),m-k*x0);               // slide left to show the end, but keep the start on screen
+ else vx+=m-sx0;                                                 // the start is off the left edge: slide back
  viewTo={x:vx,y:vy,k};kick()}
 function computeAns(L) {
   const last=L.syms[L.syms.length-1],trailingEquals=!!(last&&ch(last)=='=');
@@ -396,7 +396,12 @@ cv.onpointerup=cv.onpointercancel=e=>{const wasGest=!!gest;ptrEnd(e);if(wasGest|
  if(down.len<8&&performance.now()-down.t<350&&tapCycle(down.p)){return}
  if(isScribble(s))scribble(s);else{const r=seqOn()?null:radical(s);attach(r||s)}
  rt=setTimeout(recognize,650);kick()};
-$('zr').onclick=()=>setView(0,0,1);
+/* The zoom pill brings you back to what you wrote: all of it centred, at 100% when it fits (otherwise the zoom that fits it). */
+function homeView(){const bs=allBoxes();if(!bs.length){setView(0,0,1);return}
+ const x0=Math.min(...bs.map(b=>b.x0)),x1=Math.max(...bs.map(b=>b.x1)),y0=Math.min(...bs.map(b=>b.y0)),y1=Math.max(...bs.map(b=>b.y1)),m=40;
+ const k=Math.min(1,Math.max(ZMIN,Math.min((SW-2*m)/Math.max(1,x1-x0),(SH-2*m)/Math.max(1,y1-y0))));
+ viewTo=null;setView(SW/2-k*(x0+x1)/2,SH/2-k*(y0+y1)/2,k)}
+$('zr').onclick=homeView;
 cv.addEventListener('wheel',e=>{e.preventDefault();zoomAt(e.clientX,e.clientY,V.k*Math.exp(-e.deltaY*(e.ctrlKey?.01:.0015)))},{passive:false});
 addEventListener('resize',fit);
 document.fonts.load('40px H').then(()=>{fit()});fit();

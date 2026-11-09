@@ -75,9 +75,9 @@ test('conjugate, argument and e^(i q π)', () => {
   assert.equal(calc('e ^ ( 3 i π )').text, '-1');
   assert.equal(calc('e ^ ( i π ) + 1').text, '0');
   assert.equal(calc('arg ( 1 + 2 i )').text, '≈1.107148718');                           // not a multiple of π: numeric, marked
-  assert.equal(calc('arg ( - 1 )').text, 'π ≈3.141592654');
-  assert.equal(calc('arg ( 1 + i )').text, 'π/4 ≈0.7853981634');
-  assert.equal(calc('arg ( - 1 - i )').text, '-3π/4 ≈-2.35619449');
-  assert.equal(calc('arg ( i )').text, 'π/2 ≈1.570796327');
+  assert.equal(calc('arg ( - 1 )').text, 'π');
+  assert.equal(calc('arg ( 1 + i )').text, 'π/4');
+  assert.equal(calc('arg ( - 1 - i )').text, '-3π/4');
+  assert.equal(calc('arg ( i )').text, 'π/2');
   assert.throws(() => MathCore.evaluateComplex(T('arg ( 0 )'), C), e => e.code === 'undefined');
 });
