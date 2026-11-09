@@ -1,6 +1,8 @@
-# Releasing Mikajy Free
+# Releasing Mikajy Atlas
 
-> Mikajy Free (`com.mikajy.app.free`) lives in its own repository, so tags are plain `vMAJOR.MINOR` and releases are ordinary (non-pre-release) GitHub releases. Until the `release` environment has its signing secrets (an admin of the repository adds them with `scripts/setup-release-signing.sh` or `scripts/import-release-signing.sh`), `release.yml` only reports that signing is unavailable: build and sign locally with `scripts/build-signed-local.sh`, then `gh release create vX.Y Mikajy-Free-X.Y.apk SHA256SUMS.txt --notes-file .github/release-notes-free.md`. The text below was written for the original Mikajy.
+> Mikajy Atlas (formerly Mikajy Free; package ID `com.mikajy.app.free`) lives in its own repository, so tags are plain `vMAJOR.MINOR` and releases are ordinary (non-pre-release) GitHub releases. Until the `release` environment has its signing secrets (an admin of the repository adds them with `scripts/setup-release-signing.sh` or `scripts/import-release-signing.sh`), `release.yml` only reports that signing is unavailable: build and sign locally with `scripts/build-signed-local.sh`, then `gh release create vX.Y Mikajy-Atlas-X.Y.apk SHA256SUMS.txt --notes-file .github/release-notes-free.md`. The text below was written for the original Mikajy.
+
+The repository URL and signing configuration remain unchanged. The local build output is still `Mikajy-Free.apk`; on future tagged releases, the workflow renames the signed asset to `Mikajy-Atlas-X.Y.apk`. Older published assets retain their existing names.
 
 Releases are built, tested, **signed and published by GitHub Actions** from a version tag.
 The app's built-in update check (Settings → *Check for updates*, and once a day when online)
@@ -13,7 +15,7 @@ reads the newest GitHub Release, so publishing a release is what delivers an upd
 2. Move the `Unreleased` notes in `CHANGELOG.md` under the new version.
 3. Merge to `main` once CI is green, then tag and push: `git tag v5.1 && git push origin v5.1`.
 4. `release.yml` re-runs every test, builds, signs with the persistent key, checks the certificate fingerprint
-   against `MIKAJY_CERT_SHA256`, and publishes `Mikajy-5.1.apk` plus `SHA256SUMS.txt`.
+   against `MIKAJY_CERT_SHA256`, and publishes `Mikajy-Atlas-X.Y.apk` plus `SHA256SUMS.txt`.
 5. Installed apps pick the release up within a day (or immediately via *Check for updates*) and offer the
    download link. Installation is done by the user in the system installer; the app never installs silently.
 
@@ -106,7 +108,7 @@ Increment `android:versionCode` above 15 and update
 `android:versionName` (e.g. `5.1`) in
 `android/AndroidManifest.xml`. After merging and testing the changes,
 push the matching tag (e.g. `v5.1`). GitHub Actions then verifies, signs,
-and publishes `Mikajy-5.1.apk` and its SHA-256 checksum to
+and publishes `Mikajy-Atlas-X.Y.apk` and its SHA-256 checksum to
 [GitHub Releases](https://github.com/Heritiana-Ankatso/Mikajy-Free/releases).
 
 **Do not rerun the setup in a fresh Codespace to make ordinary releases.**
