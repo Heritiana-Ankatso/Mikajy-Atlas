@@ -1,8 +1,10 @@
 # Licensing and distribution
 
-This document describes the **current Mikajy Free** repository. It supersedes earlier text that mistakenly described this edition as commercially reusable and stated it bundled no libraries. It is project documentation, not legal advice.
+**Current product name:** Mikajy Atlas (formerly Mikajy Atlas). The historic GitHub repository, package ID and prior release names are unchanged.
 
-## Mikajy Free
+This document describes the **current Mikajy Atlas** repository. It supersedes earlier text that mistakenly described this edition as commercially reusable and stated it bundled no libraries. It is project documentation, not legal advice.
+
+## Mikajy Atlas
 
 - **First-party application source:** [PolyForm Noncommercial 1.0.0](../LICENSE). This is source-available, **not** an unrestricted commercial or OSI open-source grant. Selling the app or using it for commercial purposes is not permitted by that grant.
 - **Research handwriting model** (`web/model/seq1-research.json`): **CC BY-NC-SA 4.0**. It includes training on MathWriting (Google LLC, CC BY-NC-SA 4.0), whose expression labels also require Wikipedia attribution (CC BY-SA 4.0). See [FREE.md](FREE.md) and [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md).
@@ -20,7 +22,7 @@ The main-branch MIT grant permits use, modification, redistribution and commerci
 
 ## Separation rule
 
-Code from the original project may be reused in Mikajy Free subject to its own licence. Reusing improvements from Mikajy Free in the original project requires checking the actual copyright grant and all dependencies: **never copy Free's MathWriting-trained weights, data, or other non-commercially restricted materials into the MIT original**. Avoid merging repositories wholesale.
+Code from the original project may be reused in Mikajy Atlas subject to its own licence. Reusing improvements from Mikajy Atlas in the original project requires checking the actual copyright grant and all dependencies: **never copy Free's MathWriting-trained weights, data, or other non-commercially restricted materials into the MIT original**. Avoid merging repositories wholesale.
 
 ## Trained data provenance
 
