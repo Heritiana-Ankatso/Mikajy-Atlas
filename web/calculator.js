@@ -150,11 +150,11 @@ const Calculator = (() => {
     if (!tokens.length) return null;
     const W = key => I18.t(settings.lang, key);   // result words follow the interface language
     const eqIndex = tokens.indexOf('=');
-    const explicit = trailingEquals || eqIndex >= 0;
+    const relIdx = tokens.findIndex(t => REL_CH.includes(t));
+    const explicit = trailingEquals || eqIndex >= 0 || relIdx >= 0;   // the symbol itself is the question, like the = of an equation
     if (settings.mode === 'demand' && !explicit) return null;
     try {
-      const relIdx = tokens.findIndex(t => REL_CH.includes(t));
-      if (relIdx >= 0) return relation(tokens, relIdx, settings, W);
+      if (relIdx >= 0) return relation(tokens, relIdx, {...settings, domain: 'real'}, W);   // an order exists on the reals only, whatever the numbers setting
       if (eqIndex >= 0) {
         if (tokens.indexOf('=', eqIndex + 1) >= 0) return null;
         const left = tokens.slice(0, eqIndex), right = tokens.slice(eqIndex + 1);

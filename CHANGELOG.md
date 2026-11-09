@@ -8,7 +8,7 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 ## [6.3] - 2026-11-09
 
 ### Added
-- **Inequalities.** `<`, `>`, `≤`, `≥` are solved exactly by sign analysis: polynomials, rational functions (poles stay open), and `2^x`, `|x−1|`, `ln x`, `√x`. The answer is a set with exact endpoints: `S=]−∞ ; −2] ∪ [2 ; +∞[` in French, `S=(−∞, −2] ∪ [2, ∞)` in English; `S=ℝ`, `S=∅`, or `{1}` when it applies. Between constants it says True / False. Periodic ones (`sin x > 0`) and functions whose domain edge has no exact value are refused rather than guessed.
+- **Inequalities.** `<`, `>`, `≤`, `≥` are solved exactly by sign analysis: polynomials, rational functions (poles stay open), and `2^x`, `|x−1|`, `ln x`, `√x`. The answer is a set with exact endpoints: `S=]−∞ ; −2] ∪ [2 ; +∞[` in French, `S=(−∞, −2] ∪ [2, ∞)` in English; `S=ℝ`, `S=∅`, or `{1}` when it applies. Between constants it says True / False. Periodic ones (`sin x > 0`) and functions whose domain edge has no exact value are refused ("unsupported") rather than guessed. The inequality sign is itself the request, so it answers in *On demand* mode without a trailing `=`, and in *complex* mode (an order exists on the reals only).
 
 ### Fixed
 - **No more automatic zoom-out after writing.** The view only slides to keep the answer in sight, never leaving the start of the line off screen. The zoom pill now brings you back to what you wrote (all of it, centred) instead of the board's origin.
