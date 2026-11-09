@@ -5,16 +5,8 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 
 ## [Unreleased]
 
-### Branding
-- Update the release checker and URL allowlist to the renamed `Heritiana-Ankatso/Mikajy-Atlas` repository. Existing signed APKs retain their historical update code; only future builds incorporate this correction.
-- Rename the full edition to **Mikajy Atlas** (formerly Mikajy Free) in launcher labels, web UI, localization, and future release names. Keep the `com.mikajy.app.free` Android package ID, GitHub update channel, signing identity, and old release artifacts unchanged.
-- New launcher icon / logo for Atlas (`branding/logo-atlas.svg`): a heavy black M cut out of a white disc inside a red ring, on a black tile, still black / red / white. It replaces the former Free emblem; sources and renderer are in `branding/`.
+## [6.3] - 2026-11-09 — Mikajy Atlas
 
-### Licensing documentation (2026-11-09)
-- Clarified that this edition uses PolyForm Noncommercial 1.0.0 for first-party code, CC BY-NC-SA 4.0 for research model weights, plus the separately licensed bundled Nerdamer, decimal.js and Caveat font.
-- Corrected obsolete commercial-use claims in `docs/LICENSING.md`. The sibling Mikajy code on `main` is now MIT, while its tagged `v5.0` release remains GPL-3.0-or-later; no old APK was relicensed.
-
-## [6.3] - 2026-11-09
 
 ### Added
 - **Inequalities.** `<`, `>`, `≤`, `≥` are solved exactly by sign analysis: polynomials, rational functions (poles stay open), and `2^x`, `|x−1|`, `ln x`, `√x`. The answer is a set with exact endpoints: `S=]−∞ ; −2] ∪ [2 ; +∞[` in French, `S=(−∞, −2] ∪ [2, ∞)` in English; `S=ℝ`, `S=∅`, or `{1}` when it applies. Between constants it says True / False. Periodic ones (`sin x > 0`) and functions whose domain edge has no exact value are refused ("unsupported") rather than guessed. The inequality sign is itself the request, so it answers in *On demand* mode without a trailing `=`, and in *complex* mode (an order exists on the reals only).
@@ -28,6 +20,15 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 - **`\left(` and `\right)` no longer appear as the words "left(" and "right)".** The recogniser emits them as single tokens; the board, the calculator and the matrix/modular evaluator now treat them as plain brackets (so `(4/3)³ ÷ 1/3` also gets its answer).
 - **The root sign spans its whole radicand.** Over a stacked fraction (or a power) the bar clears the numerator and the hook reaches the denominator.
 - **Scribble erase is more forgiving.** Over writing, any zigzag with two sharp turns (up-down-up) erases it instead of being read as a letter, and a scribble also erases what its box fully encloses.
+
+### Branding
+- Update the release checker and URL allowlist to the renamed `Heritiana-Ankatso/Mikajy-Atlas` repository. Existing signed APKs retain their historical update code; only future builds incorporate this correction.
+- Rename the full edition to **Mikajy Atlas** (formerly Mikajy Free) in launcher labels, web UI, localization, and future release names. Keep the `com.mikajy.app.free` Android package ID, GitHub update channel, signing identity, and old release artifacts unchanged.
+- New launcher icon / logo for Atlas (`branding/logo-atlas.svg`): a heavy black M cut out of a white disc inside a red ring, on a black tile, still black / red / white. It replaces the former Free emblem; sources and renderer are in `branding/`.
+
+### Licensing documentation (2026-11-09)
+- Clarified that this edition uses PolyForm Noncommercial 1.0.0 for first-party code, CC BY-NC-SA 4.0 for research model weights, plus the separately licensed bundled Nerdamer, decimal.js and Caveat font.
+- Corrected obsolete commercial-use claims in `docs/LICENSING.md`. The sibling Mikajy code on `main` is now MIT, while its tagged `v5.0` release remains GPL-3.0-or-later; no old APK was relicensed.
 
 ## [6.2] - 2026-11-09
 
