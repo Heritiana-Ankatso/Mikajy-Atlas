@@ -1,6 +1,6 @@
 # Mikajy Free — handwriting calculator for Android
 
-*The free-for-non-commercial-use sibling of [Mikajy](https://github.com/ARHeritiana/Mikajy) (MIT): same engine and interface, plus a handwriting recogniser trained on non-commercial data.*
+*A more capable, non-commercially licensed sibling of [Mikajy](https://github.com/ARHeritiana/Mikajy), with a separate handwriting model and extended mathematical engine. The original's current `main` branch code is MIT; its existing `v5.0` release was published under GPL-3.0-or-later.*
 
 [![Checks](https://github.com/Heritiana-Ankatso/Mikajy-Free/actions/workflows/checks.yml/badge.svg)](https://github.com/Heritiana-Ankatso/Mikajy-Free/actions/workflows/checks.yml)
 [![Latest release](https://img.shields.io/github/v/release/Heritiana-Ankatso/Mikajy-Free)](https://github.com/Heritiana-Ankatso/Mikajy-Free/releases/latest)
@@ -244,9 +244,9 @@ See [docs/AUDIT.md](docs/AUDIT.md) for the full review and the remaining known d
 > and its model weights are trained on non-commercial datasets (weights: CC BY-NC-SA 4.0). You may use, share and modify it,
 > but not sell it or use it commercially. See [docs/FREE.md](docs/FREE.md). The sibling project [Mikajy](https://github.com/ARHeritiana/Mikajy) is MIT.
 
-The app ships no third-party code; the only third-party asset is the Caveat font (SIL OFL 1.1, text in `licenses/`).
+The app bundles third-party code: Nerdamer (Apache-2.0) with decimal.js (MIT), and the Caveat font (SIL OFL 1.1). Their licence notices are in `licenses/`. The research handwriting weights have separate non-commercial attribution obligations.
 Mikajy Free's code is under the PolyForm Noncommercial licence (LICENSE) and the trained weights under CC BY-NC-SA 4.0.
-See [docs/FREE.md](docs/FREE.md) for what is allowed and [docs/LICENSING.md](docs/LICENSING.md) for the history (the sibling Mikajy is MIT).
+See [docs/FREE.md](docs/FREE.md) for what is allowed and [docs/LICENSING.md](docs/LICENSING.md) for the complete licensing history, including the original Mikajy `v5.0` GPL release and subsequent MIT change to its `main` branch.
 See also [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 
