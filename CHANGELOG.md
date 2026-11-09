@@ -5,6 +5,9 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 
 ## [Unreleased]
 
+### Branding
+- Rename the full edition to **Mikajy Atlas** (formerly Mikajy Free) in launcher labels, web UI, localization, and future release names. Keep the `com.mikajy.app.free` Android package ID, GitHub update channel, signing identity, old release artifacts, and existing launcher icon unchanged.
+
 ### Licensing documentation (2026-11-09)
 - Clarified that this edition uses PolyForm Noncommercial 1.0.0 for first-party code, CC BY-NC-SA 4.0 for research model weights, plus the separately licensed bundled Nerdamer, decimal.js and Caveat font.
 - Corrected obsolete commercial-use claims in `docs/LICENSING.md`. The sibling Mikajy code on `main` is now MIT, while its tagged `v5.0` release remains GPL-3.0-or-later; no old APK was relicensed.
