@@ -5,7 +5,7 @@ set +x
 set -euo pipefail
 umask 077
 
-REPO='Heritiana-Ankatso/Mikajy-Free'
+REPO='Heritiana-Ankatso/Mikajy-Atlas'
 ENVIRONMENT='release'
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 KEY="${1:-$ROOT/mikajy-release.jks}"

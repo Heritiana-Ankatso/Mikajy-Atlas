@@ -6,6 +6,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 K="${MIKAJY_KEY_DIR:-release-key-backup}"
+# The one key backup lives beside the sibling Spark checkout; fall back to it when this repo has no copy.
+[[ -f "$K/mikajy-release.jks" ]] || K="../Mikajy/release-key-backup"
 [[ -f "$K/mikajy-release.jks" && -f "$K/PASSWORD.txt" ]] || { echo "Missing $K/mikajy-release.jks or PASSWORD.txt (set MIKAJY_KEY_DIR)" >&2; exit 1; }
 export MIKAJY_KEYSTORE="$(cd "$K" && pwd)/mikajy-release.jks"
 export MIKAJY_ALIAS="$(sed -n 's/^Alias:[[:space:]]*//p' "$K/PASSWORD.txt" | head -1)"

@@ -4,7 +4,7 @@ set +x
 set -euo pipefail
 umask 077
 
-REPO='Heritiana-Ankatso/Mikajy-Free'
+REPO='Heritiana-Ankatso/Mikajy-Atlas'
 ENV='release'
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BACKUP="$ROOT/release-key-backup"
