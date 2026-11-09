@@ -57,12 +57,21 @@ async def main():
         got = await page.evaluate("() => { const s = lines[0].ink[0]; return [s[0][0], s[0][1]]; }")
         assert abs(got[0] - (300 - v["x"]) / v["k"]) < 1 and abs(got[1] - (250 - v["y"]) / v["k"]) < 1, (got, v)
         # --- reset button
+        # (it brings back what you wrote: all of it centred, at 100% when it fits)
         await page.click('#zr')
-        assert await view() == {"x": 0, "y": 0, "k": 1}
+        v = await view()
+        assert v["k"] == 1, v
+        c = await page.evaluate("() => { const b = allBoxes(), x0 = Math.min(...b.map(q => q.x0)), x1 = Math.max(...b.map(q => q.x1)), y0 = Math.min(...b.map(q => q.y0)), y1 = Math.max(...b.map(q => q.y1)); return [(x0 + x1) / 2, (y0 + y1) / 2]; }")
+        assert abs(c[0] * v["k"] + v["x"] - 400) < 1e-6 and abs(c[1] * v["k"] + v["y"] - 250) < 1e-6, (c, v)
         # --- wheel zoom keeps the point under the cursor
+        v0 = await view(); w = [(200 - v0["x"]) / v0["k"], (100 - v0["y"]) / v0["k"]]   # the world point under the cursor
         await page.mouse.move(200, 100); await page.mouse.wheel(0, -300)
         v = await view()
-        assert v["k"] > 1 and abs(200 - (200 * v["k"] + v["x"])) < 1e-6, v
+        assert v["k"] > v0["k"] and abs(200 - (w[0] * v["k"] + v["x"])) < 1e-6 and abs(100 - (w[1] * v["k"] + v["y"])) < 1e-6, v
+        # --- a pending auto-pan (an answer arriving) never overrides a zoom made meanwhile
+        zoomed = await page.evaluate("() => { viewTo = {x: V.x - 200, y: V.y, k: V.k}; zoomAt(400, 250, V.k * 0.5); return V.k; }")
+        await page.wait_for_timeout(600)
+        assert abs((await view())["k"] - zoomed) < 1e-9 and await page.evaluate("() => viewTo") is None
         # --- zoom is clamped
         for _ in range(30): await page.mouse.wheel(0, -400)
         assert (await view())["k"] <= 3 + 1e-9

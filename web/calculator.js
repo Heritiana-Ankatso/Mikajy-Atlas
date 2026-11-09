@@ -52,6 +52,15 @@ const Calculator = (() => {
     out.push(textPiece('i'));
     return out;
   }
+  /** closed-form parts {re, im, imAbs} (CAS text) -> pieces: re ± im·i, either part omitted when it is zero */
+  function complexClosed(cf) {
+    const tiny = v => v === '0', sum = /[^(]*[+-]/.test(cf.imAbs.replace(/\([^()]*\)/g, '')) ;
+    const imag = cf.imAbs === '1' ? [textPiece('i')] : [...(sum ? [textPiece('('), ...typeset(cf.imAbs), textPiece(')')] : typeset(cf.imAbs)), textPiece(/^\d+$/.test(cf.imAbs) ? 'i' : '·i')];
+    const neg = cf.im.startsWith('-') || cf.imAbs !== cf.im;
+    if (tiny(cf.re)) return neg ? [textPiece('-'), ...imag] : imag;
+    if (tiny(cf.im)) return typeset(cf.re);
+    return [...typeset(cf.re), textPiece(neg ? '-' : '+'), ...imag];
+  }
   const asComplex = r => ({re: r.re, im: r.im, eRe: r.exact ? r.exact.re : r.exactRe || null, eIm: r.exact ? r.exact.im : r.exactIm || null});
   function asResponse(pieces, value) {
     return {pieces, text: textOf(pieces), val: value};
@@ -176,7 +185,19 @@ const Calculator = (() => {
         }
         if (result.kind === 'croots') {
           const pieces = [textPiece('x=')];
-          result.roots.forEach((r, i) => { if (i) pieces.push(textPiece(', ')); pieces.push(...complexPieces(asComplex(r), settings.fmt || 'dec')); });
+          const fmt = settings.fmt === 'mixed' ? 'mixed' : 'frac';   // exact roots are written exactly in every format
+          const realForms = Calc.exactRoots(left, right, result.roots.filter(r => Math.abs(r.im) < 1e-12 && !r.exactRe).map(r => r.re), settings);
+          const realIdx = result.roots.filter(r => Math.abs(r.im) < 1e-12 && !r.exactRe);
+          result.roots.forEach((r, i) => {
+            if (i) pieces.push(textPiece(', '));
+            // a + b√c·i with rational a: the radical is written exactly (closed-form formats only)
+            const ri = realIdx.indexOf(r);
+            if (ri >= 0 && realForms[ri]) { pieces.push(...typeset(realForms[ri])); return; }
+            const rad = r.exactRe && !r.exactIm && r.imSq && r.imSq.n > 0n ? Calc.sqrtRational(r.imSq.n, r.imSq.d) : null;
+            if (!rad) { pieces.push(...complexPieces(asComplex(r), settings.fmt || 'dec')); return; }
+            if (r.exactRe.n !== 0n) pieces.push(...numberPieces({value: r.re, rational: r.exactRe}, fmt));
+            pieces.push(textPiece(r.im < 0 ? '-' : r.exactRe.n !== 0n ? '+' : ''), ...typeset(rad), textPiece('·i'));
+          });
           return asResponse(pieces, result.roots.length === 1 && Math.abs(result.roots[0].im) < 1e-12 ? result.roots[0].re : undefined);
         }
         if (result.kind === 'identity') return asResponse([textPiece('x∈ℝ')], undefined);
@@ -197,8 +218,14 @@ const Calculator = (() => {
       if (settings.domain === 'complex') {
         const z = Core.evaluateComplex(tokens, settings);
         if (tokens.includes('arg') && !z.exact && Math.abs(z.im) < 1e-12 && piText(z.re)) return asResponse([...(!trailingEquals ? [textPiece('=')] : []), ...argPieces(z.re)], z.re);
-        const pieces = complexPieces(asComplex(z), settings.fmt || 'dec');
-        return asResponse([...(!trailingEquals ? [textPiece('=')] : []), ...pieces], Math.abs(z.im) < 1e-12 ? z.re : undefined);
+        const eq = !trailingEquals ? [textPiece('=')] : [];
+        const val = Math.abs(z.im) < 1e-12 ? z.re : undefined;
+        // not exact in Q(i): the ℂ mode gives radicals exactly (√2+i, 2√2·i) whatever the decimal/fraction setting, and ≈ only when no closed form exists
+        if (!z.exact) {
+          const cf = Calc.exactComplexValue(tokens, z, settings);
+          if (cf) return asResponse([...eq, ...complexClosed(cf)], val);
+        }
+        return asResponse([...eq, ...complexPieces(asComplex(z), settings.fmt || 'dec')], val);
       }
       const result = Core.evaluate(tokens, settings);
       if (tokens.includes('arg') && !result.rational && piText(result.value)) return asResponse([...(!trailingEquals ? [textPiece('=')] : []), ...argPieces(result.value)], result.value);

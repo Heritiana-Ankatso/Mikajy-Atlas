@@ -258,7 +258,7 @@ const PolyCore = (() => {
       const re = qdiv(qneg(b), qmul(q(2n), a));
       const imSq = qdiv(qneg(disc), qmul(q(4n), qmul(a, a)));                 // disc < 0 here: no real roots were found
       const exactIm = exactSqrt(imSq), im = exactIm ? toNumber(exactIm) : Math.sqrt(toNumber(imSq));
-      out.push({re: toNumber(re), im: -im, exactRe: re, exactIm: exactIm && qneg(exactIm)}, {re: toNumber(re), im, exactRe: re, exactIm});
+      out.push({re: toNumber(re), im: -im, exactRe: re, exactIm: exactIm && qneg(exactIm), imSq}, {re: toNumber(re), im, exactRe: re, exactIm, imSq});   // imSq: the square of the imaginary part, kept so a radical can be written exactly
     } else if (degree(rest) > irrational.length) {
       const z = aberth(rest.map(toNumber)).sort((u, v) => Math.abs(u[1]) - Math.abs(v[1]));
       const nonreal = z.slice(irrational.length);                             // the |im|-smallest ones are the certified real roots

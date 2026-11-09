@@ -16,6 +16,7 @@ const Calculus = (() => {
   const NAME = {ln: 'log', log: 'log10'};
   const SAMPLES = [-3.1371, -2.2093, -1.5137, -0.9013, -0.4127, -0.1371, 0.0931, 0.2713, 0.5231, 0.7619, 1.1317, 1.4973, 1.9037, 2.4613, 3.2931, 4.1079];
 
+  let casComplex = false;                    // set only while exactComplexValue translates: then the symbol i is the imaginary unit
   function toCas(n) {
     switch (n.type) {
       case 'number': {
@@ -24,6 +25,7 @@ const Calculus = (() => {
       }
       case 'symbol':
         if (n.name === 'π') return 'pi';
+        if (n.name === 'i' && casComplex) return 'i';
         if (n.name === 'e' || n.name === 'x') return n.name;
         return fail('unsupported');
       case 'negate': return `(-${toCas(n.arg)})`;
@@ -201,6 +203,43 @@ const Calculus = (() => {
     } catch (_) { return null; }
   }
 
+  /** Closed forms of the real and imaginary parts of a complex constant (√(-8) -> 0, 2√2; (1+i)/√2 -> √2/2, √2/2), or null.
+   * `z` is the certified double result {re, im}: each part must reproduce it, so nothing unverified is claimed. Parts are CAS text; neg is the negated imaginary part. */
+  function exactComplexValue(tokens, z, settings) {
+    casComplex = true;
+    try {
+      const ast = parseExpr(tokens, settings);
+      if (JSON.stringify(ast).includes('"x"')) return null;
+      const src = toCas(ast);
+      const num = t => { const m = /^(-?\d+)\/(\d+)$/.exec(t); return m ? Number(m[1]) / Number(m[2]) : casValue(t); };   // the CAS leaves a bare fraction undecimalised
+      const part = (fn, want) => {
+        const t = CAS(`${fn}(${src})`).toString();
+        if (unevaluated(t) || looksNumeric(t) || /\bi\b/.test(t) || /\bln\b(?!\()/.test(t) || /atan|asin|acos|\barg\b/.test(t)) return null;   // inverse-trig names are not a closed form worth claiming
+        return close(num(t), want, 1e-9) ? t : null;
+      };
+      const re = part('realpart', z.re), im = part('imagpart', z.im);
+      if (re === null || im === null) return null;
+      const abs = z.im < 0 ? CAS(`expand(-(${im}))`).toString() : im;
+      if (z.im < 0 && !close(num(abs), -z.im, 1e-9)) return null;
+      return {re: prettyExact(re), im: prettyExact(im), imAbs: prettyExact(abs)};
+    } catch (_) { return null; }
+    finally { casComplex = false; }
+  }
+
+  /** √(n/d) for positive integers as a closed form ("2√11/9", "√3/2"), or null. */
+  function sqrtRational(n, d) {
+    try {
+      const t = CAS(`sqrt(${n}/${d})`).toString();
+      if (unevaluated(t) || looksNumeric(t) || /\bi\b/.test(t)) return null;
+      const num = u => { const m = /^(-?\d+)\/(\d+)$/.exec(u); return m ? Number(m[1]) / Number(m[2]) : casValue(u); };
+      if (!close(num(t), Math.sqrt(Number(n) / Number(d)), 1e-12)) return null;
+      let out = prettyExact(t);
+      const m = /^\((\d+)\/(\d+)\)(.+)$/.exec(out);                      // (2/9)√11 -> 2√11/9
+      if (m) out = (m[1] === '1' ? '' : m[1]) + m[3] + '/' + m[2];
+      return out;
+    } catch (_) { return null; }
+  }
+
   /** Constant statement a = b: true / false when it can be decided (exactly or symbolically), else null. */
   function compare(leftTokens, rightTokens, settings) {
     const L = parseExpr(leftTokens, settings), R = parseExpr(rightTokens, settings);
@@ -229,6 +268,6 @@ const Calculus = (() => {
     } catch (_) { return none; }
   }
 
-  return Object.freeze({derivative, antiderivative, definite, limit, solveEquation, exactValue, compare, exactRoots, casValue, splitTopList: splitTop, prettyExact});
+  return Object.freeze({derivative, antiderivative, definite, limit, solveEquation, exactValue, exactComplexValue, sqrtRational, compare, exactRoots, casValue, splitTopList: splitTop, prettyExact});
 })();
 if (typeof module !== 'undefined' && module.exports) module.exports = Calculus;

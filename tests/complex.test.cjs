@@ -21,10 +21,10 @@ test('complex arithmetic is exact in the Gaussian rationals', () => {
   assert.equal(calc('( 1 + i ) ^ ( 8 )').text, '16');
 });
 
-test('transcendental and irrational complex results are marked approximate', () => {
-  assert.equal(calc('sqrt ( - 2 )').text, '≈1.414213562i');
-  assert.equal(calc('ln ( - 1 )').text, '≈3.141592654i');                            // principal branch: +pi i
-  assert.equal(calc('( - 8 ) ^ ( 1 / 3 )').text.startsWith('≈1+1.732050808i'), true);
+test('irrational complex results are exact when a closed form exists, approximate otherwise', () => {
+  assert.equal(calc('sqrt ( - 2 )').text, '√2·i');
+  assert.equal(calc('ln ( - 1 )').text, 'π·i');                            // principal branch: +pi i
+  assert.equal(calc('( - 8 ) ^ ( 1 / 3 )').text, '1+√3·i');
   const eipi = MathCore.evaluateComplex(T('e ^ ( i π )'), C);
   within(eipi.re, -1); within(eipi.im, 0, 1e-15); assert.ok(eipi.exact && eipi.exact.re.n === -1n && eipi.exact.im.n === 0n);   // exact: e^(iπ) = -1
   assert.equal(calc('e ^ ( i π )').text, '-1');
@@ -42,11 +42,11 @@ test('real mode still refuses i and negative square roots', () => {
 test('equations: every complex root, exact when the polynomial allows', () => {
   assert.equal(calc('x ^ ( 2 ) + 1 = 0').text, 'x=-i, i');
   assert.equal(calc('x ^ ( 2 ) + 4 x + 5 = 0').text, 'x=-2-i, -2+i');
-  assert.equal(calc('x ^ ( 3 ) = 1').text.startsWith('x=≈-0.5-0.8660254038i, ≈-0.5+0.8660254038i, 1'), true);
+  assert.equal(calc('x ^ ( 3 ) = 1').text, 'x=-1/2-√3/2·i, -1/2+√3/2·i, 1');
   assert.equal(calc('x ^ ( 3 ) - 6 x ^ ( 2 ) + 11 x = 6').text, 'x=1, 2, 3');         // all-real roots print as before
   assert.equal(calc('( x ^ ( 2 ) + 1 ) / ( x - 1 ) = 0').text, 'x=-i, i');
   assert.equal(calc('( x ^ ( 2 ) + 1 ) / ( x ^ ( 2 ) + 1 ) = 0').text, 'S=∅');
-  assert.equal(calc('x ^ ( 2 ) + 2 = 0').text, 'x=≈-1.414213562i, ≈1.414213562i');
+  assert.equal(calc('x ^ ( 2 ) + 2 = 0').text, 'x=-√2·i, √2·i');
   assert.equal(calc('x ^ ( 4 ) = - 1').text.split(', ').length, 4);
   assert.equal(calc('2 ^ ( x ) = 8').text, '= unsupported');                           // infinitely many complex solutions
 });
@@ -80,4 +80,26 @@ test('conjugate, argument and e^(i q π)', () => {
   assert.equal(calc('arg ( - 1 - i )').text, '-3π/4');
   assert.equal(calc('arg ( i )').text, 'π/2');
   assert.throws(() => MathCore.evaluateComplex(T('arg ( 0 )'), C), e => e.code === 'undefined');
+});
+
+test('complex results with radicals are exact in the closed-form formats, approximate in decimal', () => {
+  const f = t => calc(t, {fmt: 'frac'}).text;
+  assert.equal(f('sqrt ( - 8 )'), '2√2·i');
+  assert.equal(f('sqrt ( 2 ) + i'), '√2+i');
+  assert.equal(f('( 1 + i ) / sqrt ( 2 )'), '√2/2+√2/2·i');
+  assert.equal(f('e ^ ( i π / 3 )'), '1/2+√3/2·i');
+  assert.equal(f('( - 8 ) ^ ( 1 / 3 )'), '1+√3·i');
+  assert.equal(f('sqrt ( 2 ) - sqrt ( 3 ) i'), '√2-√3·i');
+  assert.equal(f('sqrt ( 2 )'), '√2');
+  assert.equal(calc('sqrt ( - 8 )', {fmt: 'dec'}).text, '2√2·i');   // the ℂ mode is exact whatever the decimal setting
+  assert.equal(f('( 1 + 2 i ) ( 3 - i )'), '5+5i');                           // Gaussian rationals are unchanged
+});
+
+test('complex roots with radicals are exact', () => {
+  for (const fmt of ['frac', 'dec']) {
+    assert.equal(calc('x ^ ( 2 ) + x + 1 = 0', {fmt}).text, 'x=-1/2-√3/2·i, -1/2+√3/2·i');
+    assert.equal(calc('( 2 x - 5 ) / x ^ ( 2 ) = 9', {fmt}).text, 'x=1/9-2√11/9·i, 1/9+2√11/9·i');
+    assert.equal(calc('x ^ ( 2 ) + 3 = 0', {fmt}).text, 'x=-√3·i, √3·i');
+  }
+  assert.equal(calc('x ^ ( 2 ) - 2 = 0', {fmt: 'frac'}).text, 'x=-√2, √2');
 });
