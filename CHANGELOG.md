@@ -5,6 +5,12 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 
 ## [Unreleased]
 
+## [6.2] - 2026-11-09
+
+### Fixed
+- **Updates happen inside the app.** Tapping *Get Mikajy Free x.y* used to open the browser and download the APK there. The app now downloads it itself (progress shown on the button), checks it against the release's `SHA256SUMS.txt`, and hands it to Android's installer, which asks once and replaces the app in place; your history and settings stay. If Android has not yet allowed Mikajy Free to install apps, the button opens that one settings screen and asks you to tap again. Only GitHub hosts are ever contacted; Android refuses anything not signed with the same key. New permission: `REQUEST_INSTALL_PACKAGES` (used only for this). `android/src/com/mikajy/app/UpdateInstaller.java`.
+- Updating *to* 6.2 still needs one manual download for anyone on 6.1 or older, because the old versions cannot update themselves in place.
+
 ## [6.1] - 2026-11-09
 
 ### Added

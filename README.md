@@ -137,7 +137,7 @@ sudo apt install openjdk-21-jdk-headless aapt apksigner zipalign android-sdk-pla
 ./build_apk.sh            # -> Mikajy.apk (minSdk 21, targetSdk 34)
 ```
 The build fails on any compiler warning and checks that the APK has the expected package id, contains the page and
-`classes.dex`, and requests **no permission other than `INTERNET`**. To iterate on the UI without Android, open
+`classes.dex`, and requests **no permission other than `INTERNET` and `REQUEST_INSTALL_PACKAGES`**. To iterate on the UI without Android, open
 `android/assets/index.html` in desktop Chrome after `python3 web/build_web.py` (bridge calls fall back to
 clipboard/new tab; the update UI is hidden).
 
@@ -223,10 +223,9 @@ what to write — fractions, exponents and matrices laid out — in a rotating s
 
 ## Security model
 * The page is the only content the WebView loads (`file:///android_asset/`); every other navigation is refused and
-  the WebView's network loads are blocked. The app's only permission is `INTERNET`, used by the native update check
-  (one HTTPS GET to GitHub's releases API; see [SECURITY.md](SECURITY.md)).
+  the WebView's network loads are blocked. The app's only permissions are `INTERNET` (the native update check and, when you tap *Get*, the download of the signed APK from this project's releases) and `REQUEST_INSTALL_PACKAGES` (so Android can install that update over the app after you confirm). The update check is one HTTPS GET to GitHub's releases API; the download follows redirects only to GitHub hosts and is checked against the release's `SHA256SUMS.txt`, and Android refuses anything not signed with the same key (see [SECURITY.md](SECURITY.md)).
 * The page carries a strict Content-Security-Policy (`default-src 'none'`, no `eval`, no remote origins).
-* The JavaScript bridge has a few methods (`copy`, `shareText`, `shareImage`, `version`, `checkForUpdates`, `openUpdate`); each validates type, size and, for links, that they point into this project's GitHub releases.
+* The JavaScript bridge has a few methods (`copy`, `shareText`, `shareImage`, `version`, `checkForUpdates`, `installUpdate`, `openUpdate`); each validates type, size and, for links, that they point into this project's GitHub releases.
 * Everything read back from `localStorage` is treated as untrusted and re-validated (`web/storage.js`).
 * Backups are disabled; the shared PNG lives in the app cache and is removed on the next start.
 See [docs/AUDIT.md](docs/AUDIT.md) for the full review and the remaining known debt.

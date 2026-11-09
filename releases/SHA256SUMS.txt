@@ -1,2 +1,3 @@
 2a578a7691dddac15ac2ec391a7352d3073eac35245e48d9ef022c9d5a0b89a8  Mikajy-Free-6.0.apk
 4fdaafaff0b2016dd8516202512b9bded5b7b0263ad11c780bcee26c18c4eb35  Mikajy-Free-6.1.apk
+8c40a05faa0b3908dc67340ce7f713f02e2d614ee2d2b08c9b7ba6a2522c22fc  Mikajy-Free-6.2.apk
