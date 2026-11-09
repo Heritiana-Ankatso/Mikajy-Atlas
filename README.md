@@ -1,6 +1,8 @@
-# Mikajy Free — handwriting calculator for Android
+# Mikajy Atlas — full handwriting calculator for Android
 
-*A more capable, non-commercially licensed sibling of [Mikajy](https://github.com/ARHeritiana/Mikajy), with a separate handwriting model and extended mathematical engine. The original's current `main` branch code is MIT; its existing `v5.0` release was published under GPL-3.0-or-later.*
+> **Naming:** Mikajy Atlas was previously called Mikajy Free. The GitHub repository URL, Android package ID `com.mikajy.app.free`, update endpoint and signing identity are deliberately unchanged. Existing signed releases retain their historical names. The proposed Atlas logo is not installed yet.
+
+*The full-featured, non-commercially licensed sibling of [Mikajy Spark](https://github.com/ARHeritiana/Mikajy), with a separate handwriting model and extended mathematical engine. The original's current `main` branch code is MIT; its existing `v5.0` release was published under GPL-3.0-or-later.*
 
 [![Checks](https://github.com/Heritiana-Ankatso/Mikajy-Free/actions/workflows/checks.yml/badge.svg)](https://github.com/Heritiana-Ankatso/Mikajy-Free/actions/workflows/checks.yml)
 [![Latest release](https://img.shields.io/github/v/release/Heritiana-Ankatso/Mikajy-Free)](https://github.com/Heritiana-Ankatso/Mikajy-Free/releases/latest)
@@ -12,9 +14,9 @@ app. When the phone happens to be online it checks GitHub (at most once a day, o
 tells you.
 
 ## Install and update
-1. Download `Mikajy-x.y.apk` from the [latest release](https://github.com/Heritiana-Ankatso/Mikajy-Free/releases/latest) and open it
+1. Download the APK (currently `Mikajy-Free-6.2.apk`; future releases use the Atlas name) from the [latest release](https://github.com/Heritiana-Ankatso/Mikajy-Free/releases/latest) and open it
    (allow installing from your browser when Android asks). Check it with `SHA256SUMS.txt` if you like.
-2. Later versions announce themselves: a red dot appears on the menu button and Settings shows **Get Mikajy x.y**.
+2. Later versions announce themselves: a red dot appears on the menu button and Settings shows **Get Mikajy Atlas x.y**.
    *Settings → Updates → Off* disables the automatic check; *Check for updates* does it on demand.
    The download opens in your browser and is installed by Android's installer — the app never installs anything itself.
 
@@ -89,7 +91,7 @@ are prefixed `≈`; fraction/mixed display is used only for known exact rational
 
 ## Look
 Black-red-white identity with a **Dark / Light** option in Settings, saved locally. Dark mode shows white handwriting on a black canvas; Light mode shows black handwriting on a white canvas. Answers, active controls and selection rings remain red in both.
-Logo: **Mikajy Free** is the Mikajy mark (white **M** on a black-and-red rounded square, `branding/logo-512.png`) pushed harder — heavier forward-leaning M, double sweep, speed stripes and a FREE plaque — drawn by `branding/make_free_icon.py` into `branding/logo-free-512.png` / `logo-free-1024.png` and the launcher icon.
+Logo: the current launcher icon still uses the former **Mikajy Free** emblem; an Atlas-specific SVG redesign is being reviewed. The former mark (white **M** on a black-and-red rounded square, `branding/logo-512.png`) pushed harder — heavier forward-leaning M, double sweep, speed stripes and a FREE plaque — drawn by `branding/make_free_icon.py` into `branding/logo-free-512.png` / `logo-free-1024.png` and the launcher icon.
 Package id is `com.mikajy.app.free`, so it installs next to Mikajy (`com.mikajy.app`) and never replaces it. Its updates come only from this repository's releases.
 
 
@@ -240,12 +242,12 @@ See [docs/AUDIT.md](docs/AUDIT.md) for the full review and the remaining known d
 * No physical-device benchmark or Android APK build is claimed by the Node test suite. The CNN fallback may run on the main thread when workers are unavailable; performance and battery use require device testing.
 
 ## Licences / data
-> **Free for non-commercial use only.** Mikajy Free is licensed under PolyForm Noncommercial 1.0.0
+> **Free to download; non-commercial use only.** Mikajy Atlas is licensed under PolyForm Noncommercial 1.0.0
 > and its model weights are trained on non-commercial datasets (weights: CC BY-NC-SA 4.0). You may use, share and modify it,
-> but not sell it or use it commercially. See [docs/FREE.md](docs/FREE.md). The sibling project [Mikajy](https://github.com/ARHeritiana/Mikajy) is MIT.
+> but not sell it or use it commercially. See [docs/FREE.md](docs/FREE.md). The sibling project [Mikajy Spark](https://github.com/ARHeritiana/Mikajy) has MIT-licensed main-branch code.
 
 The app bundles third-party code: Nerdamer (Apache-2.0) with decimal.js (MIT), and the Caveat font (SIL OFL 1.1). Their licence notices are in `licenses/`. The research handwriting weights have separate non-commercial attribution obligations.
-Mikajy Free's code is under the PolyForm Noncommercial licence (LICENSE) and the trained weights under CC BY-NC-SA 4.0.
+Mikajy Atlas's code is under the PolyForm Noncommercial licence (LICENSE) and the trained weights under CC BY-NC-SA 4.0.
 See [docs/FREE.md](docs/FREE.md) for what is allowed and [docs/LICENSING.md](docs/LICENSING.md) for the complete licensing history, including the original Mikajy `v5.0` GPL release and subsequent MIT change to its `main` branch.
 See also [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
