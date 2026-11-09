@@ -1,40 +1,29 @@
-# Licensing and commercial use
+# Licensing and distribution
 
-*Engineering notes, not legal advice. Have a lawyer confirm before you sell the app.*
+This document describes the **current Mikajy Free** repository. It supersedes earlier text that mistakenly described this edition as commercially reusable and stated it bundled no libraries. It is project documentation, not legal advice.
 
-## 1. Is commercial use possible?
-Yes. The shipped app contains only code written for this project plus one OFL font, so there is no third-party
-licence that forbids selling it. Every tool added to the maths engine in 5.1 is **our own code** (`web/poly-core.js`);
-nothing was pulled in from a library.
+## Mikajy Free
 
-## 2. Licence of Mikajy's own code: MIT
-Mikajy is released under the **MIT licence**: anyone, including you, may use, sell, modify and embed it in closed-source
-products, provided the copyright and licence notice are kept. Versions published before this change were GPL-3.0-or-later;
-copies already distributed under the GPL stay under it, but all new releases are MIT. This was possible because the
-repository has a single author (`git shortlog -sne`: two names, one GitHub id). If anyone else contributes code, get their
-agreement (a CLA or a DCO sign-off) so the MIT grant stays valid.
+- **First-party application source:** [PolyForm Noncommercial 1.0.0](../LICENSE). This is source-available, **not** an unrestricted commercial or OSI open-source grant. Selling the app or using it for commercial purposes is not permitted by that grant.
+- **Research handwriting model** (`web/model/seq1-research.json`): **CC BY-NC-SA 4.0**. It includes training on MathWriting (Google LLC, CC BY-NC-SA 4.0), whose expression labels also require Wikipedia attribution (CC BY-SA 4.0). See [FREE.md](FREE.md) and [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md).
+- **Caveat font** (`web/fonts/hand.woff2`): **SIL Open Font License 1.1**.
+- **Bundled Nerdamer CAS 2.0.1:** **Apache-2.0**; the bundled **decimal.js 10.6.0** is **MIT**. Their copyright and licence notices must be retained. See [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) and `licenses/`.
+- Other original project files and assets must be assessed separately where noted; the non-commercial code grant does not replace their individual rights or notices.
 
-## 3. Third-party material and why it is safe
-* **Caveat font** — SIL OFL 1.1 allows commercial use and embedding; the licence text is in `licenses/`. Keep it with any redistribution.
-* **Libraries** — none shipped (see `THIRD_PARTY_NOTICES.md`).
-* **Maths engine** — in-house exact arithmetic (BigInt rationals, Sturm sequences). Deliberately *not* used, because their
-  licences would force your whole app open or restrict sale: Maxima and Giac (GPL), anything AGPL, and SDKs with proprietary terms.
-  Permissive options if you ever want a bigger CAS: mathjs (Apache-2.0), Nerdamer (MIT), Algebrite (MIT) — note each
-  would need a review against the app's no-`eval` Content-Security-Policy.
+Free downloads and sharing under the applicable notices are allowed. Commercial reuse of the **Free** edition is not allowed without obtaining the necessary separate permissions, including for the trained weights.
 
-## 4. Training data — the part that needs care
-The recogniser weights are derived from training data, so the data's terms matter.
+## Original Mikajy (separate repository)
 
-| Source | Status | Action |
-|--------|--------|--------|
-| Synthetic strokes (`training/train.py`) | Own work | OK |
-| **Stroke-sequence model** (`training/gen_corpus.py`, `train_seq.py`) | Trained only on strokes our own generator makes from OFL handwriting fonts (`training/synth/`): no MNIST, no third-party handwriting corpus, no user data. Four fonts are held out of training and used only for testing | OK |
-| Your 29 real finger-written samples (`training/real_data/`) | Collected from you with `tools/collect/`; gitignored. Used **only** as a test set, never to train | Keep out of the repository |
-| OFL handwriting fonts (`fetch_assets.sh`) | OFL does not restrict what you render from a font; fonts are not redistributed | OK; keep the font list in this repo |
-| **MNIST** | Terms are not stated clearly by its distributors (derived from NIST data; some mirrors say CC BY-SA 3.0, which has share-alike implications) | **Recommended: retrain without it** (digits from fonts + synthetic strokes + data you collect), or get counsel's opinion. See `training/train4.py` `--no-mnist` |
-| IAM-OnDB, CROHME, MathWriting and similar handwriting corpora | Typically research / non-commercial terms (verify each licence text) | **Do not train on them** for a commercial product without written permission |
-| Your own users' strokes | Ideal source for real handwriting | Only with explicit opt-in consent and a privacy notice; the app is offline today and should stay so unless you add this deliberately |
+The **`main` branch** of [ARHeritiana/Mikajy](https://github.com/ARHeritiana/Mikajy) was changed to the **MIT code licence on 2026-11-09**. Its pre-existing **`v5.0` tag and signed APK** were published with **GPL-3.0-or-later** source terms and remain unchanged; changing `main` does not relicense old release artifacts. New original-edition releases should disclose their exact licences. Code licencing alone does not establish rights in fonts, models, or training data.
 
-## 5. Google ML Kit / Play Services handwriting
-Free for commercial use and very good at cursive text, but it is a proprietary SDK that downloads models at run time:
-it would break the "fully offline, no SDK" design and tie the app to Google Play Services. Not used.
+The main-branch MIT grant permits use, modification, redistribution and commercial use of the original project code, subject to its licence conditions. Before commercially distributing a build, verify the provenance and rights of bundled recognizer weights and third-party materials. The original project's recognizer model should not be assumed automatically cleared merely because the first-party code has been relicensed.
+
+## Separation rule
+
+Code from the original project may be reused in Mikajy Free subject to its own licence. Reusing improvements from Mikajy Free in the original project requires checking the actual copyright grant and all dependencies: **never copy Free's MathWriting-trained weights, data, or other non-commercially restricted materials into the MIT original**. Avoid merging repositories wholesale.
+
+## Trained data provenance
+
+See [FREE.md](FREE.md) for the dataset register, usage restrictions, attribution obligations, and model identifiers. See [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) for components in the actual app.
+
+This documentation distinguishes source licences, trained-model rights, and release history; it is not a certification of commercial clearance.
