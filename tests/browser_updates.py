@@ -44,14 +44,14 @@ async def main():
         await page.click("#mb")
         await page.click("button[data-tab=app]")
         text = await page.inner_text("#panel")
-        assert "Updates" in text and "Check for updates" in text and "Mikajy Free 5.0" in text, text
+        assert "Updates" in text and "Check for updates" in text and "Mikajy Atlas 5.0" in text, text
         await page.click("button[data-a=upd]")
         for _ in range(20):   # the page's CSP forbids eval, so poll instead of wait_for_function(string)
             if await page.evaluate("() => document.getElementById('mb').classList.contains('upd')"):
                 break
             await page.wait_for_timeout(100)
         text = await page.inner_text("#panel")
-        assert "Get Mikajy Free 5.1" in text and "version 5.1 is available" in text, text
+        assert "Get Mikajy Atlas 5.1" in text and "version 5.1 is available" in text, text
         await page.click("button[data-a=getupd]")
         calls = await page.evaluate("window.__calls")
         assert calls == ["check", "open:" + available["apk"]], calls
@@ -76,7 +76,7 @@ async def main():
         await page.evaluate("() => window.onUpdateState(JSON.stringify({state: 'installing', pct: 100, reason: ''}))")
         assert "Installing…" in await page.inner_text("button[data-a=getupd]")
         await page.evaluate("() => window.onUpdateState(JSON.stringify({state: 'failed', pct: 0, reason: 'x'}))")
-        assert "Get Mikajy Free 5.1" in await page.inner_text("button[data-a=getupd]")
+        assert "Get Mikajy Atlas 5.1" in await page.inner_text("button[data-a=getupd]")
         assert not errors, errors
         await page.close()
 
