@@ -5,6 +5,8 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 
 ## [Unreleased]
 
+## [6.3] - 2026-11-09
+
 ### Fixed
 - **`\left(` and `\right)` no longer appear as the words "left(" and "right)".** The recogniser emits them as single tokens; the board, the calculator and the matrix/modular evaluator now treat them as plain brackets (so `(4/3)³ ÷ 1/3` also gets its answer).
 - **The root sign spans its whole radicand.** Over a stacked fraction (or a power) the bar clears the numerator and the hook reaches the denominator.
