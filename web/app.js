@@ -38,8 +38,9 @@ function fit(){const d=DPR=Math.min(devicePixelRatio||1,2);SW=innerWidth;SH=inne
 function strokePath(s){ctx.beginPath();ctx.moveTo(...s[0]);ctx.lineTo(...mid(s[0],s[1]));for(let i=1;i<s.length-1;i++)ctx.quadraticCurveTo(...s[i],...mid(s[i],s[i+1]));ctx.lineTo(...s[s.length-1]);ctx.stroke()}
 function drawInk(s,a){if(a<=.01)return;ctx.globalAlpha=a;ctx.strokeStyle=ctx.fillStyle=palette.ink;ctx.lineWidth=4.5;ctx.lineCap=ctx.lineJoin='round';
  if(s.length==1){ctx.beginPath();ctx.arc(s[0][0],s[0][1],2.6,0,7);ctx.fill()}else strokePath(s);ctx.globalAlpha=1}
-function drawRad(g,a){const s=g.sz,x=g.x,y=g.y,top=y-.8*s;ctx.globalAlpha=a;ctx.strokeStyle=g.ans?palette.accent:palette.ink;ctx.lineWidth=Math.max(2,s*.055);ctx.lineCap=ctx.lineJoin='round';
- ctx.beginPath();ctx.moveTo(x+.02*s,y-.36*s);ctx.lineTo(x+.1*s,y-.43*s);ctx.lineTo(x+.26*s,y-.02*s);ctx.lineTo(x+.5*s,top);ctx.lineTo(Math.max(g.vx,x+.56*s),top);ctx.stroke();ctx.globalAlpha=1}
+function drawRad(g,a){const s=g.sz,x=g.x,y=g.y,top=y-(g.ru||.8)*s,bot=y+(g.rd===undefined?-.02:g.rd)*s,h=bot-top;ctx.globalAlpha=a;ctx.strokeStyle=g.ans?palette.accent:palette.ink;ctx.lineWidth=Math.max(2,s*.055);ctx.lineCap=ctx.lineJoin='round';
+ // the sign spans its radicand: the bar clears the top of a stacked fraction and the hook reaches its bottom; the little tick keeps its size
+ ctx.beginPath();ctx.moveTo(x+.02*s,bot-Math.min(.44*h,.4*s));ctx.lineTo(x+.1*s,bot-Math.min(.53*h,.47*s));ctx.lineTo(x+.26*s,bot);ctx.lineTo(x+.5*s,top);ctx.lineTo(Math.max(g.vx,x+.56*s),top);ctx.stroke();ctx.globalAlpha=1}
 function drawBar(g,a){ctx.globalAlpha=a;ctx.strokeStyle=g.ans?palette.accent:palette.ink;ctx.lineWidth=Math.max(2.5,g.sz*.05);ctx.lineCap='round';ctx.beginPath();ctx.moveTo(g.x,g.y);ctx.lineTo(g.x+g.bw,g.y);ctx.stroke();ctx.globalAlpha=1}
 function drawMat(g,a){const s=g.sz,x=g.x,y=g.y,h=Math.max(g.mh||0,.5*s),w=Math.max(g.bw,.6*s),t=y-h/2,b=y+h/2,k=.22*s;ctx.globalAlpha=a;ctx.strokeStyle=g.ans?palette.accent:palette.ink;ctx.lineWidth=Math.max(2.5,s*.05);ctx.lineCap=ctx.lineJoin='round';ctx.beginPath();
  if(g.br=='('){ctx.moveTo(x+k,t);ctx.quadraticCurveTo(x-.08*s,y,x+k,b);ctx.moveTo(x+w-k,t);ctx.quadraticCurveTo(x+w+.08*s,y,x+w-k,b)}
@@ -117,7 +118,9 @@ function layout(L){const F=L.F,top=L.syms.filter(g=>!isPart(g)&&!g.pfid),items=t
   if(isFB(g))placeBox(L,g,x,base,F*f);
   else{g.tx=x;g.tsz=F*f*sf(g);g.w=g.w0*f;g.ty=base-(g.sup?.42*F*f:0)}
   x+=(g.w0+trail(g))*f});
- seqs(L).concat(seqs(L,L.ans)).forEach(A=>A.forEach((g,k)=>{if(ch(g)=='√'||ch(g)=='‾'){const n=coverN(A,k),e=A[Math.min(k+n,A.length-1)];g.vtx=n>0?e.tx+e.w:g.tx+g.w;if(g.vx===undefined)g.vx=ch(g)=='‾'?g.tx:g.tx+.56*g.tsz}}))}
+ seqs(L).concat(seqs(L,L.ans)).forEach(A=>A.forEach((g,k)=>{if(ch(g)=='√'||ch(g)=='‾'){const n=coverN(A,k),e=A[Math.min(k+n,A.length-1)];g.vtx=n>0?e.tx+e.w:g.tx+g.w;
+   if(ch(g)=='√'&&g.tsz>0){g.ru=.8;g.rd=-.02;if(n>0){const x=extOf(L,A.slice(k+1,k+1+n).map(q=>q.sup?Object.assign({},q,{sup:false}):q),g.tsz);g.ru=Math.max(.8,x.up/g.tsz+.08);if(x.dn/g.tsz>.3)g.rd=x.dn/g.tsz}}   // tall radicand (stacked fraction, power): the sign grows to cover it
+if(g.vx===undefined)g.vx=ch(g)=='‾'?g.tx:g.tx+.56*g.tsz}}))}
 function tokSeq(L,A0,top){const A=A0.slice();if(top)while(A.length&&ch(A[A.length-1])=='=')A.pop();
  const out=[],close=new Map();let inSup=false,num='',word='';
  const fN=()=>{if(num){out.push(num);num=''}},fW=()=>{if(word){if(word=='e'||word=='o'||word=='x'||(word=='i'&&SET.domain=='complex')||FUNCS.has(word))out.push(word);else throw new Error('unknown word');word=''}};
@@ -192,11 +195,15 @@ function allBoxes(){const bs=[];for(const L of lines){L.syms.concat(L.ans).forEa
 function revs(v,amp){let d=0,ext=v[0],n=0;for(const x of v){if(d==0){if(Math.abs(x-ext)>amp){d=x>ext?1:-1;ext=x}}else if(d==1){if(x>ext)ext=x;else if(ext-x>amp){d=-1;ext=x;n++}}else{if(x<ext)ext=x;else if(x-ext>amp){d=1;ext=x;n++}}}return n}
 function scribStats(s){const b=bb(s),m=Math.max(b.w,b.h);let len=0;for(let i=1;i<s.length;i++)len+=Math.hypot(s[i][0]-s[i-1][0],s[i][1]-s[i-1][1]);
  const pts=resamp(s,6);return{m,ratio:len/Math.max(m,1),c:cusps(s),over:allBoxes().some(q=>coverage(pts,q)>=.15)}}
-function isScribble(s){if(s.length<8)return false;const k=scribStats(s);if(k.m<18)return false;
- if(seqOn()){const strict=(k.c>=8&&k.ratio>=1.8)||(k.c>=5&&k.ratio>=3.5)||(k.c>=4&&k.ratio>=7),loose=k.c>=3&&k.ratio>=7;if(!strict&&!loose)return false;const pts=resamp(s,6);return allBoxes().some(q=>coverage(pts,q)>=(strict?.4:.7))}   // a looser wiggle must cover a whole reading to erase it   // ink stays on the board: only a real wiggle over existing ink erases (a looped 2 or a cursive x overlaps a neighbour)
+/* Over existing writing, any zigzag erases: up-down-up (two turns) is enough, whether the turns are sharp or a shallow wave. Elsewhere it takes a real wiggle to be a scribble rather than a letter. */
+function zigzag(s){const b=bb(s),ax=b.w<b.h?0:1;return Math.max(cusps(s),s.length<8?0:revs(s.map(p=>p[ax]),Math.max(8,.4*(ax?b.h:b.w))))}   // sharp turns, or reversals across the shorter axis
+function overText(s){const b=bb(s);return allBoxes().some(q=>ovl(q,b)>=.6)}   // the stroke's box covers most of something already there (a neighbour written close by does not)
+function isScribble(s){if(s.length<8)return false;const k=scribStats(s);if(k.m<18)return false;const pts=resamp(s,6);
+ if(zigzag(s)>=2&&overText(s))return true;   // up-down-up across a reading or a glyph
+ if(seqOn()){const strict=(k.c>=8&&k.ratio>=1.8)||(k.c>=5&&k.ratio>=3.5)||(k.c>=4&&k.ratio>=7),loose=k.c>=3&&k.ratio>=7;if(!strict&&!loose)return false;return allBoxes().some(q=>coverage(pts,q)>=(strict?.4:.7))}   // a looser wiggle must cover a whole reading to erase it   // ink stays on the board: only a real wiggle over existing ink erases (a looped 2 or a cursive x overlaps a neighbour)
  return k.over?((k.c>=3&&k.ratio>=2.2)||(k.c>=2&&k.ratio>=2.6)||k.ratio>=4.2):((k.c>=4&&k.ratio>=3.5)||k.ratio>=6)}
-function scribble(s){const now=performance.now();ghosts.push({pts:s,t0:now});const pts=resamp(s,6),cov=(b,r)=>coverage(pts,b,r),cg=g=>ch(g)=='§'?cov(gbox(g),6)*(.22/.45):cov(gbox(g),18);
- for(const L of lines.slice()){const nIn=L.ink.length;L.ink=L.ink.filter(t=>{const q=bb(t);if(cov({x0:q.x0-8,y0:q.y0-8,x1:q.x1+8,y1:q.y1+8})>=.22){ghosts.push({pts:t,t0:now});return false}return true});
+function scribble(s){const now=performance.now();ghosts.push({pts:s,t0:now});const pts=resamp(s,6),sb0=bb(s),sb={x0:sb0.x0-6,y0:sb0.y0-6,x1:sb0.x1+6,y1:sb0.y1+6},cov=(b,r)=>coverage(pts,b,r),inside=b=>ovl(b,sb)>=.6,cg=g=>inside(gbox(g))?1:ch(g)=='§'?cov(gbox(g),6)*(.22/.45):cov(gbox(g),18);   // a glyph is hit when the pen passes over it or the scribble's box encloses it
+ for(const L of lines.slice()){const nIn=L.ink.length;L.ink=L.ink.filter(t=>{const q=bb(t);if(cov({x0:q.x0-8,y0:q.y0-8,x1:q.x1+8,y1:q.y1+8})>=.22||inside(q)){ghosts.push({pts:t,t0:now});return false}return true});
   if(L.seq){if(L.ink.length!==nIn){L.sk=null;if(!L.ink.length){clearReading(L);lines.splice(lines.indexOf(L),1);boardChanged(null)}}continue}
   if(L.ans.some(g=>cg(g)>=.22)){L.syms.forEach(kill);L.syms=[];L.ans.forEach(kill);L.ans=[];L.at=null}
   else{const rem=L.syms.filter(g=>cg(g)>=.22);for(let i=0;i<rem.length;i++){const bar=rem[i];if(bar.fp=='bar')L.syms.forEach(s=>{if((s.fid===bar.fid||s.pfid===bar.fid)&&!rem.includes(s))rem.push(s)})}   // erasing a bar takes its parts and any fraction nested in them

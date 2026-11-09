@@ -260,6 +260,8 @@ const SeqCore = (() => {
         else if (t === '\\div') out.push('/');
         else if (t === '\\pi') out.push('π');
         else if (t === '\\left' || t === '\\right') { /* the bracket token follows */ }
+        else if (t === '\\left(' || t === '\\left[') out.push('(');       // the model's fused bracket tokens
+        else if (t === '\\right)' || t === '\\right]') out.push(')');
         else if (t === '(' || t === ')' || t === '+' || t === '-' || t === '=' || t === '!' || t === '%') out.push(t);
         else if (t === 'x' || t === 'e') out.push(t);
         else if (t === 'i') { if (!complex) fail('i needs the complex setting'); out.push('i'); }
@@ -305,6 +307,8 @@ const SeqCore = (() => {
           item({sup: false, fid: id, fp: 'n', cnt: {n: 0}, depth: 1}); item({sup: false, fid: id, fp: 'd', cnt: {n: 0}, depth: 1});
         }
       } else if (t === '\\sqrt') { const g = glyph('√', ctx), before = ctx.cnt.n; item(ctx); g.cover = ctx.cnt.n - before; }
+      else if (t === '\\left(' || t === '\\left[') glyph('(', ctx, {ti});   // fused bracket tokens: a bracket, never the word "left("
+      else if (t === '\\right)' || t === '\\right]') glyph(')', ctx, {ti});
       else if (t === '\\times') glyph('*', ctx, {mul: true, ti});
       else if (t === '\\div') glyph('/', ctx, {ti});
       else if (t === '\\pi') glyph('π', ctx, {ti});

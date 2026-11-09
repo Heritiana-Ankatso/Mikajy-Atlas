@@ -61,3 +61,8 @@ test('rational matrices stay exact (no floats)', () => {
   assert.equal(La.toTextM(r.rows), '-9/8 5/8; 7/8 -3/8');
   assert.equal(La.toText(La.det(r.rows)), '-1/8');
 });
+
+test('fused \\left( … \\right) tokens (as the research model emits them) evaluate like plain brackets', () => {
+  const val = t => { const r = LatexEval.evaluate(t); return r.q.n + '/' + r.q.d; };
+  assert.strictEqual(val(['7', '\\bmod', '\\left(', '2', '+', '3', '\\right)']), val(['7', '\\bmod', '(', '2', '+', '3', ')']));
+});

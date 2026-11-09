@@ -20,7 +20,10 @@ const LatexEval = (() => {
   const needConst = v => { if (v.k !== 'lin' || !isConst(v)) fail('unsupported'); return v.b; };
   const asInt = q => { if (q.d !== 1n) fail('unsupported'); return q.n; };
 
+  const FUSED = {'\\left(': ['\\left', '('], '\\left[': ['\\left', '('], '\\right)': ['\\right', ')'], '\\right]': ['\\right', ')']};   // the model's fused bracket tokens
+  const unfuse = tokens => tokens.flatMap(t => FUSED[t] || [t]);
   function parse(tokens) {
+    tokens = unfuse(tokens);
     let i = 0;
     const peek = (o = 0) => tokens[i + o], next = () => tokens[i++];
     const eat = t => { if (peek() !== t) fail('syntax'); i++; };
