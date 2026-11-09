@@ -1,11 +1,11 @@
 # Mikajy Atlas — full handwriting calculator for Android
 
-> **Naming:** Mikajy Atlas was previously called Mikajy Free. The GitHub repository URL, Android package ID `com.mikajy.app.free`, update endpoint and signing identity are deliberately unchanged. Existing signed releases retain their historical names. The Atlas logo is installed.
+> **Naming:** Mikajy Atlas was previously called Mikajy Free. The GitHub repository is now `Heritiana-Ankatso/Mikajy-Atlas` (old URLs redirect). The Android package ID `com.mikajy.app.free` and signing identity remain unchanged; new builds use the renamed update endpoint. Existing signed releases retain their historical names. The Atlas logo is installed.
 
-*The full-featured, non-commercially licensed sibling of [Mikajy Spark](https://github.com/ARHeritiana/Mikajy), with a separate handwriting model and extended mathematical engine. The original's current `main` branch code is MIT; its existing `v5.0` release was published under GPL-3.0-or-later.*
+*The full-featured, non-commercially licensed sibling of [Mikajy Spark](https://github.com/ARHeritiana/Mikajy-Spark), with a separate handwriting model and extended mathematical engine. The original's current `main` branch code is MIT; its existing `v5.0` release was published under GPL-3.0-or-later.*
 
-[![Checks](https://github.com/Heritiana-Ankatso/Mikajy-Free/actions/workflows/checks.yml/badge.svg)](https://github.com/Heritiana-Ankatso/Mikajy-Free/actions/workflows/checks.yml)
-[![Latest release](https://img.shields.io/github/v/release/Heritiana-Ankatso/Mikajy-Free)](https://github.com/Heritiana-Ankatso/Mikajy-Free/releases/latest)
+[![Checks](https://github.com/Heritiana-Ankatso/Mikajy-Atlas/actions/workflows/checks.yml/badge.svg)](https://github.com/Heritiana-Ankatso/Mikajy-Atlas/actions/workflows/checks.yml)
+[![Latest release](https://img.shields.io/github/v/release/Heritiana-Ankatso/Mikajy-Atlas)](https://github.com/Heritiana-Ankatso/Mikajy-Atlas/releases/latest)
 [![License: PolyForm Noncommercial](https://img.shields.io/badge/license-PolyForm%20NC%201.0.0-orange.svg)](LICENSE)
 
 A blank screen: write maths with your finger, it turns into a handwritten-style typeset line and the
@@ -14,7 +14,7 @@ app. When the phone happens to be online it checks GitHub (at most once a day, o
 tells you.
 
 ## Install and update
-1. Download the APK (currently `Mikajy-Free-6.2.apk`; future releases use the Atlas name) from the [latest release](https://github.com/Heritiana-Ankatso/Mikajy-Free/releases/latest) and open it
+1. Download the APK (currently `Mikajy-Free-6.2.apk`; future releases use the Atlas name) from the [latest release](https://github.com/Heritiana-Ankatso/Mikajy-Atlas/releases/latest) and open it
    (allow installing from your browser when Android asks). Check it with `SHA256SUMS.txt` if you like.
 2. Later versions announce themselves: a red dot appears on the menu button and Settings shows **Get Mikajy Atlas x.y**.
    *Settings → Updates → Off* disables the automatic check; *Check for updates* does it on demand.
@@ -244,7 +244,7 @@ See [docs/AUDIT.md](docs/AUDIT.md) for the full review and the remaining known d
 ## Licences / data
 > **Free to download; non-commercial use only.** Mikajy Atlas is licensed under PolyForm Noncommercial 1.0.0
 > and its model weights are trained on non-commercial datasets (weights: CC BY-NC-SA 4.0). You may use, share and modify it,
-> but not sell it or use it commercially. See [docs/FREE.md](docs/FREE.md). The sibling project [Mikajy Spark](https://github.com/ARHeritiana/Mikajy) has MIT-licensed main-branch code.
+> but not sell it or use it commercially. See [docs/FREE.md](docs/FREE.md). The sibling project [Mikajy Spark](https://github.com/ARHeritiana/Mikajy-Spark) has MIT-licensed main-branch code.
 
 The app bundles third-party code: Nerdamer (Apache-2.0) with decimal.js (MIT), and the Caveat font (SIL OFL 1.1). Their licence notices are in `licenses/`. The research handwriting weights have separate non-commercial attribution obligations.
 Mikajy Atlas's code is under the PolyForm Noncommercial licence (LICENSE) and the trained weights under CC BY-NC-SA 4.0.

@@ -1,10 +1,10 @@
 {
-  "name": "mikajy-free",
+  "name": "mikajy-atlas",
   "version": "6.0.0",
   "private": true,
   "description": "Offline handwriting calculator for Android (HTML5 canvas in a WebView shell).",
   "license": "SEE LICENSE IN LICENSE",
-  "repository": {"type": "git", "url": "https://github.com/Heritiana-Ankatso/Mikajy-Free.git"},
+  "repository": {"type": "git", "url": "https://github.com/Heritiana-Ankatso/Mikajy-Atlas.git"},
   "engines": {"node": ">=20"},
   "scripts": {
     "test": "node --test tests/*.test.cjs",

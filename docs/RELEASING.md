@@ -2,7 +2,7 @@
 
 > Mikajy Atlas (formerly Mikajy Free; package ID `com.mikajy.app.free`) lives in its own repository, so tags are plain `vMAJOR.MINOR` and releases are ordinary (non-pre-release) GitHub releases. Until the `release` environment has its signing secrets (an admin of the repository adds them with `scripts/setup-release-signing.sh` or `scripts/import-release-signing.sh`), `release.yml` only reports that signing is unavailable: build and sign locally with `scripts/build-signed-local.sh`, then `gh release create vX.Y Mikajy-Atlas-X.Y.apk SHA256SUMS.txt --notes-file .github/release-notes-free.md`. The text below was written for the original Mikajy.
 
-The repository URL and signing configuration remain unchanged. The local build output is still `Mikajy-Free.apk`; on future tagged releases, the workflow renames the signed asset to `Mikajy-Atlas-X.Y.apk`. Older published assets retain their existing names.
+The repository is now `Heritiana-Ankatso/Mikajy-Atlas`; the Android package ID and signing configuration remain unchanged. Future builds use the new canonical update endpoint. The local build output is still `Mikajy-Free.apk`; on future tagged releases, the workflow names the signed asset `Mikajy-Atlas-X.Y.apk`. Already published APKs retain their original names and update logic.
 
 Releases are built, tested, **signed and published by GitHub Actions** from a version tag.
 The app's built-in update check (Settings → *Check for updates*, and once a day when online)
@@ -38,7 +38,7 @@ verifies the pinned public certificate fingerprint and publishes the APK with
 signed with this key cannot ordinarily update an installed 4.5 APK in place.
 Uninstalling the old app may erase its locally saved history and training data.
 
-1. On [Mikajy](https://github.com/Heritiana-Ankatso/Mikajy-Free), choose **Code →
+1. On [Mikajy](https://github.com/Heritiana-Ankatso/Mikajy-Atlas), choose **Code →
    Codespaces → Create codespace on main**.
 2. In the Codespaces terminal, run:
    ```bash
@@ -68,7 +68,7 @@ Uninstalling the old app may erase its locally saved history and training data.
    file is sensitive; never paste it into issues, commits or chat.
    GitHub Actions secrets cannot be read back in plaintext if lost.
 5. Consider requiring approval and protecting the release tags using
-   [GitHub's release environment settings](https://github.com/Heritiana-Ankatso/Mikajy-Free/settings/environments).
+   [GitHub's release environment settings](https://github.com/Heritiana-Ankatso/Mikajy-Atlas/settings/environments).
    The script will not silently reset any existing environment rules.
 
 The setup creates:
@@ -109,7 +109,7 @@ Increment `android:versionCode` above 15 and update
 `android/AndroidManifest.xml`. After merging and testing the changes,
 push the matching tag (e.g. `v5.1`). GitHub Actions then verifies, signs,
 and publishes `Mikajy-Atlas-X.Y.apk` and its SHA-256 checksum to
-[GitHub Releases](https://github.com/Heritiana-Ankatso/Mikajy-Free/releases).
+[GitHub Releases](https://github.com/Heritiana-Ankatso/Mikajy-Atlas/releases).
 
 **Do not rerun the setup in a fresh Codespace to make ordinary releases.**
 That could create a different identity. The encrypted secrets persist across

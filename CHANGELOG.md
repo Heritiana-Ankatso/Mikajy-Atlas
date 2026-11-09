@@ -6,6 +6,7 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 ## [Unreleased]
 
 ### Branding
+- Update the release checker and URL allowlist to the renamed `Heritiana-Ankatso/Mikajy-Atlas` repository. Existing signed APKs retain their historical update code; only future builds incorporate this correction.
 - Rename the full edition to **Mikajy Atlas** (formerly Mikajy Free) in launcher labels, web UI, localization, and future release names. Keep the `com.mikajy.app.free` Android package ID, GitHub update channel, signing identity, and old release artifacts unchanged.
 - New launcher icon / logo for Atlas (`branding/logo-atlas.svg`): a heavy black M cut out of a white disc inside a red ring, on a black tile, still black / red / white. It replaces the former Free emblem; sources and renderer are in `branding/`.
 
