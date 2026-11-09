@@ -4,7 +4,7 @@ What is **inside the shipped app** (the APK):
 
 | Component | Licence | Notes |
 |-----------|---------|-------|
-| First-party Mikajy Free application code (excluding the vendored libraries, model weights and font) | PolyForm Noncommercial 1.0.0 (see [LICENSE](LICENSE)); original Mikajy has MIT code on `main` as of 2026-11-09, while its released `v5.0` source was GPL-3.0-or-later | Written for the project; see [docs/LICENSING.md](docs/LICENSING.md) for distribution and model restrictions |
+| First-party Mikajy Atlas application code (excluding the vendored libraries, model weights and font) | PolyForm Noncommercial 1.0.0 (see [LICENSE](LICENSE)); original Mikajy has MIT code on `main` as of 2026-11-09, while its released `v5.0` source was GPL-3.0-or-later | Written for the project; see [docs/LICENSING.md](docs/LICENSING.md) for distribution and model restrictions |
 | Caveat font, subset in `web/fonts/hand.woff2` | SIL Open Font License 1.1 — [licenses/OFL-Caveat.txt](licenses/OFL-Caveat.txt) | © 2014 The Caveat Project Authors. The licence text must travel with the font |
 | CNN weights `web/model/model4.f16.json` | Own work, trained as described in [docs/LICENSING.md](docs/LICENSING.md) | Training-data provenance is documented there |
 | Research weights (stroke-sequence model, any `*-research*` model file) | CC BY-NC-SA 4.0 | Trained on the datasets in the register of [docs/FREE.md](docs/FREE.md); credit those datasets, non-commercial use only |
