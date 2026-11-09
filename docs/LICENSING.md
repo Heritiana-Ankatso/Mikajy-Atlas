@@ -1,6 +1,6 @@
 # Licensing and distribution
 
-**Current product name:** Mikajy Atlas (formerly Mikajy Atlas). The historic GitHub repository, package ID and prior release names are unchanged.
+**Current product name:** Mikajy Atlas (formerly Mikajy Free). The historic GitHub repository, package ID and prior release names are unchanged.
 
 This document describes the **current Mikajy Atlas** repository. It supersedes earlier text that mistakenly described this edition as commercially reusable and stated it bundled no libraries. It is project documentation, not legal advice.
 
@@ -12,7 +12,7 @@ This document describes the **current Mikajy Atlas** repository. It supersedes e
 - **Bundled Nerdamer CAS 2.0.1:** **Apache-2.0**; the bundled **decimal.js 10.6.0** is **MIT**. Their copyright and licence notices must be retained. See [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) and `licenses/`.
 - Other original project files and assets must be assessed separately where noted; the non-commercial code grant does not replace their individual rights or notices.
 
-Free downloads and sharing under the applicable notices are allowed. Commercial reuse of the **Free** edition is not allowed without obtaining the necessary separate permissions, including for the trained weights.
+Free downloads and sharing under the applicable notices are allowed. Commercial reuse of the **Atlas** edition is not allowed without obtaining the necessary separate permissions, including for the trained weights.
 
 ## Original Mikajy (separate repository)
 
@@ -22,7 +22,7 @@ The main-branch MIT grant permits use, modification, redistribution and commerci
 
 ## Separation rule
 
-Code from the original project may be reused in Mikajy Atlas subject to its own licence. Reusing improvements from Mikajy Atlas in the original project requires checking the actual copyright grant and all dependencies: **never copy Free's MathWriting-trained weights, data, or other non-commercially restricted materials into the MIT original**. Avoid merging repositories wholesale.
+Code from the original project may be reused in Mikajy Atlas subject to its own licence. Reusing improvements from Mikajy Atlas in the original project requires checking the actual copyright grant and all dependencies: **never copy Atlas's MathWriting-trained weights, data, or other non-commercially restricted materials into the MIT original**. Avoid merging repositories wholesale.
 
 ## Trained data provenance
 
