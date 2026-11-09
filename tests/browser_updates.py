@@ -6,7 +6,7 @@ from pathlib import Path
 from playwright.async_api import async_playwright
 
 PAGE = (Path(__file__).resolve().parents[1] / "android/assets/index.html").as_uri()
-R = "https://github.com/Heritiana-Ankatso/Mikajy-Free/releases/"
+R = "https://github.com/Heritiana-Ankatso/Mikajy-Atlas/releases/"
 BRIDGE = """
   window.__calls = [];
   window.__answer = %s;
