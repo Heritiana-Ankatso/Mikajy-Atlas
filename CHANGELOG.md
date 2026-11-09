@@ -5,6 +5,10 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 
 ## [Unreleased]
 
+### Licensing documentation (2026-11-09)
+- Clarified that this edition uses PolyForm Noncommercial 1.0.0 for first-party code, CC BY-NC-SA 4.0 for research model weights, plus the separately licensed bundled Nerdamer, decimal.js and Caveat font.
+- Corrected obsolete commercial-use claims in `docs/LICENSING.md`. The sibling Mikajy code on `main` is now MIT, while its tagged `v5.0` release remains GPL-3.0-or-later; no old APK was relicensed.
+
 ## [6.3] - 2026-11-09
 
 ### Added
