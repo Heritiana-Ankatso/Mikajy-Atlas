@@ -1,4 +1,4 @@
-# Mikajy Atlas (formerly Mikajy Atlas): licence, data and release rules
+# Mikajy Atlas (formerly Mikajy Free): licence, data and release rules
 
 Mikajy Atlas lets the recogniser be trained on datasets whose licences forbid commercial use, and it can be **shared for
 free** (source on GitHub, signed APKs from GitHub releases). It can **not** be sold or used commercially. Its sibling
@@ -17,10 +17,10 @@ listings. Donation links are a grey area: keep them out of the app. If you want 
 against this licence first. This is engineering guidance, not legal advice.
 
 ## Rules
-1. **Cross-project flow.** Do not merge the repositories wholesale. Before reusing Free-edition code in original Mikajy, verify that its authors and third-party dependencies permit the intended licensing. The MathWriting-trained research weights, data, and derived artifacts must never be transferred to the original under an unrestricted MIT claim.
-2. **Releases from here are free releases only.** Tags are `vMAJOR.MINOR`; `.github/release-notes-free.md` puts "Non-commercial use only" and the
+1. **Cross-project flow.** Do not merge the repositories wholesale. Before reusing Atlas-edition code in original Mikajy, verify that its authors and third-party dependencies permit the intended licensing. The MathWriting-trained research weights, data, and derived artifacts must never be transferred to the original under an unrestricted MIT claim.
+2. **Releases from here remain non-commercial only.** Tags are `vMAJOR.MINOR`; `.github/release-notes-free.md` puts "Non-commercial use only" and the
    credits at the top of every release note. Mikajy Atlas is a separate app (`com.mikajy.app.free`) with its own repository, so its updater
-   (`releases/latest`) only ever sees Free releases.
+   (`releases/latest`) only ever sees Atlas releases.
 3. **Record every dataset** in the register below before training on it: name, URL, licence as read from the licence text
    (not from memory), date checked, and which weights it contributed to.
 4. **Keep trained weights separate** (`*-research*` naming) so their non-commercial restrictions and attribution cannot be lost.
