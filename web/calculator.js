@@ -183,7 +183,8 @@ const Calculator = (() => {
       }
       if (Ode.applies(tokens)) {
         if (settings.mode === 'demand' && !explicit) return null;
-        return asResponse(typesetEq(Ode.solve(tokens).text), undefined);
+        const sol = Ode.solve(tokens).text;
+        return asResponse(typesetEq(/C2/.test(sol) ? sol : sol.replace(/\bC1\b/g, 'C')), undefined);   // one arbitrary constant is written C; two keep their numbers
       }
       if (Prob.applies(tokens)) {
         if (settings.mode === 'demand' && !explicit) return null;

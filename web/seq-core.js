@@ -284,7 +284,7 @@ const SeqCore = (() => {
   function toGlyphs(tokens) {
     let i = 0, fids = 0;
     const flat = [], peek = () => tokens[i], next = () => tokens[i++];
-    const glyph = (c, ctx, extra) => { const g = Object.assign({c}, extra); if (ctx.sup) g.sup = true; if (ctx.fid) { g.fp = ctx.fp; g.fid = ctx.fid; } flat.push(g); ctx.cnt.n++; return g; };
+    const glyph = (c, ctx, extra) => { const g = Object.assign({c}, extra); if (ctx.sup) g.sup = ctx.sup === 2 ? 2 : true; if (ctx.fid) { g.fp = ctx.fp; g.fid = ctx.fid; } flat.push(g); ctx.cnt.n++; return g; };
     function item(ctx) {
       if (peek() === '{') { next(); run(ctx, '}'); if (peek() === '}') next(); } else if (i < tokens.length) one(ctx, next());
     }
@@ -294,10 +294,22 @@ const SeqCore = (() => {
       const ti = i - 1;                                              // index of this token, so a glyph can be traced back to it (tap-to-correct)
       if (t === '{') { run(ctx, '}'); if (peek() === '}') next(); }
       else if (t === '}' || t === '<nl>' || t === '\\left' || t === '\\right' || t === '\\quad') { /* structure only */ }
-      else if (t === '^') item(Object.assign({}, ctx, {sup: true}));
+      else if (t === '^') item(Object.assign({}, ctx, {sup: ctx.sup ? 2 : true}));   // sup 2: a power inside an exponent, x^2 in e^(x^2/2)
       else if (t === '\\frac') {
-        if (ctx.sup || (ctx.fid && ctx.depth >= 3)) {                  // inside an exponent, or nested too deep: inline (a)/(b)
-          glyph('(', ctx); item(ctx); glyph(')', ctx); glyph('/', ctx); glyph('(', ctx); item(ctx); glyph(')', ctx);
+        if (ctx.sup || (ctx.fid && ctx.depth >= 3)) {                  // inside an exponent, or nested too deep: inline a/b, bracketed unless both parts are simple
+          const simple = at => {                                       // one token, or a {group} without sums, products or fractions (a leading minus is fine)
+            if (tokens[at] !== '{') return tokens[at] !== undefined && !/^\\(frac|times|div)$/.test(tokens[at]) && !['+', '-', '='].includes(tokens[at]);
+            for (let k = at, d = 0; k < tokens.length; k++) {
+              const u = tokens[k];
+              if (u === '{') d++; else if (u === '}') { if (--d === 0) return true; }
+              else if (['+', '=', '\\frac', '\\times', '\\div'].includes(u) || (u === '-' && k > at + 1)) return false;
+            }
+            return false;
+          };
+          const after = at => { if (tokens[at] !== '{') return at + 1; for (let k = at, d = 0; k < tokens.length; k++) { if (tokens[k] === '{') d++; else if (tokens[k] === '}' && --d === 0) return k + 1; } return tokens.length; };
+          const bare = simple(i) && simple(after(i));
+          if (bare) { item(ctx); glyph('/', ctx, {sl: true}); item(ctx); }
+          else { glyph('(', ctx); item(ctx); glyph(')', ctx); glyph('/', ctx, {sl: true}); glyph('(', ctx); item(ctx); glyph(')', ctx); }
         } else if (ctx.fid) {                                          // a fraction inside a numerator / denominator stays stacked
           const id = ++fids, bar = glyph('§', ctx);
           bar.pfid = ctx.fid; bar.pfp = ctx.fp; bar.fp = 'bar'; bar.fid = id;   // its own bar; the parent link says which part it sits in
@@ -344,6 +356,9 @@ const SeqCore = (() => {
     return flat;
   }
 
-  return Object.freeze({K, featurise, load, encode, decode, recognise, recogniseAlts, toLatex, toMathTokens, toGlyphs});
+  /** the model's fused bracket tokens as the bare pair every consumer expects: \left( -> \left (  ([ ] are read as round brackets) */
+  const FUSED = {'\\left(': ['\\left', '('], '\\left[': ['\\left', '('], '\\right)': ['\\right', ')'], '\\right]': ['\\right', ')']};
+  const unfuse = tokens => tokens.flatMap(t => FUSED[t] || [t]);
+  return Object.freeze({K, featurise, load, encode, decode, recognise, recogniseAlts, toLatex, toMathTokens, toGlyphs, unfuse});
 })();
 if (typeof module !== 'undefined' && module.exports) module.exports = SeqCore;

@@ -8,6 +8,8 @@ const BoardCore = (() => {
   const RESERVED = new Set(['e', 'i', 'x', 'y']);                 // e, i are constants; x is the variable; y belongs to differential equations
   const isLower = t => typeof t === 'string' && /^[a-z]$/.test(t);
   const isUpper = t => typeof t === 'string' && /^[A-Z]$/.test(t);
+  const FUSED = {'\\left(': ['\\left', '('], '\\left[': ['\\left', '('], '\\right)': ['\\right', ')'], '\\right]': ['\\right', ')']};   // the model's fused bracket tokens
+  const unfuse = tokens => tokens.flatMap(t => FUSED[t] || [t]);
   const empty = () => ({defs: {}, rvs: {}});
   const clone = s => ({defs: {...s.defs}, rvs: {...s.rvs}});
   class BoardError extends Error { constructor(code) { super(code); this.name = 'BoardError'; this.code = code; } }
@@ -41,7 +43,7 @@ const BoardCore = (() => {
 
   /** the statement a line makes, without touching the store: {kind:'def', name, body} | {kind:'rv', name, dist, args} | null */
   function parseStatement(tokens) {
-    const t = tokens.filter(u => u !== '<nl>');
+    const t = unfuse(tokens).filter(u => u !== '<nl>');
     while (t.length && t[t.length - 1] === '=') t.pop();
     // f ( x ) = body
     if (t.length > 6 && isLower(t[0]) && !RESERVED.has(t[0])) {
@@ -78,6 +80,7 @@ const BoardCore = (() => {
 
   /** replace every call of a defined function by its body with the argument substituted; leaves anything else alone */
   function expand(tokens, store, stack = []) {
+    tokens = unfuse(tokens);
     if (tokens.length > MAX_TOKENS) fail('unsupported');
     const out = [];
     for (let i = 0; i < tokens.length; i++) {
@@ -100,6 +103,7 @@ const BoardCore = (() => {
 
   /** does this reading mention a function the store defines, called with arguments? */
   function usesDefs(tokens, store) {
+    tokens = unfuse(tokens);
     for (let i = 0; i < tokens.length; i++) {
       if (isLower(tokens[i]) && Object.prototype.hasOwnProperty.call(store.defs, tokens[i]) && callArgs(tokens, i + 1)) return true;
     }

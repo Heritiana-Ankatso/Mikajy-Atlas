@@ -55,7 +55,7 @@ function drawG(g){const col=g.ans?palette.accent:palette.ink;ctx.fillStyle=col;c
  else if(c=='▦')drawMat(g,a);
  else if(c=='‾')drawOver(g,a);
  else{if(g.ot>0&&g.old){ctx.globalAlpha=a*g.ot;ctx.fillText(disp(g.old),g.x,g.y);ctx.globalAlpha=a*(1-g.ot)}else ctx.globalAlpha=a;
-  ctx.fillText(disp(c),g.x,g.y);ctx.globalAlpha=1}
+  ctx.fillText(g.sl?'/':disp(c),g.x,g.y);ctx.globalAlpha=1}
  if(g.ink&&g.a<.99){const k=Math.max(0,1-g.a*1.1);g.ink.forEach(s=>drawInk(s,k))}else g.ink=null}
 function render(now){ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,cv.width,cv.height);ctx.setTransform(DPR,0,0,DPR,0,0);
  if(!started&&!lines.length&&!cur){ctx.globalAlpha=.25;ctx.fillStyle=palette.ink;ctx.font='54px '+FONT;ctx.textAlign='center';ctx.fillText(T('writeHint'),SW/2,SH/2);ctx.textAlign='left';ctx.globalAlpha=1}
@@ -79,6 +79,7 @@ const adv=(c,F)=>{if(c=='√')return F*.62;if(c=='‾')return 0;ctx.font=F+'px '
 function coverN(A,k){const g=A[k];if(g.cover>0)return Math.min(g.cover,A.length-k-1);let j=k+1,n=0;if(j>=A.length)return 0;
  if(ch(A[j])=='('){let d=0;for(;j<A.length;j++){const q=ch(A[j]);if(q=='(')d++;if(q==')'){d--;if(d==0){j++;break}}}return j-k-1}
  while(j<A.length){const q=ch(A[j]),ok=A[j].sup?n>0:/[0-9.πe]/.test(q);if(!ok)break;n++;j++}return n}
+const supZ=g=>g.sup>1?.465:g.sup?.62:1,supY=g=>g.sup>1?.67:g.sup?.42:0;   // size and lift of a superscript (2 = a power inside an exponent)
 const isPart=g=>typeof g.fp=='string'&&/^(n|d|r\d+c\d+)$/.test(g.fp);
 const isHeadG=g=>g.fp=='bar'||g.fp=='head';
 const partsOf=(L,bar,p)=>L.syms.concat(L.ans).filter(s=>s.fid===bar.fid&&s.fp==p||isHeadG(s)&&s.pfid===bar.fid&&s.pfp==p);   // a part's glyphs, nested containers included
@@ -88,10 +89,10 @@ function seqs(L,list=L.syms){const top=[],m=new Map();for(const g of list){if(is
    far a sequence reaches above and below its baseline, so a fraction inside a numerator lifts it clear of the bar, and matrix rows get
    exactly the height their entries need. */
 const isFB=g=>(ch(g)=='§'&&g.fp=='bar')||g.fp=='head';
-const extOf=(L,A,s)=>{let up=0,dn=0;for(const g of A){let u,d;if(isFB(g)){const e=boxExt(L,g,s*(g.sup?.62:1));u=e.up;d=e.dn}else{const z=g.sup?.62:1;u=.72*s*z+(g.sup?.42*s:0);d=.22*s*z}up=Math.max(up,u);dn=Math.max(dn,d)}return{up,dn}};
+const extOf=(L,A,s)=>{let up=0,dn=0;for(const g of A){let u,d;if(isFB(g)){const e=boxExt(L,g,s*supZ(g));u=e.up;d=e.dn}else{const z=supZ(g);u=.72*s*z+supY(g)*s;d=.22*s*z}up=Math.max(up,u);dn=Math.max(dn,d)}return{up,dn}};
 function partOffs(L,g,s){const sn=.8*s,N=extOf(L,partsOf(L,g,'n'),sn),D=extOf(L,partsOf(L,g,'d'),sn);return{sn,N,D,nOff:Math.max(.14*s,N.dn+.06*s),dOff:Math.max(.14*s+.55*sn,D.up+.1*s)}}
 function fracExt(L,g,s){const o=partOffs(L,g,s);return{up:.28*s+o.nOff+o.N.up,dn:Math.max(.22*s,o.dOff-.28*s+o.D.dn)}}
-const seqW=(L,A,s)=>A.reduce((w,g)=>w+(isFB(g)?boxW(L,g,s*(g.sup?.62:1)):adv(ch(g),s*(g.sup?.62:1)))+.06*s*(g.sup?.62:1),0);
+const seqW=(L,A,s)=>A.reduce((w,g)=>w+(isFB(g)?boxW(L,g,s*supZ(g)):adv(ch(g),s*supZ(g)))+.06*s*supZ(g),0);
 function fracW(L,g,s){const sn=.8*s;g.nW=seqW(L,partsOf(L,g,'n'),sn);g.dW=seqW(L,partsOf(L,g,'d'),sn);return g.w0=Math.max(g.nW,g.dW)+.4*s}
 /* matrix: column widths, row extents; entries centred in their column */
 function matInfo(L,g,s){const cells=L.syms.concat(L.ans).filter(q=>q.fid===g.fid&&isPart(q)&&/^r\d+c\d+$/.test(q.fp)),R=Math.max(0,...cells.map(q=>+/^r(\d+)/.exec(q.fp)[1]))+1,C=Math.max(0,...cells.map(q=>+/c(\d+)$/.exec(q.fp)[1]))+1;
@@ -107,32 +108,31 @@ function placeFrac(L,g,x,base,s){const o=partOffs(L,g,s),ay=base-.28*s;g.tx=x;g.
 function placeMat(L,g,x,base,s){const m=g.mi||matInfo(L,g,s),ay=base-.28*s;g.tx=x;g.ty=ay;g.tsz=s;g.w=g.w0=m.W;g.bwt=m.W;if(!g.bw)g.bw=m.W;g.mht=m.H;if(!g.mh)g.mh=m.H;
  let y=ay-m.H/2+.15*s;for(let r=0;r<m.R;r++){y+=m.up[r];let cx=x+m.pad;for(let c=0;c<m.C;c++){const A=partsOf(L,g,'r'+r+'c'+c);placeSeq(L,A,cx+(m.cw[c]-seqW(L,A,s))/2,y,s);cx+=m.cw[c]+m.gx}y+=m.dn[r]+m.gy}}
 function placeBox(L,g,x,base,s){g.fp=='head'?placeMat(L,g,x,base,s):placeFrac(L,g,x,base,s)}
-function placeSeq(L,A,x,base,s){for(const g of A){const z=g.sup?.62:1;if(isFB(g)){boxW(L,g,s*z);placeBox(L,g,x,base,s*z);x+=g.w+.06*s*z}
- else{const a=adv(ch(g),s*z);g.tx=x;g.tsz=s*z;g.ty=base-(g.sup?.42*s:0);g.w=a;x+=a+.06*s*z}}}
+function placeSeq(L,A,x,base,s){for(const g of A){const z=supZ(g);if(isFB(g)){boxW(L,g,s*z);placeBox(L,g,x,base,s*z);x+=g.w+.06*s*z}
+ else{const a=adv(ch(g),s*z);g.tx=x;g.tsz=s*z;g.ty=base-supY(g)*s;g.w=a;x+=a+.06*s*z}}}
 function layout(L){const F=L.F,top=L.syms.filter(g=>!isPart(g)&&!g.pfid),items=top.concat(L.ans.filter(g=>!isPart(g)&&!g.pfid));if(!items.length)return;let tot=0;
- const sf=g=>g.sup?.62:1,first=(g,k)=>g.ans&&(k==0||!items[k-1].ans),extra=(g,k)=>(first(g,k)?.28*F:0)+(isFB(g)&&k>0?.1*F:0),trail=g=>.06*F*sf(g)+(g.ans&&ch(g)=='='?.14*F:0);
+ const sf=supZ,first=(g,k)=>g.ans&&(k==0||!items[k-1].ans),extra=(g,k)=>(first(g,k)?.28*F:0)+(isFB(g)&&k>0?.1*F:0),trail=g=>.06*F*sf(g)+(g.ans&&ch(g)=='='?.14*F:0);
  items.forEach((g,k)=>{if(isFB(g))boxW(L,g,F);else g.w0=adv(ch(g),F*sf(g));tot+=g.w0+trail(g)+extra(g,k)});
  let x0=L.x0,f=1;
  const base=L.base;let x=x0;
  items.forEach((g,k)=>{x+=extra(g,k)*f;
   if(isFB(g))placeBox(L,g,x,base,F*f);
-  else{g.tx=x;g.tsz=F*f*sf(g);g.w=g.w0*f;g.ty=base-(g.sup?.42*F*f:0)}
+  else{g.tx=x;g.tsz=F*f*sf(g);g.w=g.w0*f;g.ty=base-supY(g)*F*f}
   x+=(g.w0+trail(g))*f});
  seqs(L).concat(seqs(L,L.ans)).forEach(A=>A.forEach((g,k)=>{if(ch(g)=='√'||ch(g)=='‾'){const n=coverN(A,k),e=A[Math.min(k+n,A.length-1)];g.vtx=n>0?e.tx+e.w:g.tx+g.w;
    if(ch(g)=='√'&&g.tsz>0){g.ru=.8;g.rd=-.02;if(n>0){const x=extOf(L,A.slice(k+1,k+1+n).map(q=>q.sup?Object.assign({},q,{sup:false}):q),g.tsz);g.ru=Math.max(.8,x.up/g.tsz+.08);if(x.dn/g.tsz>.3)g.rd=x.dn/g.tsz}}   // tall radicand (stacked fraction, power): the sign grows to cover it
 if(g.vx===undefined)g.vx=ch(g)=='‾'?g.tx:g.tx+.56*g.tsz}}))}
 function tokSeq(L,A0,top){const A=A0.slice();if(top)while(A.length&&ch(A[A.length-1])=='=')A.pop();
- const out=[],close=new Map();let inSup=false,num='',word='';
+ const out=[],close=new Map();let sd=0,num='',word='';
  const fN=()=>{if(num){out.push(num);num=''}},fW=()=>{if(word){if(word=='e'||word=='o'||word=='x'||(word=='i'&&SET.domain=='complex')||FUNCS.has(word))out.push(word);else throw new Error('unknown word');word=''}};
  A.forEach((g,k)=>{const c=ch(g);
-  if(g.sup&&!inSup){fN();fW();out.push('^','(');inSup=true}
-  if(!g.sup&&inSup){fN();fW();out.push(')');inSup=false}
+  const want=g.sup>1?2:g.sup?1:0;while(sd<want){fN();fW();out.push('^','(');sd++}while(sd>want){fN();fW();out.push(')');sd--}   // exponent depth, one bracket pair per level
   if(/[0-9.]/.test(c)){fW();num+=c}else if(/[a-z]/.test(c)){fN();if(g.wb)fW();word+=c}
   else{fN();fW();
    if(c=='§'){const n=tokSeq(L,partsOf(L,g,'n'),false),d=tokSeq(L,partsOf(L,g,'d'),false);if(!n.length||!d.length)throw new Error('empty fraction part');out.push('(','(',...n,')','/','(',...d,')',')')}
    else if(c=='√'){out.push('√');const n=coverN(A,k);if(n>0){out.push('(');close.set(k+n,(close.get(k+n)||0)+1)}}else if(c=='*'&&g.mul)out.push('*');else if(c=='*'){const nx=A[k+1],pv=A[k-1],nc=nx&&ch(nx),pc=pv&&ch(pv);out.push((!nx||nx.sup||g.sup&&!(pv&&pv.sup)||'+-*/=)%→d'.includes(nc)||!pv||'+-*/=(d∫→'.includes(pc))?'x':'*')}else out.push(c)}
-  if(close.has(k)){fN();fW();if(inSup&&!(A[k+1]&&A[k+1].sup)){out.push(')');inSup=false}for(let q=close.get(k);q>0;q--)out.push(')')}});
- fN();fW();if(inSup)out.push(')');return out}
+  if(close.has(k)){fN();fW();if(sd&&!(A[k+1]&&A[k+1].sup))while(sd>0){out.push(')');sd--}for(let q=close.get(k);q>0;q--)out.push(')')}});
+ fN();fW();while(sd-->0)out.push(')');return out}
 function tokenize(L){return tokSeq(L,seqs(L)[0],true)}
 /* Mathematical parsing and evaluation live in math-core.js + calculator.js. */
 /* ---------- the board's memory: f(x) = ..., X ~ B(n, p) ---------- a line sees what is written above it (and, failing that, below it) */
@@ -277,7 +277,7 @@ const SYMTOK=/^([0-9a-zA-Z+\-=().,<>!]|\\times|\\div|\\pi)$/,TOKCH={'\\times':'*
 function candidates(o,row,off,alts){const base=[{c:o.c,p:1,tok:row[o.ti]}];if(o.ti===undefined||!alts||!SYMTOK.test(row[o.ti]))return base;
  for(const a of alts[off+o.ti]||[])if(a.p>=.02&&SYMTOK.test(a.t)&&a.t!==row[o.ti])base.push({c:TOKCH[a.t]||a.t,p:a.p,tok:a.t});return base}
 function mkGlyphs(row,extra,off,alts){const ids=new Map();return SeqCore.toGlyphs(row).map(o=>{let fid;if(o.fid){if(!ids.has(o.fid))ids.set(o.fid,++FID);fid=ids.get(o.fid)}
- const g=newG(candidates(o,row,off||0,alts),Object.assign({sup:!!o.sup,fp:o.fp,fid,pfid:o.pfid?ids.get(o.pfid):undefined,pfp:o.pfp,br:o.br,cover:o.cover||0,wb:!!o.wb,mul:!!o.mul,fresh:false},extra&&extra()));if(o.ti!==undefined)g.ti=(off||0)+o.ti;return g})}
+ const g=newG(candidates(o,row,off||0,alts),Object.assign({sup:o.sup===2?2:!!o.sup,sl:!!o.sl,fp:o.fp,fid,pfid:o.pfid?ids.get(o.pfid):undefined,pfp:o.pfp,br:o.br,cover:o.cover||0,wb:!!o.wb,mul:!!o.mul,fresh:false},extra&&extra()));if(o.ti!==undefined)g.ti=(off||0)+o.ti;return g})}
 function placeRow(L,gs,x0,base,F){L.syms=gs;L.x0=x0;L.base=base;L.F=F;layout(L);
  for(const g of gs){g.x=g.tx;g.y=g.ty+10;g.sz=g.tsz;g.a=0;g.ta=1;if(ch(g)=='√')g.vx=g.tx+.56*g.tsz}updateAns(L)}
 function applyReading(L,tokens,alts){const key=tokens.join(' ');if(L.seq&&L.tk===key)return;alts=alts||tokens.alts;L.alts=alts;L.toks=tokens;
@@ -288,8 +288,8 @@ function applyReading(L,tokens,alts){const key=tokens.join(' ');if(L.seq&&L.tk==
  if(R>1)F=Math.max(40,Math.min(F,(y1-y0)/R/1.45));                                  // every row must fit in its share of the ink's height
  // The reading takes the place of the handwriting: its rows are centred on the ink's rows (the baseline sits .32 F below the centre line).
  const baseOf=k=>y0+(k+.5)*(y1-y0)/R+.32*F;
- L.seq=true;L.rt=rows[0].join(' ');placeRow(L,mkGlyphs(rows[0],null,0,alts),x0,baseOf(0),F);
- let off=rows[0].length+1;rows.slice(1).forEach((r,k)=>{const o0=off;off+=r.length+1;const K={syms:[],ans:[],ink:[],x0,base:baseOf(k+1),F,at:null,kidOf:L,rt:r.join(' ')};lines.push(K);L.kids.push(K);placeRow(K,mkGlyphs(r,null,o0,alts),x0,K.base,F)});boardChanged(L)}
+ L.seq=true;L.rt=SeqCore.unfuse(rows[0]).join(' ');placeRow(L,mkGlyphs(rows[0],null,0,alts),x0,baseOf(0),F);
+ let off=rows[0].length+1;rows.slice(1).forEach((r,k)=>{const o0=off;off+=r.length+1;const K={syms:[],ans:[],ink:[],x0,base:baseOf(k+1),F,at:null,kidOf:L,rt:SeqCore.unfuse(r).join(' ')};lines.push(K);L.kids.push(K);placeRow(K,mkGlyphs(r,null,o0,alts),x0,K.base,F)});boardChanged(L)}
 async function doRecognizeSeq(){
  for(const L of lines.slice()){if(L.kidOf||!L.ink.length||!lines.includes(L))continue;
   const snap=L.ink.slice(),key=snap.length+':'+snap.map(s=>s.length).join(',');if(L.sk===key)continue;
@@ -432,16 +432,16 @@ function drop(d){if(d.y>SH-70){if(!d.fromMem)memAdd(d.text);return}const [x,y]=t
 let HIST=Store.cleanHistory(Store.loadArray(localStorage,'inkhist'));
 const histPersist=()=>{Store.save(localStorage,'inkhist',HIST)};
 const SUP='⁰¹²³⁴⁵⁶⁷⁸⁹';
-function strSeq(L,A){let o='',run='',inSup=false;const flush=()=>{if(!run)return;o+=/^[0-9]+$/.test(run)?[...run].map(c=>SUP[c]).join(''):'^('+run+')';run=''};
- A.forEach(g=>{const c=ch(g);if(g.sup){inSup=true;run+=c;return}if(inSup){flush();inSup=false}
+function strSeq(L,A){let o='',run='',inSup=false,l2=false;const flush=()=>{if(l2){run+=')';l2=false}if(!run)return;o+=/^[0-9]+$/.test(run)?[...run].map(c=>SUP[c]).join(''):'^('+run+')';run=''};
+ A.forEach(g=>{const c=ch(g);if(g.sup){inSup=true;if(g.sup>1&&!l2){run+='^(';l2=true}if(!(g.sup>1)&&l2){run+=')';l2=false}run+=g.sl?'/':c;return}if(inSup){flush();inSup=false}
   if(c=='§')o+='('+strSeq(L,partsOf(L,g,'n'))+')/('+strSeq(L,partsOf(L,g,'d'))+')';else o+=c=='*'?'×':c=='/'?'÷':c});flush();return o}
 const textOf=L=>strSeq(L,seqs(L)[0]).replace(/=+$/,'').trim();
-const serial=L=>L.syms.map(g=>({c:ch(g),sup:g.sup?1:0,fp:g.fp||'',fid:g.fid||'',cover:g.cover||0,pfid:g.pfid||'',pfp:g.pfp||'',br:g.br||''}));
+const serial=L=>L.syms.map(g=>({c:ch(g),sup:g.sup>1?2:g.sup?1:0,fp:g.fp||'',fid:g.fid||'',cover:g.cover||0,pfid:g.pfid||'',pfp:g.pfp||'',br:g.br||''}));
 window.histSave=function(L){if(!L.syms.length)return;L.hid=L.hid||Date.now()+'-'+Math.random().toString(36).slice(2,6);clearTimeout(L.ht);
  L.ht=setTimeout(()=>{const r=computeAns(L);if(!r||!lines.includes(L))return;const e={id:L.hid,ts:Date.now(),syms:serial(L),F:L.F,ans:r.text,text:textOf(L)},i=HIST.findIndex(h=>h.id==L.hid);
   if(i>=0)HIST[i]=e;else HIST.unshift(e);HIST=HIST.slice(0,100);histPersist()},1500)};
 function openHist(e){closeSheet();const L={syms:[],ans:[],ink:[],x0:toW(30,0)[0],base:toW(0,SH*.35)[1],F:e.F||70,at:null,hid:e.id};for(const q of lines)L.base=Math.max(L.base,q.base+q.F*1.5);
- e.syms.forEach(s=>L.syms.push(newG([{c:s.c,p:1}],{sup:!!s.sup,fp:s.fp||undefined,fid:s.fid||undefined,pfid:s.pfid||undefined,pfp:s.pfp||undefined,br:s.br||undefined,cover:s.cover,fresh:false})));
+ e.syms.forEach(s=>L.syms.push(newG([{c:s.c,p:1}],{sup:s.sup>1?2:!!s.sup,fp:s.fp||undefined,fid:s.fid||undefined,pfid:s.pfid||undefined,pfp:s.pfp||undefined,br:s.br||undefined,cover:s.cover,fresh:false})));
  lines.push(L);layout(L);L.syms.forEach(g=>{g.x=g.tx;g.y=g.ty+12;g.sz=g.tsz*.9;g.a=0;g.ta=1});updateAns(L);kick()}
 /* ---------- export ---------- */
 function copyText(t){if(window.Android&&Android.copy){Android.copy(t);toast(T('copied'))}else{try{const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove();toast(T('copied'))}catch(e){}}}
