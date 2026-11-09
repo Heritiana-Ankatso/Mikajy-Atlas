@@ -85,3 +85,15 @@ test('fused bracket tokens \\left( and \\right) are brackets, not the words "lef
   assert.strictEqual(sq, '(2)');
   assert.deepStrictEqual(SeqCore.toMathTokens('\\left( 1 + 2 \\right) \\times 3'.replace('\\left(', '\\left(').split(' ')), ['(', '1', '+', '2', ')', '*', '3']);
 });
+
+test('an exponent with a fraction of powers: x^2/2 is inline with a slash and a second superscript level, no brackets, no ÷', () => {
+  const g = SeqCore.toGlyphs('{ e } ^ { \\frac { { x } ^ { 2 } } { 2 } }'.split(' '));
+  assert.deepStrictEqual(g.map(x => x.c), ['e', 'x', '2', '/', '2']);
+  assert.deepStrictEqual(g.map(x => x.sup || 0), [0, true, 2, true, true]);
+  assert.strictEqual(g[3].sl, true);
+  const sum = SeqCore.toGlyphs('{ e } ^ { \\frac { x + 1 } { 2 } }'.split(' ')).map(x => x.c).join('');
+  assert.strictEqual(sum, 'e(x+1)/(2)');                       // a sum keeps its brackets
+});
+test('unfuse: the fused bracket tokens become the bare pairs', () => {
+  assert.deepStrictEqual(SeqCore.unfuse(['f', '\\left(', '3', '\\right)']), ['f', '\\left', '(', '3', '\\right', ')']);
+});

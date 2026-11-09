@@ -8,6 +8,9 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 ## [6.3] - 2026-11-09
 
 ### Fixed
+- **`f(x) = x² + 1` followed by `f(3) =` now answers.** Tall handwritten brackets are read as the fused `\left(` / `\right)` tokens, which the board's memory did not recognise, so the definition and the call were never matched.
+- **Exponents are written like on paper:** `e^(x²/2)` shows `x²` with a raised power inside the exponent and a plain slash (no `÷`, no brackets unless the parts are sums), instead of `(x2)÷(2)`.
+- **A single arbitrary constant is `C`, not `C1`** in differential-equation answers (two constants keep their numbers).
 - **`\left(` and `\right)` no longer appear as the words "left(" and "right)".** The recogniser emits them as single tokens; the board, the calculator and the matrix/modular evaluator now treat them as plain brackets (so `(4/3)³ ÷ 1/3` also gets its answer).
 - **The root sign spans its whole radicand.** Over a stacked fraction (or a power) the bar clears the numerator and the hook reaches the denominator.
 - **Scribble erase is more forgiving.** Over writing, any zigzag with two sharp turns (up-down-up) erases it instead of being read as a letter, and a scribble also erases what its box fully encloses.

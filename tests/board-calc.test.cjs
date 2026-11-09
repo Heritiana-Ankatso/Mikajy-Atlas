@@ -45,3 +45,16 @@ test('in on-demand mode nothing is computed until the line ends with =', () => {
   assert.equal(run([f], 'f \\left( 3 \\right)', {mode: 'demand'}), null);
   assert.equal(run([f], 'f \\left( 3 \\right)', {mode: 'demand'}, true), '6');
 });
+
+test('f(x) = ... then f(3) = works when the model emits the fused \\left( and \\right) tokens', () => {
+  const def = ['f', '\\left(', 'x', '\\right)', '=', 'x', '^', '{', '2', '}', '+', '1'];
+  const st = Board.scan(def, Board.empty());
+  assert.ok(st.defs.f);
+  const r = Calculator.computeLatex(['f', '\\left(', '3', '\\right)', '='], {...SET, fmt: 'dec'}, true, st);
+  assert.strictEqual(r.text, '10');
+});
+test('a single arbitrary constant of a differential equation is written C, two keep their numbers', () => {
+  const one = Calculator.computeLatex(T("y ^ { \\prime } = x y"), SET, false, Board.empty());
+  assert.ok(/^y=C/.test(one.text), one.text);
+  assert.ok(!/C1/.test(one.text), one.text);
+});
