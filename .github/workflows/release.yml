@@ -1,4 +1,4 @@
-name: Mikajy Free signed release
+name: Mikajy Atlas signed release
 
 on:
   push:
@@ -116,7 +116,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          apk="Mikajy-Free-${GITHUB_REF_NAME#v}.apk"
+          apk="Mikajy-Atlas-${GITHUB_REF_NAME#v}.apk"
           mv Mikajy-Free.apk "$apk"
           sha256sum "$apk" > SHA256SUMS.txt
 
@@ -126,7 +126,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          apk="Mikajy-Free-${GITHUB_REF_NAME#v}.apk"
+          apk="Mikajy-Atlas-${GITHUB_REF_NAME#v}.apk"
           gh release create "$GITHUB_REF_NAME" "$apk" SHA256SUMS.txt \
             --verify-tag --notes-file .github/release-notes-free.md --generate-notes \
-            --title "Mikajy Free ${GITHUB_REF_NAME#v}"
+            --title "Mikajy Atlas ${GITHUB_REF_NAME#v}"
