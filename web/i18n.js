@@ -10,12 +10,12 @@ const I18n = (() => {
     angles: 'Angles', radians: 'Radians', degrees: 'Degrees', numbers: 'Numbers', real: 'ℝ real', complex: 'ℂ complex',
     calculate: 'Calculate', instant: 'Instant', onDemand: 'On demand', calculateHint: 'On demand waits for a trailing = before answering.',
     language: 'Language', theme: 'Theme', dark: 'Dark', light: 'Light', recogniser: 'Recogniser', sequence: 'Sequence', classic: 'Classic',
-    updates: 'Updates', auto: 'Auto', off: 'Off', checkUpdates: 'Check for updates', getUpdate: 'Get Mikajy Free {v}',
-    downloadingUpdate: 'Downloading… {p}%', installingUpdate: 'Installing…', allowInstall: 'Allow Mikajy Free to install updates, then tap again', updateFailed: 'Update failed; try again',
-    updateHint: ' Mikajy Free {v}{avail}. Updates are looked up on GitHub at most once a day; nothing about you is sent.', availableSuffix: ' · version {n} is available',
-    copied: 'Copied', memoryEmptied: 'Memory emptied', upToDate: 'Mikajy Free is up to date', noResult: 'No result yet', nothingToShare: 'Nothing to share',
+    updates: 'Updates', auto: 'Auto', off: 'Off', checkUpdates: 'Check for updates', getUpdate: 'Get Mikajy Atlas {v}',
+    downloadingUpdate: 'Downloading… {p}%', installingUpdate: 'Installing…', allowInstall: 'Allow Mikajy Atlas to install updates, then tap again', updateFailed: 'Update failed; try again',
+    updateHint: ' Mikajy Atlas {v}{avail}. Updates are looked up on GitHub at most once a day; nothing about you is sent.', availableSuffix: ' · version {n} is available',
+    copied: 'Copied', memoryEmptied: 'Memory emptied', upToDate: 'Mikajy Atlas is up to date', noResult: 'No result yet', nothingToShare: 'Nothing to share',
     savedToMemory: 'Saved to memory', tooLarge: 'Too large for memory', checking: 'Checking…', offline: 'You are offline', checkFailed: 'Could not check',
-    updateAvailable: 'Mikajy Free {v} is available', writeHint: 'write a sum', credits: 'Free for non-commercial use only. The recogniser was trained with MathWriting (Google, CC BY-NC-SA 4.0) and mathematical expressions from Wikipedia contributors (CC BY-SA 4.0).', canvasAria: 'Handwriting canvas: write a calculation with your finger', menuAria: 'Menu', resetView: 'Reset view',
+    updateAvailable: 'Mikajy Atlas {v} is available', writeHint: 'write a sum', credits: 'Free for non-commercial use only. The recogniser was trained with MathWriting (Google, CC BY-NC-SA 4.0) and mathematical expressions from Wikipedia contributors (CC BY-SA 4.0).', canvasAria: 'Handwriting canvas: write a calculation with your finger', menuAria: 'Menu', resetView: 'Reset view',
     unsupported: 'unsupported', undefined: 'undefined', true: 'True', false: 'False'
   };
   const FR = {
@@ -27,12 +27,12 @@ const I18n = (() => {
     angles: 'Angles', radians: 'Radians', degrees: 'Degrés', numbers: 'Nombres', real: 'ℝ réels', complex: 'ℂ complexes',
     calculate: 'Calcul', instant: 'Instantané', onDemand: 'À la demande', calculateHint: "À la demande attend un = final avant de répondre.",
     language: 'Langue', theme: 'Thème', dark: 'Sombre', light: 'Clair', recogniser: 'Reconnaissance', sequence: 'Séquence', classic: 'Classique',
-    updates: 'Mises à jour', auto: 'Auto', off: 'Non', checkUpdates: 'Vérifier les mises à jour', getUpdate: 'Obtenir Mikajy Free {v}',
-    downloadingUpdate: 'Téléchargement… {p} %', installingUpdate: 'Installation…', allowInstall: "Autorisez Mikajy Free à installer des mises à jour, puis touchez de nouveau", updateFailed: 'Échec de la mise à jour ; réessayez',
-    updateHint: " Mikajy Free {v}{avail}. Les mises à jour sont cherchées sur GitHub au plus une fois par jour ; rien sur vous n'est envoyé.", availableSuffix: ' · la version {n} est disponible',
-    copied: 'Copié', memoryEmptied: 'Mémoire vidée', upToDate: 'Mikajy Free est à jour', noResult: 'Pas encore de résultat', nothingToShare: 'Rien à partager',
+    updates: 'Mises à jour', auto: 'Auto', off: 'Non', checkUpdates: 'Vérifier les mises à jour', getUpdate: 'Obtenir Mikajy Atlas {v}',
+    downloadingUpdate: 'Téléchargement… {p} %', installingUpdate: 'Installation…', allowInstall: "Autorisez Mikajy Atlas à installer des mises à jour, puis touchez de nouveau", updateFailed: 'Échec de la mise à jour ; réessayez',
+    updateHint: " Mikajy Atlas {v}{avail}. Les mises à jour sont cherchées sur GitHub au plus une fois par jour ; rien sur vous n'est envoyé.", availableSuffix: ' · la version {n} est disponible',
+    copied: 'Copié', memoryEmptied: 'Mémoire vidée', upToDate: 'Mikajy Atlas est à jour', noResult: 'Pas encore de résultat', nothingToShare: 'Rien à partager',
     savedToMemory: 'Enregistré en mémoire', tooLarge: 'Trop grand pour la mémoire', checking: 'Vérification…', offline: 'Vous êtes hors ligne', checkFailed: 'Vérification impossible',
-    updateAvailable: 'Mikajy Free {v} est disponible', writeHint: 'écrivez un calcul', credits: 'Gratuit, pour un usage non commercial uniquement. La reconnaissance a été entraînée avec MathWriting (Google, CC BY-NC-SA 4.0) et des expressions mathématiques des contributeurs de Wikipédia (CC BY-SA 4.0).', canvasAria: "Zone d'écriture : écrivez un calcul avec le doigt", menuAria: 'Menu', resetView: 'Réinitialiser la vue',
+    updateAvailable: 'Mikajy Atlas {v} est disponible', writeHint: 'écrivez un calcul', credits: 'Gratuit, pour un usage non commercial uniquement. La reconnaissance a été entraînée avec MathWriting (Google, CC BY-NC-SA 4.0) et des expressions mathématiques des contributeurs de Wikipédia (CC BY-SA 4.0).', canvasAria: "Zone d'écriture : écrivez un calcul avec le doigt", menuAria: 'Menu', resetView: 'Réinitialiser la vue',
     unsupported: 'non géré', undefined: 'indéfini', true: 'Vrai', false: 'Faux'
   };
   const TABLES = Object.freeze({en: EN, fr: FR});
