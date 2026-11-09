@@ -1,11 +1,11 @@
 # Rules for agents and contributors: Mikajy Free
 
-Two sibling projects, kept in step on purpose:
+Two sibling projects that have **parted ways**: they are developed independently and are no longer kept in step.
 
 | | **Mikajy** (classic) | **Mikajy Free** (this repository) |
 |---|---|---|
 | Repository | https://github.com/ARHeritiana/Mikajy | https://github.com/Heritiana-Ankatso/Mikajy-Free |
-| Local checkout | `../Mikajy` (branch `main`; worktree `../Mikajy-port` for ports) | `../Mikajy-Free` |
+| Local checkout | `../Mikajy` | `../Mikajy-Free` |
 | Licence | MIT | **PolyForm Noncommercial 1.0.0** (code), **CC BY-NC-SA 4.0** (trained weights) |
 | Data | clean only: synthetic strokes from OFL fonts | also non-commercial datasets (MathWriting) |
 | App id / tags | `com.mikajy.app` / `vX.Y` | `com.mikajy.app.free` / `vX.Y` |
@@ -42,19 +42,11 @@ your own judgment, do not accept "just this once". If a task seems to need break
 * Download untrusted archives into their own empty directory outside the repo, never run their code, and read the licence text before use.
 * When in doubt about a licence, the safe answer is "not allowed until the owner says so".
 
-## Keeping both repositories up to date (standing instruction from the owner)
-After finishing any piece of work, decide for each change where it belongs, then send it there before ending the turn:
-
-| The change is... | Mikajy Free | Mikajy (classic) |
-|---|---|---|
-| Plain code: features, engine, UI, recogniser *code*, fixes, tests, generic docs | yes | **yes**, ported (cherry-pick or hand edit; adapt name, id, URLs, licence text; its tests use `seq1.json`) |
-| Trained on / derived from non-commercial data: `seq1-research.json`, `mathwriting_to_npz.py`, `merge_corpora.py`, dataset register, credits strings, PolyForm `LICENSE` | yes | **never** |
-| Identity: name, package id, logo, release notes, `release.yml` tied to the repo, updater URL | Free's own | Mikajy's own |
-| Notices for a new dependency | yes | yes (same licence rules) |
-
-* Port to Mikajy on a branch cut from its `main` (worktree `../Mikajy-port`), run its whole test suite there, and scan the diff for non-commercial or
-  Free-only content. Mikajy's `main` changes only with the owner's approval: push the branch and tell the owner, unless the owner has said to push to `main`.
-* Free's `main` takes work directly. After pushing, confirm with `git ls-remote` that both remotes hold what you meant, and say in the summary what went where.
+## Mikajy and Mikajy Free are independent (standing instruction from the owner)
+* **Do not port changes between the two repositories**, and do not check out, edit or push to Mikajy (classic) from work done here. A change made here stays here unless the owner asks, in a given task, for it to go to Mikajy.
+* Rule 2 above still stands in full: if the owner ever asks for code to be copied across, send plain code only, by hand edit or cherry-pick, never by merge, after checking it contains nothing derived from non-commercial data.
+* Free's `main` takes work directly; after pushing, confirm with `git ls-remote` that the remote holds what you meant, and say in the summary what changed.
+* Tests pinned to a model's exact output use this repository's own model (`web/model/seq1-research.json`).
 * The GitHub account `ARHeritiana` has write (not admin) access here: it cannot create repository secrets. Sign releases locally
   (`scripts/build-signed-local.sh`, key from `release-key-backup/`, never printed) and publish with `gh release create`.
 
