@@ -6,7 +6,7 @@ const V={x:0,y:0,k:1},ZMIN=.3,ZMAX=3,ptrs=new Map();let gest=null;
 const toW=(x,y)=>[(x-V.x)/V.k,(y-V.y)/V.k];
 const viewMoved=()=>V.x!==0||V.y!==0||V.k!==1;
 function setView(x,y,k){V.x=x;V.y=y;V.k=k;const b=$('zr');if(b){b.style.display=viewMoved()?'block':'none';b.textContent=Math.round(k*100)+'%'}kick()}
-function zoomAt(cx,cy,k){k=Math.min(ZMAX,Math.max(ZMIN,k));const w=toW(cx,cy);setView(cx-w[0]*k,cy-w[1]*k,k)}
+function zoomAt(cx,cy,k){viewTo=null;k=Math.min(ZMAX,Math.max(ZMIN,k));const w=toW(cx,cy);setView(cx-w[0]*k,cy-w[1]*k,k)}
 function drawGrid(){if(!viewMoved())return;const S=80,x0=Math.floor(-V.x/V.k/S)*S,x1=(SW-V.x)/V.k,y0=Math.floor(-V.y/V.k/S)*S,y1=(SH-V.y)/V.k;
  if(((x1-x0)/S+1)*((y1-y0)/S+1)>4000)return;const r=1.6/Math.sqrt(V.k);ctx.globalAlpha=.16;ctx.fillStyle=palette.ink;
  for(let x=x0;x<=x1;x+=S)for(let y=y0;y<=y1;y+=S)ctx.fillRect(x-r,y-r,2*r,2*r);ctx.globalAlpha=1}
@@ -71,7 +71,7 @@ function stepG(g,dt,now){if(now<g.delay)return true;const k=1-Math.exp(-dt*7),k2
  if(g.mht!==undefined){g.mh+=(g.mht-g.mh)*k;if(Math.abs(g.mht-g.mh)>.3)r=true}return r}
 function step(dt,now){let act=false;const tick=g=>{if(stepG(g,dt,now))act=true};
  for(const L of lines){L.syms.forEach(tick);L.ans.forEach(tick);L.ink.forEach(t=>{const to=t.read?0:1,f=t.fa===undefined?1:t.fa;if(Math.abs(to-f)>.01){t.fa=f+(to-f)*(1-Math.exp(-dt*7));act=true}else t.fa=to})}   // read strokes dissolve into the typeset reading
- if(viewTo){if(ptrs.size||gest)viewTo=null;else{const f=1-Math.exp(-dt*7);setView(V.x+(viewTo.x-V.x)*f,V.y+(viewTo.y-V.y)*f,V.k+(viewTo.k-V.k)*f);if(Math.abs(viewTo.x-V.x)<.5&&Math.abs(viewTo.k-V.k)<.002){setView(viewTo.x,viewTo.y,viewTo.k);viewTo=null}else act=true}}
+ if(viewTo){if(ptrs.size||gest||viewTo.k!==V.k)viewTo=null;else{const f=1-Math.exp(-dt*7);setView(V.x+(viewTo.x-V.x)*f,V.y+(viewTo.y-V.y)*f,V.k);if(Math.abs(viewTo.x-V.x)<.5){setView(viewTo.x,viewTo.y,V.k);viewTo=null}else act=true}}
  fx.forEach(tick);if(fx.length)fx=fx.filter(g=>g.a>.02);if(ghosts.length)ghosts=ghosts.filter(g=>now-g.t0<420);return act||ghosts.length>0}
 function kick(){if(!raf){tPrev=performance.now();raf=requestAnimationFrame(frame)}}
 function frame(now){raf=0;const dt=Math.min(.05,(now-tPrev)/1000);tPrev=now;const act=step(dt,now);render(now);if(act||cur)kick()}

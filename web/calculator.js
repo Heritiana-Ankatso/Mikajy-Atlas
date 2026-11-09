@@ -52,6 +52,15 @@ const Calculator = (() => {
     out.push(textPiece('i'));
     return out;
   }
+  /** closed-form parts {re, im, imAbs} (CAS text) -> pieces: re ± im·i, either part omitted when it is zero */
+  function complexClosed(cf) {
+    const tiny = v => v === '0', sum = /[^(]*[+-]/.test(cf.imAbs.replace(/\([^()]*\)/g, '')) ;
+    const imag = cf.imAbs === '1' ? [textPiece('i')] : [...(sum ? [textPiece('('), ...typeset(cf.imAbs), textPiece(')')] : typeset(cf.imAbs)), textPiece(/^\d+$/.test(cf.imAbs) ? 'i' : '·i')];
+    const neg = cf.im.startsWith('-') || cf.imAbs !== cf.im;
+    if (tiny(cf.re)) return neg ? [textPiece('-'), ...imag] : imag;
+    if (tiny(cf.im)) return typeset(cf.re);
+    return [...typeset(cf.re), textPiece(neg ? '-' : '+'), ...imag];
+  }
   const asComplex = r => ({re: r.re, im: r.im, eRe: r.exact ? r.exact.re : r.exactRe || null, eIm: r.exact ? r.exact.im : r.exactIm || null});
   function asResponse(pieces, value) {
     return {pieces, text: textOf(pieces), val: value};
@@ -197,8 +206,14 @@ const Calculator = (() => {
       if (settings.domain === 'complex') {
         const z = Core.evaluateComplex(tokens, settings);
         if (tokens.includes('arg') && !z.exact && Math.abs(z.im) < 1e-12 && piText(z.re)) return asResponse([...(!trailingEquals ? [textPiece('=')] : []), ...argPieces(z.re)], z.re);
-        const pieces = complexPieces(asComplex(z), settings.fmt || 'dec');
-        return asResponse([...(!trailingEquals ? [textPiece('=')] : []), ...pieces], Math.abs(z.im) < 1e-12 ? z.re : undefined);
+        const eq = !trailingEquals ? [textPiece('=')] : [];
+        const val = Math.abs(z.im) < 1e-12 ? z.re : undefined;
+        // not exact in Q(i): in the closed-form formats give radicals exactly (√2+i, 2√2i), as the real domain does
+        if (!z.exact && (settings.fmt || 'dec') !== 'dec') {
+          const cf = Calc.exactComplexValue(tokens, z, settings);
+          if (cf) return asResponse([...eq, ...complexClosed(cf)], val);
+        }
+        return asResponse([...eq, ...complexPieces(asComplex(z), settings.fmt || 'dec')], val);
       }
       const result = Core.evaluate(tokens, settings);
       if (tokens.includes('arg') && !result.rational && piText(result.value)) return asResponse([...(!trailingEquals ? [textPiece('=')] : []), ...argPieces(result.value)], result.value);

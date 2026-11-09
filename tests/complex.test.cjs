@@ -81,3 +81,16 @@ test('conjugate, argument and e^(i q π)', () => {
   assert.equal(calc('arg ( i )').text, 'π/2');
   assert.throws(() => MathCore.evaluateComplex(T('arg ( 0 )'), C), e => e.code === 'undefined');
 });
+
+test('complex results with radicals are exact in the closed-form formats, approximate in decimal', () => {
+  const f = t => calc(t, {fmt: 'frac'}).text;
+  assert.equal(f('sqrt ( - 8 )'), '2√2·i');
+  assert.equal(f('sqrt ( 2 ) + i'), '√2+i');
+  assert.equal(f('( 1 + i ) / sqrt ( 2 )'), '√2/2+√2/2·i');
+  assert.equal(f('e ^ ( i π / 3 )'), '1/2+√3/2·i');
+  assert.equal(f('( - 8 ) ^ ( 1 / 3 )'), '1+√3·i');
+  assert.equal(f('sqrt ( 2 ) - sqrt ( 3 ) i'), '√2-√3·i');
+  assert.equal(f('sqrt ( 2 )'), '√2');
+  assert.equal(calc('sqrt ( - 8 )', {fmt: 'dec'}).text, '≈2.828427125i');   // decimal format keeps its explicit ≈
+  assert.equal(f('( 1 + 2 i ) ( 3 - i )'), '5+5i');                           // Gaussian rationals are unchanged
+});
