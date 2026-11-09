@@ -29,7 +29,7 @@ test('probability through the calculator: exact, symbolic and approximate answer
   assert.equal(run([b], 'P \\left( X = 5 \\right)', {fmt: 'dec'}), '=≈0.24609375'.replace('≈', '') .replace('=', '=') );
   assert.equal(run([b], 'E \\left( X \\right)'), '=5');
   assert.equal(run([b], 'V \\left( X \\right)'), '=5/2');
-  assert.equal(run(['X \\sim P \\left( 3 \\right)'], 'P \\left( X = 2 \\right)'), '=9/2·e^(-3) ≈0.2240418077');
+  assert.equal(run(['X \\sim P \\left( 3 \\right)'], 'P \\left( X = 2 \\right)'), '=9/2·e^(-3)');
   assert.equal(run(['X \\sim N \\left( 100 , 15 \\right)'], 'P \\left( X \\le 115 \\right)'), '=≈0.8413447461');
   assert.equal(run([], 'C \\left( 10 , 3 \\right)'), '=120');
   assert.equal(run([], 'P \\left( X = 2 \\right)', {}, true), '= unsupported');       // X was never declared

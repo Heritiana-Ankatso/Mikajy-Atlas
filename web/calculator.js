@@ -77,7 +77,7 @@ const Calculator = (() => {
   /** CAS-style text -> pieces drawn like paper: stacked fractions, roots with the bar over the whole radicand, raised powers (typeset.js); plain text when it cannot be parsed. */
   function typeset(str) { const t = TS.tokens(str); return t ? [{tex: t, text: str}] : rich(str); }
   /** "x=…" / "y=…": the name stays text, the right-hand side is typeset */
-  function argPieces(v) { const t = piText(v); return t === '0' ? [textPiece('0')] : [...typeset(t), textPiece(' ≈' + niceNumber(v))]; }
+  function argPieces(v) { const t = piText(v); return t === '0' ? [textPiece('0')] : typeset(t); }
   function typesetEq(str) { const m = /^([a-zA-Z]\w*=)(.*)$/.exec(str); return m ? [textPiece(m[1]), ...typeset(m[2])] : typeset(str); }
   /** v as a rational multiple of π ("π/4", "-3π/4", "π", "0") when it is one to double precision (denominators up to 12), else null. Used for arg(z). */
   function piText(v) {
@@ -92,13 +92,69 @@ const Calculator = (() => {
     }
     return null;
   }
+
+  /* ---------- inequalities: x^2 - 4 < 0  ->  S = ]-2 ; 2[  (French lycée brackets) or (-2, 2) ---------- */
+  const REL_CH = ['<', '>', '≤', '≥'];
+  /** "<" followed by "=" is "≤" (the classic recogniser reads the two strokes apart) */
+  function joinRel(tokens) {
+    const out = [];
+    for (let i = 0; i < tokens.length; i++) {
+      if ((tokens[i] === '<' || tokens[i] === '>') && tokens[i + 1] === '=') { out.push(tokens[i] === '<' ? '≤' : '≥'); i++; } else out.push(tokens[i]);
+    }
+    return out;
+  }
+  function setPieces(res, settings) {
+    if (res.kind === 'none') return [textPiece('S=∅')];
+    if (res.kind === 'all') return [textPiece('S=ℝ')];
+    const fmt = settings.fmt || 'dec', fr = settings.lang === 'fr';
+    const pts = [];
+    res.parts.forEach(p => [p.lo, p.hi].forEach(e => { if (e && !e.rational && e.eq && !pts.includes(e)) pts.push(e); }));
+    const closed = new Map();
+    if (fmt !== 'dec') {
+      const groups = new Map();
+      pts.forEach(e => { if (!groups.has(e.eq)) groups.set(e.eq, []); groups.get(e.eq).push(e); });
+      for (const [eq, es] of groups) {
+        const forms = Calc.exactRoots(eq.left, eq.right, es.map(e => e.value), settings);
+        es.forEach((e, k) => { if (forms[k]) closed.set(e, forms[k]); });
+      }
+    }
+    const end = e => closed.has(e) ? typeset(closed.get(e)) : numberPieces({value: e.value, rational: e.rational}, fmt);
+    const sep = fr ? ' ; ' : ', ';
+    const out = [textPiece('S=')];
+    res.parts.forEach((p, i) => {
+      if (i) out.push(textPiece(' ∪ '));
+      if (p.lo && p.lo === p.hi) { out.push(textPiece('{'), ...end(p.lo), textPiece('}')); return; }
+      out.push(textPiece(!p.lo || !p.loClosed ? (fr ? ']' : '(') : '['));
+      out.push(...(p.lo ? end(p.lo) : [textPiece('-∞')]), textPiece(sep), ...(p.hi ? end(p.hi) : [textPiece(fr ? '+∞' : '∞')]));
+      out.push(textPiece(!p.hi || !p.hiClosed ? (fr ? '[' : ')') : ']'));
+    });
+    return out;
+  }
+  /** a relation between two expressions: True / False for constants, the solution set for x */
+  function relation(tokens, i, settings, W) {
+    if (tokens.includes('=') || tokens.slice(i + 1).some(t => REL_CH.includes(t))) return null;
+    const left = tokens.slice(0, i), right = tokens.slice(i + 1), op = tokens[i];
+    if (!left.length || !right.length) return null;
+    if (!tokens.includes('x')) {
+      const a = Core.evaluate(left, settings), b = Core.evaluate(right, settings);
+      let c;
+      if (a.rational && b.rational) { const d = a.rational.n * b.rational.d - b.rational.n * a.rational.d; c = d > 0n ? 1 : d < 0n ? -1 : 0; }
+      else { const d = a.value - b.value; c = Math.abs(d) <= 1e-12 * Math.max(1, Math.abs(a.value), Math.abs(b.value)) ? 0 : Math.sign(d); }
+      const verdict = op === '<' ? c < 0 : op === '>' ? c > 0 : op === '≤' ? c <= 0 : c >= 0;
+      return asResponse([textPiece(W(verdict ? 'true' : 'false'))], undefined);
+    }
+    return asResponse(setPieces(Core.inequality(left, op, right, settings), settings), undefined);
+  }
   function compute(tokens, settings = {}, trailingEquals = false) {
+    tokens = joinRel(tokens);
     if (!tokens.length) return null;
     const W = key => I18.t(settings.lang, key);   // result words follow the interface language
     const eqIndex = tokens.indexOf('=');
     const explicit = trailingEquals || eqIndex >= 0;
     if (settings.mode === 'demand' && !explicit) return null;
     try {
+      const relIdx = tokens.findIndex(t => REL_CH.includes(t));
+      if (relIdx >= 0) return relation(tokens, relIdx, settings, W);
       if (eqIndex >= 0) {
         if (tokens.indexOf('=', eqIndex + 1) >= 0) return null;
         const left = tokens.slice(0, eqIndex), right = tokens.slice(eqIndex + 1);
@@ -131,7 +187,7 @@ const Calculator = (() => {
           ? Calc.exactRoots(left, right, result.roots.map(r => r.value), settings) : [];
         result.roots.forEach((r, i) => {
           if (i) pieces.push(textPiece(', '));
-          if (!r.rational && closed[i]) pieces.push(...typeset(closed[i]), textPiece(' ≈' + niceNumber(r.value)));
+          if (!r.rational && closed[i]) pieces.push(...typeset(closed[i]));   // an exact answer is shown alone, no decimal beside it
           else pieces.push(...numberPieces(r, settings.fmt || 'dec'));
         });
         return asResponse(pieces, result.roots[0]?.value);
@@ -149,7 +205,7 @@ const Calculator = (() => {
       // Symbolic first: an irrational value gets its closed form (√8 -> 2√2) with the decimal as a secondary reading.
       if (!result.rational && (settings.fmt || 'dec') !== 'dec') {
         const closedForm = Calc.exactValue(tokens, result.value, settings);
-        if (closedForm) return asResponse([...(!trailingEquals ? [textPiece('=')] : []), ...typeset(closedForm), ...(/^-?\d+(\/\d+)?$/.test(closedForm) ? [] : [textPiece(' ≈' + niceNumber(result.value))])], result.value);
+        if (closedForm) return asResponse([...(!trailingEquals ? [textPiece('=')] : []), ...typeset(closedForm)], result.value);
       }
       return asResponse([...(!trailingEquals ? [textPiece('=')] : []), ...numberPieces(result, settings.fmt || 'dec')], result.value);
     } catch (error) {
@@ -195,7 +251,7 @@ const Calculator = (() => {
         const v = Prob.value(r.v);
         if (Prob.isApprox(r.v)) return asResponse([...eq, textPiece('≈' + niceNumber(v))], v);
         if (r.v.c.n === 0n) return asResponse([...eq, ...asQ(r.v.q)], v);
-        return asResponse([...eq, ...typeset(Prob.valText(r.v)), textPiece(' ≈' + niceNumber(v))], v);
+        return asResponse([...eq, ...typeset(Prob.valText(r.v))], v);
       }
       if (Board.usesDefs(tokens, st)) {                                                // f(3), f(g(2)): expand, then the ordinary engines
         if (settings.mode === 'demand' && !explicit) return null;

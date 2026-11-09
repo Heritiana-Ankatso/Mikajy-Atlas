@@ -650,6 +650,119 @@ const MathCore = (() => {
     if (!found) fail('unsupported');
     return found;
   }
+
+  /* ---------- inequalities: left < right, >, ≤, ≥ ----------
+   * Sign analysis. For rational functions the critical points are the real roots of the (reduced) numerator, where f = 0, and of the denominator,
+   * where f is undefined; the sign of every region between them is read exactly at a rational point. Other single-occurrence forms (2^x > 8,
+   * |x-1| < 2, ln x ...) reuse the equation solver for the roots and test points numerically, and are refused when the function is not defined
+   * everywhere (sqrt, ln: a domain edge would need its own analysis) or a test point is too close to zero to trust. */
+  const gcdBig = (a, b) => { a = abs(a); b = abs(b); while (b) [a, b] = [b, a % b]; return a || 1n; };
+  /** math tokens for a polynomial (ascending rational coefficients), scaled to integers: [3,0,-2] -> 3 ... used to get closed forms of poles */
+  function polyTokens(p) {
+    const den = p.reduce((a, c) => a / gcdBig(a, c.d) * c.d, 1n), out = [];
+    for (let k = p.length - 1; k >= 0; k--) {
+      const c = p[k].n * (den / p[k].d);
+      if (c === 0n) continue;
+      if (out.length) out.push(c < 0n ? '-' : '+'); else if (c < 0n) out.push('-');
+      const a = abs(c);
+      if (k === 0) out.push(String(a));
+      else {
+        if (a !== 1n) out.push(String(a), '*');
+        out.push('x');
+        if (k > 1) out.push('^', '(', String(k), ')');
+      }
+    }
+    return out.length ? out : ['0'];
+  }
+  const REL = {'<': {strict: true, want: -1}, '>': {strict: true, want: 1}, '≤': {strict: false, want: -1}, '≥': {strict: false, want: 1}};
+  const dblToQ = v => Poly.q(BigInt(Math.round(v * 2 ** 40)), 1n << 40n);
+  const qsign = a => a.n > 0n ? 1 : a.n < 0n ? -1 : 0;
+  /**
+   * -> {kind: 'none'} | {kind: 'all'} | {kind: 'set', parts: [{lo, loClosed, hi, hiClosed}]}; lo / hi are null for ∓∞, otherwise
+   * {value, rational, eq: {left, right}} where eq is an equation (token lists) having that endpoint among its roots (for closed forms).
+   */
+  function inequality(leftTokens, op, rightTokens, settings = {}) {
+    if (settings.domain === 'complex') fail('unsupported');
+    const rel = REL[op];
+    if (!rel) fail('syntax');
+    const angle = settings.angle === 'deg' ? 'deg' : 'rad';
+    const left = parse(leftTokens), right = parse(rightTokens);
+    if (!occurrences(left) && !occurrences(right)) fail('unsupported');
+    const eqSelf = {left: leftTokens, right: rightTokens};
+    let crit, signAt;
+    try {
+      const keep = q => { try { return q && toRational(q); } catch (error) { if (error instanceof MathError) return null; throw error; } };
+      let N, D0, D, zeros, poles;
+      try {
+        const L = rationalFunction(left), R = rationalFunction(right);
+        N = Poly.psub(Poly.pmul(L.n, R.d), Poly.pmul(R.n, L.d));
+        D0 = D = Poly.pmul(L.d, R.d);
+        if (N.length) for (;;) { const g = Poly.pgcd(N, D); if (g.length <= 1) break; N = Poly.pdivmod(N, g)[0]; D = Poly.pdivmod(D, g)[0]; }
+        zeros = N.length > 1 ? Poly.realRoots(N).map(r => ({value: finite(r.value), rational: keep(r.rational), pole: false, eq: eqSelf})) : [];
+        poles = D0.length > 1 ? Poly.realRoots(D0).map(r => ({value: finite(r.value), rational: keep(r.rational), pole: true, eq: {left: polyTokens(D0), right: ['0']}})) : [];
+      } catch (error) { if (error instanceof Poly.PolyError) fail(error.code); throw error; }
+      crit = zeros.concat(poles);
+      signAt = v => {
+        if (!N.length) return 0;
+        const x = dblToQ(v);
+        return qsign(Poly.peval(N, x)) * qsign(Poly.peval(D, x));
+      };
+    } catch (error) {
+      if (!(error instanceof MathError) || error.code !== 'unsupported') throw error;
+      // not a rational function: roots from the equation solver, signs by evaluation, domain edges (ln, sqrt) found by bisection
+      const found = solve(leftTokens, rightTokens, settings);
+      if (found.kind !== 'roots' && found.kind !== 'none') fail('unsupported');
+      crit = (found.kind === 'roots' ? found.roots : []).map(r => ({value: r.value, rational: r.rational, pole: false, eq: eqSelf}));
+      const f = v => evaluateAst(left, angle, v) - evaluateAst(right, angle, v);
+      const defined = v => { try { f(v); return true; } catch (e) { if (e instanceof MathError) return false; throw e; } };
+      const grid = [-50, -20, -10, -5, -2, -1, -.5, -.1, -.01, 0, .01, .1, .5, 1, 2, 5, 10, 20, 50, ...crit.flatMap(c => [c.value - 1, c.value + 1])].sort((u, v) => u - v);
+      const mask = grid.map(defined);
+      if (!mask.some(Boolean)) fail('unsupported');
+      for (let i = 0; i + 1 < grid.length; i++) {
+        if (mask[i] === mask[i + 1]) continue;
+        let u = grid[i], w = grid[i + 1];
+        for (let k = 0; k < 80; k++) { const m = (u + w) / 2; if (defined(m) === mask[i]) u = m; else w = m; }
+        const edge = (u + w) / 2;
+        let rat = null;
+        for (let d = 1; d <= 1000 && !rat; d++) { const n = Math.round(edge * d); if (Math.abs(edge - n / d) < 1e-9 * Math.max(1, Math.abs(edge))) rat = rational(BigInt(n), BigInt(d)); }
+        if (!rat) fail('unsupported');                                   // an edge with no exact value: not answered
+        const at = value(rat), here = defined(at);
+        let holds = false;
+        if (here) { const y = f(at); holds = y === 0 ? !rel.strict : Math.sign(y) === rel.want; }
+        crit.push({value: at, rational: rat, pole: !here, edgeOk: here && holds, eq: null});
+      }
+      signAt = v => {
+        let y;
+        try { y = f(v); } catch (e) { if (e instanceof MathError) return NaN; throw e; }
+        const scale = Math.abs(evaluateAst(left, angle, v)) + Math.abs(evaluateAst(right, angle, v)) + 1e-300;
+        if (Math.abs(y) <= 1e-9 * scale) fail('unsupported');
+        return Math.sign(y);
+      };
+    }
+    crit.sort((a, b) => a.value - b.value);
+    crit = crit.filter((c, i) => !i || Math.abs(c.value - crit[i - 1].value) > 1e-12 * (1 + Math.abs(c.value)));
+    // regions 0..n around the critical points 1..n: items alternate region, point, region, ..., region
+    const samples = crit.length ? [crit[0].value - 1, ...crit.slice(1).map((c, i) => (c.value + crit[i].value) / 2), crit[crit.length - 1].value + 1] : [0];
+    const items = [];
+    samples.forEach((v, i) => {
+      const sg = signAt(v);
+      items.push({ok: sg === rel.want || (sg === 0 && !rel.strict)});
+      if (i < crit.length) items.push({ok: crit[i].edgeOk !== undefined ? crit[i].edgeOk : !crit[i].pole && !rel.strict, point: crit[i]});
+    });
+    // a point where f = 0 satisfies ≤ / ≥ only
+    if (items.every(it => it.ok)) return {kind: 'all'};
+    if (items.every(it => !it.ok)) return NONE;
+    const parts = [];
+    for (let a = 0; a < items.length; a++) {
+      if (!items[a].ok) continue;
+      let b = a; while (b + 1 < items.length && items[b + 1].ok) b++;
+      const first = items[a], last = items[b];
+      const lo = a === 0 ? null : first.point || items[a - 1].point, hi = b === items.length - 1 ? null : last.point || items[b + 1].point;
+      parts.push({lo, loClosed: !!first.point, hi, hiClosed: !!last.point});
+      a = b;
+    }
+    return {kind: 'set', parts};
+  }
   function evaluate(tokens, settings = {}) {
     const ast = parse(tokens);
     const angle = settings.angle === 'deg' ? 'deg' : 'rad';
@@ -675,6 +788,6 @@ const MathCore = (() => {
       (() => { const a = literal(displayed.replace(/^\+/, '')); return a.n === r.n && a.d === r.d; })(); }
     catch (_) { return false; }
   }
-  return Object.freeze({parse, evaluate, evaluateComplex, solve, MathError, exactDecimal, evaluateAst});
+  return Object.freeze({parse, evaluate, evaluateComplex, solve, inequality, MathError, exactDecimal, evaluateAst});
 })();
 if (typeof module !== 'undefined' && module.exports) module.exports = MathCore;

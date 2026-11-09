@@ -7,7 +7,12 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 
 ## [6.3] - 2026-11-09
 
+### Added
+- **Inequalities.** `<`, `>`, `≤`, `≥` are solved exactly by sign analysis: polynomials, rational functions (poles stay open), and `2^x`, `|x−1|`, `ln x`, `√x`. The answer is a set with exact endpoints: `S=]−∞ ; −2] ∪ [2 ; +∞[` in French, `S=(−∞, −2] ∪ [2, ∞)` in English; `S=ℝ`, `S=∅`, or `{1}` when it applies. Between constants it says True / False. Periodic ones (`sin x > 0`) and functions whose domain edge has no exact value are refused rather than guessed.
+
 ### Fixed
+- **No more automatic zoom-out after writing.** The view only slides to keep the answer in sight, never leaving the start of the line off screen. The zoom pill now brings you back to what you wrote (all of it, centred) instead of the board's origin.
+- **Exact answers are shown alone**, without an approximate decimal beside them (`√2`, `π/4`, `2√2`, `e^(−3)`); decimals appear when the result is irrational and you chose decimals, marked `≈`.
 - **`f(x) = x² + 1` followed by `f(3) =` now answers.** Tall handwritten brackets are read as the fused `\left(` / `\right)` tokens, which the board's memory did not recognise, so the definition and the call were never matched.
 - **Exponents are written like on paper:** `e^(x²/2)` shows `x²` with a raised power inside the exponent and a plain slash (no `÷`, no brackets unless the parts are sums), instead of `(x2)÷(2)`.
 - **A single arbitrary constant is `C`, not `C1`** in differential-equation answers (two constants keep their numbers).

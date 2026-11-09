@@ -42,8 +42,8 @@ test('statements about constants are True or False', () => {
   assert.equal(calc('0.1 + 0.2 = 0.3').text, 'True');
 });
 test('symbolic results come first (decimal is secondary)', () => {
-  assert.equal(calc('√ ( 8 )').text, '=2√2 ≈2.828427125');
+  assert.equal(calc('√ ( 8 )').text, '=2√2');
   assert.equal(calc('√ ( 8 )', {fmt: 'dec'}).text.startsWith('=≈2.8284'), true);   // decimals only when asked
-  assert.match(calc('x ^ ( 2 ) = 2').text, /^x=-√2 ≈-1\.414213562, √2 ≈1\.414213562$/);
+  assert.match(calc('x ^ ( 2 ) = 2').text, /^x=-√2, √2$/);
   assert.equal(calc('x ^ ( 5 ) + x = 1').text.includes('√'), false);              // no closed form: numeric only
 });
