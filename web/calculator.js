@@ -162,7 +162,9 @@ const Calculator = (() => {
   /** What the recogniser's LaTeX means beyond plain arithmetic: user functions (f(x) = ..., f(3)), probability (X ~ B(n, p), P(X = 2)), differential
    *  equations (y' + 2y = e^x, y(0) = 1), matrices, modular arithmetic and congruences. `store` is the board's memory (board-core.js).
    *  Returns undefined when the reading is not for these engines (the token engine handles it), null when there is nothing to show, else a response. */
+  const FUSED = {'\\left(': ['\\left', '('], '\\left[': ['\\left', '('], '\\right)': ['\\right', ')'], '\\right]': ['\\right', ')']};   // the model's fused bracket tokens
   function computeLatex(tokens, settings = {}, trailingEquals = false, store) {
+    tokens = tokens.flatMap(t => FUSED[t] || [t]);
     const st = store || Board.empty();
     const W = key => I18.t(settings.lang, key);
     const explicit = trailingEquals || tokens[tokens.length - 1] === '=';

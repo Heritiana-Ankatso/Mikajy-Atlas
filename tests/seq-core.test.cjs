@@ -75,3 +75,13 @@ test('a matrix becomes a head glyph plus one part per entry (a grid on the board
   assert.equal(SeqCore.toGlyphs('\\begin { p m a t r i x } 1 \\end { p m a t r i x }'.split(' '))[0].br, '(');
   assert.equal(SeqCore.toGlyphs('\\begin { v m a t r i x } 1 \\end { v m a t r i x }'.split(' '))[0].br, '|');
 });
+
+test('fused bracket tokens \\left( and \\right) are brackets, not the words "left(" and "right)"', () => {
+  const g = SeqCore.toGlyphs('\\frac { \\left( \\frac { 4 } { 3 } \\right) ^ { 3 } } { \\frac { 1 } { 3 } }'.split(' '));
+  const cs = g.map(x => x.c).join('');
+  assert.ok(!/[lrft]/.test(cs.replace(/[^a-z]/g, '')) , cs);   // no letters of "left" / "right" anywhere
+  assert.ok(cs.includes('(') && cs.includes(')'));
+  const sq = SeqCore.toGlyphs(['\\left[', '2', '\\right]']).map(x => x.c).join('');
+  assert.strictEqual(sq, '(2)');
+  assert.deepStrictEqual(SeqCore.toMathTokens('\\left( 1 + 2 \\right) \\times 3'.replace('\\left(', '\\left(').split(' ')), ['(', '1', '+', '2', ')', '*', '3']);
+});

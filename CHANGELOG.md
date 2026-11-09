@@ -5,6 +5,11 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 
 ## [Unreleased]
 
+### Fixed
+- **`\left(` and `\right)` no longer appear as the words "left(" and "right)".** The recogniser emits them as single tokens; the board, the calculator and the matrix/modular evaluator now treat them as plain brackets (so `(4/3)³ ÷ 1/3` also gets its answer).
+- **The root sign spans its whole radicand.** Over a stacked fraction (or a power) the bar clears the numerator and the hook reaches the denominator.
+- **Scribble erase is more forgiving.** Over writing, any zigzag with two sharp turns (up-down-up) erases it instead of being read as a letter, and a scribble also erases what its box fully encloses.
+
 ## [6.2] - 2026-11-09
 
 ### Fixed
