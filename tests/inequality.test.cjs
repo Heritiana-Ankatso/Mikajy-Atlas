@@ -36,10 +36,12 @@ test('exponential, logarithm, root and absolute value', () => {
 test('constants: True / False; periodic inequalities are refused, not guessed', () => {
   assert.equal(solve('3 < 5', {lang: 'en'}), 'True');
   assert.equal(solve('2 > 7', {lang: 'en'}), 'False');
-  assert.equal(solve('sin ( x ) > 0'), null);
+  assert.match(solve('sin ( x ) > 0', {lang: 'en'}), /^= /);                 // said out loud, not silent
   assert.throws(() => Core.inequality(['sin', '(', 'x', ')'], '>', ['0']), e => e.code === 'unsupported');
 });
-test('on demand, an inequality waits for the "="', () => {
-  assert.equal(Calculator.compute('x ^ ( 2 ) < 4'.split(' '), {...SET, mode: 'demand'}, false), null);
-  assert.equal(Calculator.compute('x ^ ( 2 ) < 4'.split(' '), {...SET, mode: 'demand'}, true).text, 'S=]-2 ; 2[');
+test('the symbol is the question: answered on demand too, and in complex mode (an order exists on the reals only)', () => {
+  assert.equal(Calculator.compute('x ^ ( 2 ) < 4'.split(' '), {...SET, mode: 'demand'}, false).text, 'S=]-2 ; 2[');
+  assert.equal(solve('2 * x ^ ( 2 ) - 8 * x - ( ( 9 ) / ( 2 ) ) > 0', {domain: 'complex'}), 'S=]-∞ ; -1/2[ ∪ ]9/2 ; +∞[');
+  assert.equal(solve('2 x ^ ( 2 ) - 8 x - ( ( 9 ) / ( 2 ) ) > 0', {mode: 'demand'}), 'S=]-∞ ; -1/2[ ∪ ]9/2 ; +∞[');
+  assert.equal(solve('3 < 5', {domain: 'complex', lang: 'en'}), 'True');
 });
