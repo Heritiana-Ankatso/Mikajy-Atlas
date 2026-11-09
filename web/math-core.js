@@ -636,7 +636,7 @@ const MathCore = (() => {
     if (found.kind !== 'roots') return {kind: found.kind};
     const roots = found.roots.map(r => {
       const keep = q => { try { return q && toRational(q); } catch (error) { if (error instanceof MathError) return null; throw error; } };
-      return {re: finite(r.re), im: finite(r.im), exactRe: keep(r.exactRe), exactIm: keep(r.exactIm)};
+      return {re: finite(r.re), im: finite(r.im), exactRe: keep(r.exactRe), exactIm: keep(r.exactIm), imSq: keep(r.imSq)};
     });
     return {kind: 'croots', roots};
   }

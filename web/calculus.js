@@ -214,7 +214,7 @@ const Calculus = (() => {
       const num = t => { const m = /^(-?\d+)\/(\d+)$/.exec(t); return m ? Number(m[1]) / Number(m[2]) : casValue(t); };   // the CAS leaves a bare fraction undecimalised
       const part = (fn, want) => {
         const t = CAS(`${fn}(${src})`).toString();
-        if (unevaluated(t) || looksNumeric(t) || /\bi\b/.test(t) || /\bln\b(?!\()/.test(t)) return null;
+        if (unevaluated(t) || looksNumeric(t) || /\bi\b/.test(t) || /\bln\b(?!\()/.test(t) || /atan|asin|acos|\barg\b/.test(t)) return null;   // inverse-trig names are not a closed form worth claiming
         return close(num(t), want, 1e-9) ? t : null;
       };
       const re = part('realpart', z.re), im = part('imagpart', z.im);
@@ -224,6 +224,20 @@ const Calculus = (() => {
       return {re: prettyExact(re), im: prettyExact(im), imAbs: prettyExact(abs)};
     } catch (_) { return null; }
     finally { casComplex = false; }
+  }
+
+  /** √(n/d) for positive integers as a closed form ("2√11/9", "√3/2"), or null. */
+  function sqrtRational(n, d) {
+    try {
+      const t = CAS(`sqrt(${n}/${d})`).toString();
+      if (unevaluated(t) || looksNumeric(t) || /\bi\b/.test(t)) return null;
+      const num = u => { const m = /^(-?\d+)\/(\d+)$/.exec(u); return m ? Number(m[1]) / Number(m[2]) : casValue(u); };
+      if (!close(num(t), Math.sqrt(Number(n) / Number(d)), 1e-12)) return null;
+      let out = prettyExact(t);
+      const m = /^\((\d+)\/(\d+)\)(.+)$/.exec(out);                      // (2/9)√11 -> 2√11/9
+      if (m) out = (m[1] === '1' ? '' : m[1]) + m[3] + '/' + m[2];
+      return out;
+    } catch (_) { return null; }
   }
 
   /** Constant statement a = b: true / false when it can be decided (exactly or symbolically), else null. */
@@ -254,6 +268,6 @@ const Calculus = (() => {
     } catch (_) { return none; }
   }
 
-  return Object.freeze({derivative, antiderivative, definite, limit, solveEquation, exactValue, exactComplexValue, compare, exactRoots, casValue, splitTopList: splitTop, prettyExact});
+  return Object.freeze({derivative, antiderivative, definite, limit, solveEquation, exactValue, exactComplexValue, sqrtRational, compare, exactRoots, casValue, splitTopList: splitTop, prettyExact});
 })();
 if (typeof module !== 'undefined' && module.exports) module.exports = Calculus;

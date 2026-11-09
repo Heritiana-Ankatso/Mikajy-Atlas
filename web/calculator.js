@@ -185,7 +185,19 @@ const Calculator = (() => {
         }
         if (result.kind === 'croots') {
           const pieces = [textPiece('x=')];
-          result.roots.forEach((r, i) => { if (i) pieces.push(textPiece(', ')); pieces.push(...complexPieces(asComplex(r), settings.fmt || 'dec')); });
+          const fmt = settings.fmt === 'mixed' ? 'mixed' : 'frac';   // exact roots are written exactly in every format
+          const realForms = Calc.exactRoots(left, right, result.roots.filter(r => Math.abs(r.im) < 1e-12 && !r.exactRe).map(r => r.re), settings);
+          const realIdx = result.roots.filter(r => Math.abs(r.im) < 1e-12 && !r.exactRe);
+          result.roots.forEach((r, i) => {
+            if (i) pieces.push(textPiece(', '));
+            // a + b√c·i with rational a: the radical is written exactly (closed-form formats only)
+            const ri = realIdx.indexOf(r);
+            if (ri >= 0 && realForms[ri]) { pieces.push(...typeset(realForms[ri])); return; }
+            const rad = r.exactRe && !r.exactIm && r.imSq && r.imSq.n > 0n ? Calc.sqrtRational(r.imSq.n, r.imSq.d) : null;
+            if (!rad) { pieces.push(...complexPieces(asComplex(r), settings.fmt || 'dec')); return; }
+            if (r.exactRe.n !== 0n) pieces.push(...numberPieces({value: r.re, rational: r.exactRe}, fmt));
+            pieces.push(textPiece(r.im < 0 ? '-' : r.exactRe.n !== 0n ? '+' : ''), ...typeset(rad), textPiece('·i'));
+          });
           return asResponse(pieces, result.roots.length === 1 && Math.abs(result.roots[0].im) < 1e-12 ? result.roots[0].re : undefined);
         }
         if (result.kind === 'identity') return asResponse([textPiece('x∈ℝ')], undefined);
@@ -208,8 +220,8 @@ const Calculator = (() => {
         if (tokens.includes('arg') && !z.exact && Math.abs(z.im) < 1e-12 && piText(z.re)) return asResponse([...(!trailingEquals ? [textPiece('=')] : []), ...argPieces(z.re)], z.re);
         const eq = !trailingEquals ? [textPiece('=')] : [];
         const val = Math.abs(z.im) < 1e-12 ? z.re : undefined;
-        // not exact in Q(i): in the closed-form formats give radicals exactly (√2+i, 2√2i), as the real domain does
-        if (!z.exact && (settings.fmt || 'dec') !== 'dec') {
+        // not exact in Q(i): the ℂ mode gives radicals exactly (√2+i, 2√2·i) whatever the decimal/fraction setting, and ≈ only when no closed form exists
+        if (!z.exact) {
           const cf = Calc.exactComplexValue(tokens, z, settings);
           if (cf) return asResponse([...eq, ...complexClosed(cf)], val);
         }
