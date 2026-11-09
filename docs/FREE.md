@@ -1,8 +1,8 @@
-# Mikajy Free: licence, data and release rules
+# Mikajy Atlas (formerly Mikajy Atlas): licence, data and release rules
 
-Mikajy Free lets the recogniser be trained on datasets whose licences forbid commercial use, and it can be **shared for
+Mikajy Atlas lets the recogniser be trained on datasets whose licences forbid commercial use, and it can be **shared for
 free** (source on GitHub, signed APKs from GitHub releases). It can **not** be sold or used commercially. Its sibling
-[Mikajy](https://github.com/ARHeritiana/Mikajy) has MIT-licensed first-party code on its current `main` branch (updated 2026-11-09), while the already-published `v5.0` release remains GPL-3.0-or-later. See [LICENSING.md](LICENSING.md); the models and rights of these editions must not be mixed.
+[Mikajy Spark](https://github.com/ARHeritiana/Mikajy) has MIT-licensed first-party code on its current `main` branch (updated 2026-11-09), while the already-published `v5.0` release remains GPL-3.0-or-later. See [LICENSING.md](LICENSING.md); the models and rights of these editions must not be mixed.
 
 ## Licences here
 * **Code:** PolyForm Noncommercial 1.0.0 ([LICENSE](../LICENSE)).
@@ -19,7 +19,7 @@ against this licence first. This is engineering guidance, not legal advice.
 ## Rules
 1. **Cross-project flow.** Do not merge the repositories wholesale. Before reusing Free-edition code in original Mikajy, verify that its authors and third-party dependencies permit the intended licensing. The MathWriting-trained research weights, data, and derived artifacts must never be transferred to the original under an unrestricted MIT claim.
 2. **Releases from here are free releases only.** Tags are `vMAJOR.MINOR`; `.github/release-notes-free.md` puts "Non-commercial use only" and the
-   credits at the top of every release note. Mikajy Free is a separate app (`com.mikajy.app.free`) with its own repository, so its updater
+   credits at the top of every release note. Mikajy Atlas is a separate app (`com.mikajy.app.free`) with its own repository, so its updater
    (`releases/latest`) only ever sees Free releases.
 3. **Record every dataset** in the register below before training on it: name, URL, licence as read from the licence text
    (not from memory), date checked, and which weights it contributed to.
