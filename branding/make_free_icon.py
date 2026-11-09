@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Draws the Mikajy Free logo: the Mikajy mark (white M on a black / red rounded square with a diagonal sweep), pushed harder:
+"""LEGACY (historical Mikajy Free emblem). Do not run: it overwrites android/res/drawable/icon.png with the old FREE logo. The current Atlas logo is branding/logo-atlas.svg, rendered by render_logo.cjs.
+Draws the Mikajy Free logo: the Mikajy mark (white M on a black / red rounded square with a diagonal sweep), pushed harder:
 heavier forward-leaning M with a hard shadow and red glow, a layered double sweep, speed stripes and a slanted FREE plaque.
 Writes branding/logo-free-512.png, branding/logo-free-1024.png and the 192 px launcher icon android/res/drawable/icon.png.
 The FREE lettering uses Noto Sans Black Italic (SIL OFL) when installed; only the rendered PNGs are shipped."""

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <title>Mikajy Atlas</title>
+  <!-- Mikajy Atlas logo: complete and solid. Palette: red / black / white only.
+       Idea: the family's M made monumental: upright, symmetric, heavy, standing on a slab in front of a globe of meridians (the atlas), in a framed tile. -->
+  <defs>
+    <clipPath id="tile"><rect width="1024" height="1024" rx="205"/></clipPath>
+    <clipPath id="globe"><circle cx="512" cy="468" r="366"/></clipPath>
+    <radialGradient id="ball" cx="0.38" cy="0.32" r="0.8">
+      <stop offset="0" stop-color="#FF4B33"/>
+      <stop offset="0.6" stop-color="#E3261A"/>
+      <stop offset="1" stop-color="#8E1511"/>
+    </radialGradient>
+    <linearGradient id="slab" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#D4D4D4"/>
+    </linearGradient>
+  </defs>
+
+  <g clip-path="url(#tile)">
+    <rect width="1024" height="1024" fill="#141414"/>
+    <!-- framed: a thin white rule inside the tile, like a printed plate -->
+    <rect x="46" y="46" width="932" height="932" rx="168" fill="none" stroke="#FFFFFF" stroke-opacity="0.9" stroke-width="10"/>
+    <rect x="68" y="68" width="888" height="888" rx="148" fill="none" stroke="#E3261A" stroke-width="6"/>
+
+    <!-- the globe -->
+    <circle cx="512" cy="468" r="366" fill="url(#ball)"/>
+    <g clip-path="url(#globe)" fill="none" stroke="#141414" stroke-opacity="0.45" stroke-width="7">
+      <ellipse cx="512" cy="468" rx="254" ry="366"/>
+      <ellipse cx="512" cy="468" rx="121" ry="366"/>
+      <line x1="512" y1="102" x2="512" y2="834"/>
+      <line x1="146" y1="468" x2="878" y2="468"/>
+      <ellipse cx="512" cy="468" rx="366" ry="206"/>
+      <ellipse cx="512" cy="468" rx="366" ry="100"/>
+    </g>
+    <circle cx="512" cy="468" r="366" fill="none" stroke="#FFFFFF" stroke-width="12"/>
+
+    <!-- the M: upright, heavy, with a hard black shadow and a black keyline so it stands off the globe -->
+    <g id="m">
+      <path transform="translate(22,26)" fill="#000"
+        d="M232,712 V262 H372 L512,452 L652,262 H792 V712 H662 V438 L552,612 H472 L362,438 V712 Z"/>
+      <path fill="#FFFFFF" stroke="#141414" stroke-width="14" stroke-linejoin="miter"
+        d="M232,712 V262 H372 L512,452 L652,262 H792 V712 H662 V438 L552,612 H472 L362,438 V712 Z"/>
+    </g>
+
+    <!-- foundation slab: a stepped plinth, the part that says "solid" -->
+        <path fill="url(#slab)" stroke="#141414" stroke-width="14" stroke-linejoin="miter" d="M190,712 H834 V774 H190 Z"/>
+        <path fill="#FFFFFF" stroke="#141414" stroke-width="14" stroke-linejoin="miter" d="M150,774 H874 V846 H150 Z"/>
+    <!-- red inlay in the base -->
+    <rect x="220" y="800" width="584" height="18" fill="#E3261A"/>
+  </g>
+</svg>

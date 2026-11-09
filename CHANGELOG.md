@@ -6,7 +6,8 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 ## [Unreleased]
 
 ### Branding
-- Rename the full edition to **Mikajy Atlas** (formerly Mikajy Free) in launcher labels, web UI, localization, and future release names. Keep the `com.mikajy.app.free` Android package ID, GitHub update channel, signing identity, old release artifacts, and existing launcher icon unchanged.
+- Rename the full edition to **Mikajy Atlas** (formerly Mikajy Free) in launcher labels, web UI, localization, and future release names. Keep the `com.mikajy.app.free` Android package ID, GitHub update channel, signing identity, and old release artifacts unchanged.
+- New launcher icon / logo for Atlas (`branding/logo-atlas.svg`): upright M on a base slab in front of a globe, in a framed tile, still black / red / white. It replaces the former Free emblem; sources and renderer are in `branding/`.
 
 ### Licensing documentation (2026-11-09)
 - Clarified that this edition uses PolyForm Noncommercial 1.0.0 for first-party code, CC BY-NC-SA 4.0 for research model weights, plus the separately licensed bundled Nerdamer, decimal.js and Caveat font.
