@@ -4,7 +4,7 @@
     android:versionCode="19"
     android:versionName="6.3">
 
-    <!-- Mikajy Free: its own application id (com.mikajy.app.free), so it installs next to Mikajy and never replaces it. The Java classes keep
+    <!-- Mikajy Atlas (formerly Mikajy Free): its own application id (com.mikajy.app.free), so it installs next to Mikajy and never replaces it. The Java classes keep
          the package com.mikajy.app, hence the fully qualified names below. Everything runs on the device. INTERNET is used only by UpdateChecker (one GET to GitHub's
          releases API, optional, switchable off in Settings) and, when you tap "Get" in Settings, by UpdateInstaller (download of the signed APK from this project's
          releases; REQUEST_INSTALL_PACKAGES lets Android install it over the app after you confirm); the WebView itself has network loads blocked. -->
@@ -13,7 +13,7 @@
     <uses-feature android:name="android.hardware.touchscreen" android:required="true" />
 
     <application
-        android:label="Mikajy Free"
+        android:label="Mikajy Atlas"
         android:icon="@drawable/icon"
         android:theme="@android:style/Theme.Material.NoActionBar"
         android:allowBackup="false"
