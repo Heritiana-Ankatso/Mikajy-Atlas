@@ -45,5 +45,22 @@ async def main():
             want = ' '.join(TOK[:k] + TOK[k+1:])
             assert rt == want, (name, rt, want)
             print('Scribble over only the %s erases only it: PASS' % name.replace('up-down-up over the second nine', 'second nine (up-down-up)'))
+        # Writing into a finished reading: over a glyph replaces it, between glyphs inserts, after the last appends. The new character is the recorded 8 (two strokes).
+        async def put8(cx):
+            for st in (FIX['strokes'][12], FIX['strokes'][13]):
+                await pg.evaluate("t => window.__ck = t", st[0][2]+2000); await pg.mouse.move(st[0][0]-305.5+cx, st[0][1]); await pg.mouse.down()
+                for x,y,_ in st[1:]: await pg.mouse.move(x-305.5+cx, y)
+                await pg.evaluate("t => window.__ck = t", st[-1][2]+2000); await pg.mouse.up(); await pg.wait_for_timeout(40)
+            await pg.evaluate("() => window.__ck = null"); await pg.wait_for_timeout(900)
+            await pg.wait_for_function("() => !recBusy && hold.length==0 && lines.every(L=>!L.ink.some(t=>!t.read))",timeout=60000); await pg.wait_for_timeout(500)
+        for name, pick, want in [('over the 4 replaces it', lambda g: (g[1]['x0']+g[1]['x1'])/2, TOK[:1]+['8']+TOK[2:]),
+                                 ('between + and 1 inserts', lambda g: (g[5]['x1']+g[6]['x0'])/2, TOK[:6]+['8']+TOK[6:]),
+                                 ('after the last glyph appends', lambda g: g[11]['x1']+16, TOK+['8'])]:
+            await fresh()
+            g = await pg.evaluate("() => lines[0].syms.map(gbox)")
+            await put8(pick(g))
+            rt = await pg.evaluate("() => lines.map(L=>L.rt).join('|')")
+            assert rt == ' '.join(want), (name, rt, ' '.join(want))
+            print('Writing %s: PASS' % name)
         await b.close()
 asyncio.run(main())
