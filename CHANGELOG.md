@@ -5,6 +5,10 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 
 ## [Unreleased]
 
+### Fixed
+- **Erasing is exact.** A scribble removes only the characters the pen actually passed over: glyphs are judged on the middle of their box and handwriting on the ink itself, so a neighbour written close by stays. A character goes whole (all its strokes), so no leftover stroke is read as a character you never wrote. On a plain reading (digits, letters, operators) the other characters are kept exactly as read instead of the whole line being read again, which used to invent symbols (a `÷` erased from `24 ÷ 97` came back as `×`).
+- **Smoother ink.** The live stroke follows the pen tip, the pen is sampled more finely, the ink is drawn through a light average that removes sensor jitter (the recogniser still sees the raw points), and the canvas is sharp up to 3x pixel density (was 2x).
+
 ## [6.3] - 2026-11-09 — Mikajy Atlas
 
 
