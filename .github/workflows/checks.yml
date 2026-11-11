@@ -36,6 +36,10 @@ jobs:
         run: python3 tests/browser_updates.py
       - name: Browser test (unlimited board, pan and zoom)
         run: python3 tests/browser_canvas.py
+      - name: Sequence recogniser end to end (worker model, late strokes re-read the line)
+        run: python3 tests/browser_seq.py
+      - name: Scribble erase and writing into a finished reading
+        run: python3 tests/browser_scribble.py
   android:
     runs-on: ubuntu-latest
     timeout-minutes: 15

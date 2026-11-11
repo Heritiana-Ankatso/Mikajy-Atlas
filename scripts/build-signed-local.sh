@@ -6,8 +6,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 K="${MIKAJY_KEY_DIR:-release-key-backup}"
-# The one key backup lives beside the sibling Spark checkout; fall back to it when this repo has no copy.
-[[ -f "$K/mikajy-release.jks" ]] || K="../Mikajy/release-key-backup"
+# Since 6.4 Atlas has its own key (certificate in releases/SIGNING_CERT_SHA256.txt): never fall back to the sibling's backup, which holds the old shared key.
 [[ -f "$K/mikajy-release.jks" && -f "$K/PASSWORD.txt" ]] || { echo "Missing $K/mikajy-release.jks or PASSWORD.txt (set MIKAJY_KEY_DIR)" >&2; exit 1; }
 export MIKAJY_KEYSTORE="$(cd "$K" && pwd)/mikajy-release.jks"
 export MIKAJY_ALIAS="$(sed -n 's/^Alias:[[:space:]]*//p' "$K/PASSWORD.txt" | head -1)"
@@ -16,6 +15,9 @@ export MIKAJY_STOREPASS="$pw" MIKAJY_KEYPASS="$pw"; unset pw
 : "${MIKAJY_ALIAS:?alias not found in PASSWORD.txt}"
 export ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-$HOME/Android/Sdk}"
 bash build_apk.sh
+want="$(tr -d ': \n' < releases/SIGNING_CERT_SHA256.txt | tr '[:lower:]' '[:upper:]')"
 TOOLS="$(find "$ANDROID_SDK_ROOT/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
 echo "Signing certificate SHA-256: $("$TOOLS/apksigner" verify --print-certs Mikajy-Free.apk | sed -n 's/^Signer #1 certificate SHA-256 digest: //p')"
 echo "Package: $("$TOOLS/aapt" dump badging Mikajy-Free.apk | sed -n "s/^package: name='\([^']*\)' versionCode='\([^']*\)' versionName='\([^']*\)'.*/\1 \3 (code \2)/p")"
+got="$("$TOOLS/apksigner" verify --print-certs Mikajy-Free.apk | sed -n 's/^Signer #1 certificate SHA-256 digest: //p' | tr '[:lower:]' '[:upper:]')"
+[[ "$got" == "$want" ]] || { echo "WARNING: this is not the pinned Atlas release key (releases/SIGNING_CERT_SHA256.txt); do not publish this APK" >&2; exit 1; }

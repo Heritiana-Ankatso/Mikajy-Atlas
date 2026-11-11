@@ -5,10 +5,19 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 
 ## [Unreleased]
 
+## [6.4] - 2026-11-11
+
 ### Fixed
+- **Writing on past the end of a line is not erased.** When you carry on writing after a line that already has an answer, the new characters land where the old answer is shown. A character with turns there (a 6, an 8, a 3) used to be taken for a scribble and erased the answer instead of being written (in 6.3: `24 ÷ 97 + 19 − 8 − 6` lost its last 6). A stroke that stays within one answer glyph is now settled by the recogniser like one over a glyph of the reading. The sequence-recogniser and scribble browser tests now run in CI.
 - **Erasing is exact.** A scribble removes only the characters the pen actually passed over: glyphs are judged on the middle of their box and handwriting on the ink itself, so a neighbour written close by stays. A character goes whole (all its strokes), so no leftover stroke is read as a character you never wrote. On a plain reading (digits, letters, operators) the other characters are kept exactly as read instead of the whole line being read again, which used to invent symbols (a `÷` erased from `24 ÷ 97` came back as `×`).
 - **Writing into a finished reading works.** A character written over a glyph replaces it, one written between glyphs is inserted there, one written after the last glyph is appended. Only the new strokes are read and the reading is edited in place (plain readings), so the old handwriting under it no longer garbles the result. A character with turns (8, 3, 5, S) written over a glyph is no longer taken for a scribble: a compact stroke over one glyph is erasing only when the recogniser reads it as a scribble-like letter (W, M, n ...).
 - **Smoother ink.** The live stroke follows the pen tip, the pen is sampled more finely, the ink is drawn through a light average that removes sensor jitter (the recogniser still sees the raw points), and the canvas is sharp up to 3x pixel density (was 2x).
+
+### Release
+- **New signing key.** 6.4 is signed with a key of its own (certificate SHA-256 `D60280CF…F452C234`, full value in `releases/SIGNING_CERT_SHA256.txt`); 6.0–6.3 used the key shared with Mikajy Spark. Android does not install it over 6.3: uninstall first. `release.yml` can now be started from the Actions tab, and publishes a locally signed APK committed under `releases/` when the `release` environment has no signing secrets.
+
+### Licensing documentation
+- The `Required Notice:` line in `LICENSE` names the repository by its current URL (`Heritiana-Ankatso/Mikajy-Atlas`, was the pre-rename `Mikajy-Free`). Same copyright holder, same PolyForm Noncommercial 1.0.0 terms; nothing else in the licence changes. The security-advisory links in `SECURITY.md` and the issue chooser point there too.
 
 ## [6.3] - 2026-11-09 — Mikajy Atlas
 

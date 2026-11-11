@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 Please report privately through GitHub: **Security → Report a vulnerability** on
-<https://github.com/Heritiana-Ankatso/Mikajy-Free/security/advisories/new>. Do not open a public issue for security problems.
+<https://github.com/Heritiana-Ankatso/Mikajy-Atlas/security/advisories/new>. Do not open a public issue for security problems.
 You will get an answer within a few days.
 
 ## Supported versions
