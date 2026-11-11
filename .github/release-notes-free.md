@@ -1,6 +1,6 @@
 **Non-commercial use only.** Free to download and share, never to sell (code: PolyForm Noncommercial 1.0.0; trained model: CC BY-NC-SA 4.0).
 
-**Mikajy Atlas 6.4** — same app, same package, same signing key: it updates your existing install in place (from 6.2 or newer, tap *Get Mikajy Atlas 6.4* in the menu; 6.1 and older need one manual download).
+**Mikajy Atlas 6.4** — signed with a new key of its own, so it does not install over 6.3 or older: uninstall the old app, then install this APK. Later versions update in place from the app.
 
 ## What changed since 6.3
 
