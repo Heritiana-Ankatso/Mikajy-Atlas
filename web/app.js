@@ -200,8 +200,8 @@ function scribStats(s){const b=bb(s),m=Math.max(b.w,b.h);let len=0;for(let i=1;i
 /* Over existing writing, any zigzag erases: up-down-up (two turns) is enough, whether the turns are sharp or a shallow wave. Elsewhere it takes a real wiggle to be a scribble rather than a letter. */
 function zigzag(s){const b=bb(s),ax=b.w<b.h?0:1;return Math.max(cusps(s),s.length<8?0:revs(s.map(p=>p[ax]),Math.max(8,.4*(ax?b.h:b.w))))}   // sharp turns, or reversals across the shorter axis
 function overText(s){const b=bb(s);return allBoxes().some(q=>ovl(q,b)>=.6)}   // the stroke's box covers most of something already there (a neighbour written close by does not)
-/* A stroke that stays within one glyph is as likely a character written over it (an 8, a 3, an S all zigzag) as a scribble: it is 'maybe', settled by what the recogniser reads in it. */
-function oneGlyph(s){const b=bb(s),cx=(b.x0+b.x1)/2,cy=(b.y0+b.y1)/2,bs=[];for(const L of lines){L.syms.forEach(g=>bs.push(gbox(g)));L.ink.forEach(t=>{if(!t.read)bs.push(bb(t))})}
+/* A stroke that stays within one glyph (of a reading or of its answer) is as likely a character written over it (an 8, a 3, an S, a 6 all zigzag) as a scribble: it is 'maybe', settled by what the recogniser reads in it. */
+function oneGlyph(s){const b=bb(s),cx=(b.x0+b.x1)/2,cy=(b.y0+b.y1)/2,bs=[];for(const L of lines){L.syms.concat(L.ans).forEach(g=>bs.push(gbox(g)));L.ink.forEach(t=>{if(!t.read)bs.push(bb(t))})}   // an answer glyph too: writing on past the end of a line lands on the old answer
  return bs.some(q=>cx>=q.x0-4&&cx<=q.x1+4&&cy>=q.y0-6&&cy<=q.y1+6&&b.w<=1.35*(q.x1-q.x0)+6&&b.h<=1.6*(q.y1-q.y0)+8)}
 function isScribble(s){if(s.length<8)return false;const k=scribStats(s);if(k.m<18)return false;const pts=resamp(s,6);
  if(zigzag(s)>=2&&overText(s))return seqOn()&&oneGlyph(s)?'maybe':true;   // up-down-up across a reading or a glyph

@@ -1,21 +1,16 @@
-**Mikajy Atlas 6.3** — the full edition, formerly called Mikajy Free. Same app, same package, same signing key: it updates your existing install in place (from 6.2 or older, tap *Get Mikajy Atlas 6.3* in the menu; 6.1 and older need one manual download).
+**Non-commercial use only.** Free to download and share, never to sell (code: PolyForm Noncommercial 1.0.0; trained model: CC BY-NC-SA 4.0).
 
-## What changed since 6.2
+**Mikajy Atlas 6.4** — same app, same package, same signing key: it updates your existing install in place (from 6.2 or newer, tap *Get Mikajy Atlas 6.4* in the menu; 6.1 and older need one manual download).
 
-**New**
-- **Inequalities** with `<`, `>`, `≤`, `≥`, solved exactly: polynomials, rational functions, `2^x`, `|x−1|`, `ln x`, `√x`. The answer is a set with exact endpoints, e.g. `S=]−∞ ; −2] ∪ [2 ; +∞[`.
-- **New name and icon:** Mikajy Atlas, with a new launcher icon (a black M in a white disc inside a red ring). Package ID, settings, history and update channel are unchanged.
+## What changed since 6.3
 
 **Fixed**
-- No more automatic zoom-out after writing; the zoom pill brings you back to everything you wrote.
-- Exact answers (`√2`, `π/4`, `e^(−3)`) are shown alone; decimals only when you chose them.
-- `f(x) = x² + 1` then `f(3) =` answers again; tall handwritten brackets are understood.
-- Exponents are laid out like on paper; a single constant in a differential equation is `C`, not `C1`.
-- The root sign spans its whole radicand; exact complex roots appear in every number format.
-- Scribble-to-erase is more forgiving.
-- Updates now check the renamed repository.
+- **Erasing is exact.** A scribble removes only the characters the pen passed over, whole; the rest of the line stays exactly as read (erasing `÷` from `24 ÷ 97` no longer brings it back as `×`).
+- **Writing into a finished reading works.** A character written over a glyph replaces it, one written between glyphs is inserted, one written after the last glyph is appended. An 8, 3, 5 or S written over a glyph is no longer taken for a scribble.
+- **Writing on past the end of a line is not erased.** A 6 or an 8 written where the previous answer is shown used to erase it instead of being written.
+- **Smoother ink:** the stroke follows the pen tip, jitter is smoothed, and the board is sharp on high-density screens.
 
 Full list: `CHANGELOG.md`.
 
 ---
-Free to download, for non-commercial use only (code: PolyForm Noncommercial 1.0.0; trained model: CC BY-NC-SA 4.0). Credits and licences: `LICENSE`, `licenses/`, `THIRD_PARTY_NOTICES.md`.
+Training data credits: **MathWriting** © Google LLC, CC BY-NC-SA 4.0; mathematical expressions in its labels from **Wikipedia** contributors, CC BY-SA 4.0. Other credits and licences: `LICENSE`, `licenses/`, `THIRD_PARTY_NOTICES.md`.
