@@ -1,9 +1,17 @@
 name: Mikajy Atlas signed release
 
+# Two ways to release the version in android/AndroidManifest.xml:
+#   - push a tag vX.Y that matches it, or
+#   - run this workflow from the Actions tab on main: it creates the tag vX.Y itself, on the commit it publishes.
+# The APK is signed here when the 'release' environment holds the signing secrets (scripts/import-release-signing.sh).
+# Otherwise the owner signs locally (scripts/build-signed-local.sh) and commits releases/Mikajy-Atlas-X.Y.apk: this workflow
+# then publishes that file, after checking its certificate against releases/SIGNING_CERT_SHA256.txt and its package and
+# version against the manifest. With neither, a tag push only reports that nothing could be signed.
 on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -33,13 +41,12 @@ jobs:
           if [[ -n "$KEYSTORE" ]]; then echo "ok=true" >> "$GITHUB_OUTPUT"
           else
             echo "ok=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::No signing secrets in this repository's 'release' environment: build and upload the signed APK locally (scripts/build-signed-local.sh)."
+            echo "::notice::No signing secrets in this repository's 'release' environment: publishing the locally signed APK committed under releases/, if there is one."
           fi
 
   publish:
-    name: Sign and publish Android APK
+    name: Sign (or take the committed signed APK) and publish
     needs: [verify, flag]
-    if: needs.flag.outputs.ok == 'true'
     runs-on: ubuntu-latest
     environment: release
     timeout-minutes: 20
@@ -50,19 +57,37 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Ensure tag matches Android version
+      - name: Resolve the release tag from the Android version
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          [[ "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+(\.[0-9]+)?$ ]] || {
-            echo "::error::Release tag must be vMAJOR.MINOR or vMAJOR.MINOR.PATCH"
+          version="$(python3 -c 'import xml.etree.ElementTree as ET; root=ET.parse("android/AndroidManifest.xml").getroot(); print(root.attrib["{http://schemas.android.com/apk/res/android}versionName"])')"
+          code="$(python3 -c 'import xml.etree.ElementTree as ET; root=ET.parse("android/AndroidManifest.xml").getroot(); print(root.attrib["{http://schemas.android.com/apk/res/android}versionCode"])')"
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+            # A manual release is cut from main only, and never over an existing tag.
+            if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
+              echo "::error::Run the release from main (this run is on $GITHUB_REF)"
+              exit 1
+            fi
+            tag="v$version"
+            if gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" >/dev/null 2>&1; then
+              echo "::error::Tag $tag already exists: bump versionName/versionCode before releasing again"
+              exit 1
+            fi
+          else
+            tag="$GITHUB_REF_NAME"
+            if [[ "$tag" != "v$version" ]]; then
+              echo "::error::Tag $tag does not match Android versionName $version"
+              exit 1
+            fi
+          fi
+          [[ "$tag" =~ ^v[0-9]+\.[0-9]+(\.[0-9]+)?$ ]] || {
+            echo "::error::Release tag must be vMAJOR.MINOR or vMAJOR.MINOR.PATCH (got $tag)"
             exit 1
           }
-          version="$(python3 -c 'import xml.etree.ElementTree as ET; root=ET.parse("android/AndroidManifest.xml").getroot(); print(root.attrib["{http://schemas.android.com/apk/res/android}versionName"])')"
-          if [[ "$GITHUB_REF_NAME" != "v$version" ]]; then
-            echo "::error::Tag $GITHUB_REF_NAME does not match Android versionName $version"
-            exit 1
-          fi
+          { echo "RELEASE_TAG=$tag"; echo "VERSION_NAME=$version"; echo "VERSION_CODE=$code"; } >> "$GITHUB_ENV"
 
       - name: Install Android build and signing tools
         run: |
@@ -71,7 +96,8 @@ jobs:
             openjdk-21-jdk-headless aapt apksigner zipalign \
             android-sdk-platform-23 dalvik-exchange python3 unzip
 
-      - name: Build, sign and verify with Mikajy's persistent release certificate
+      - name: Build, sign and verify with the persistent release certificate
+        if: needs.flag.outputs.ok == 'true'
         shell: bash
         env:
           MIKAJY_KEYSTORE_B64: ${{ secrets.MIKAJY_KEYSTORE_B64 }}
@@ -95,8 +121,8 @@ jobs:
           ./build_apk.sh
           apksigner verify --verbose Mikajy-Free.apk
 
-          # The one-time Codespaces setup stores the new public SHA-256 fingerprint
-          # as a protected release-environment variable. Refuse accidental key rotation.
+          # The one-time setup stores the public SHA-256 fingerprint as a protected
+          # release-environment variable. Refuse accidental key rotation.
           expected="$(printf '%s' "$MIKAJY_CERT_SHA256" |
             tr -d ':' | tr '[:lower:]' '[:upper:]')"
           if [[ ! "$expected" =~ ^[0-9A-F]{64}$ ]]; then
@@ -111,22 +137,58 @@ jobs:
             exit 1
           fi
           echo "Verified Mikajy release-signing certificate."
+          mv Mikajy-Free.apk "Mikajy-Atlas-$VERSION_NAME.apk"
 
-      - name: Prepare release assets
+      - name: Take the locally signed APK committed under releases/
+        if: needs.flag.outputs.ok != 'true'
         shell: bash
         run: |
           set -euo pipefail
-          apk="Mikajy-Atlas-${GITHUB_REF_NAME#v}.apk"
-          mv Mikajy-Free.apk "$apk"
-          sha256sum "$apk" > SHA256SUMS.txt
+          apk="releases/Mikajy-Atlas-$VERSION_NAME.apk"
+          if [[ ! -f "$apk" ]]; then
+            if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+              echo "::error::No signing secrets and no $apk: sign locally (scripts/build-signed-local.sh) and commit it first."
+              exit 1
+            fi
+            echo "::notice::No signing secrets and no $apk: nothing published. Build and upload the signed APK locally (scripts/build-signed-local.sh)."
+            echo "SKIP_PUBLISH=1" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          apksigner verify --verbose "$apk"
+          # The certificate must be the one pinned in the repository (public fingerprint, not a secret).
+          expected="$(tr -d ': \n' < releases/SIGNING_CERT_SHA256.txt | tr '[:lower:]' '[:upper:]')"
+          [[ "$expected" =~ ^[0-9A-F]{64}$ ]] || { echo "::error::releases/SIGNING_CERT_SHA256.txt is missing or invalid"; exit 1; }
+          actual="$(apksigner verify --print-certs "$apk" |
+            sed -n 's/^Signer #1 certificate SHA-256 digest: //p' |
+            tr -d ':' | tr '[:lower:]' '[:upper:]')"
+          if [[ "$actual" != "$expected" ]]; then
+            echo "::error::$apk is not signed with the pinned release certificate."
+            exit 1
+          fi
+          # It must be this version of this app.
+          badge="$(aapt dump badging "$apk" | sed -n 1p)"
+          want="package: name='com.mikajy.app.free' versionCode='$VERSION_CODE' versionName='$VERSION_NAME'"
+          if [[ "$badge" != "$want"* ]]; then
+            echo "::error::$apk is not com.mikajy.app.free $VERSION_NAME (code $VERSION_CODE): $badge"
+            exit 1
+          fi
+          cp "$apk" "Mikajy-Atlas-$VERSION_NAME.apk"
+          echo "Verified committed APK: pinned certificate, package and version."
 
       - name: Publish signed APK and checksum to GitHub Releases
+        if: env.SKIP_PUBLISH != '1'
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-          apk="Mikajy-Atlas-${GITHUB_REF_NAME#v}.apk"
-          gh release create "$GITHUB_REF_NAME" "$apk" SHA256SUMS.txt \
-            --verify-tag --notes-file .github/release-notes-free.md --generate-notes \
-            --title "Mikajy Atlas ${GITHUB_REF_NAME#v}"
+          apk="Mikajy-Atlas-$VERSION_NAME.apk"
+          sha256sum "$apk" > SHA256SUMS.txt
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+            target=(--target "$GITHUB_SHA")   # creates the tag on the commit that was checked
+          else
+            target=(--verify-tag)             # the pushed tag must already exist
+          fi
+          gh release create "$RELEASE_TAG" "$apk" SHA256SUMS.txt \
+            "${target[@]}" --notes-file .github/release-notes-free.md --generate-notes \
+            --title "Mikajy Atlas $VERSION_NAME"

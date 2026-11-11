@@ -13,6 +13,9 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 - **Writing into a finished reading works.** A character written over a glyph replaces it, one written between glyphs is inserted there, one written after the last glyph is appended. Only the new strokes are read and the reading is edited in place (plain readings), so the old handwriting under it no longer garbles the result. A character with turns (8, 3, 5, S) written over a glyph is no longer taken for a scribble: a compact stroke over one glyph is erasing only when the recogniser reads it as a scribble-like letter (W, M, n ...).
 - **Smoother ink.** The live stroke follows the pen tip, the pen is sampled more finely, the ink is drawn through a light average that removes sensor jitter (the recogniser still sees the raw points), and the canvas is sharp up to 3x pixel density (was 2x).
 
+### Release
+- **New signing key.** 6.4 is signed with a key of its own (certificate SHA-256 `D60280CF…F452C234`, full value in `releases/SIGNING_CERT_SHA256.txt`); 6.0–6.3 used the key shared with Mikajy Spark. Android does not install it over 6.3: uninstall first. `release.yml` can now be started from the Actions tab, and publishes a locally signed APK committed under `releases/` when the `release` environment has no signing secrets.
+
 ### Licensing documentation
 - The `Required Notice:` line in `LICENSE` names the repository by its current URL (`Heritiana-Ankatso/Mikajy-Atlas`, was the pre-rename `Mikajy-Free`). Same copyright holder, same PolyForm Noncommercial 1.0.0 terms; nothing else in the licence changes. The security-advisory links in `SECURITY.md` and the issue chooser point there too.
 
