@@ -8,7 +8,7 @@ free** (source on GitHub, signed APKs from GitHub releases). It can **not** be s
 * **Code:** PolyForm Noncommercial 1.0.0 ([LICENSE](../LICENSE)).
 * **Research model weights:** CC BY-NC-SA 4.0 (the share-alike terms of the datasets below plausibly extend to them).
   Anyone who shares or adapts the weights must credit the datasets and keep the same licence.
-* **Caveat font:** SIL OFL 1.1, unchanged.
+* **Kalam Bold font:** SIL OFL 1.1, subset (replaced Caveat on 2026-11-12).
 
 ## What "non-commercial" means here
 Allowed: free download of the source and APK from GitHub or your own site; sharing with friends, classes, forums.
