@@ -1,14 +1,16 @@
 **Non-commercial use only.** Free to download and share, never to sell (code: PolyForm Noncommercial 1.0.0; trained model: CC BY-NC-SA 4.0).
 
-**Mikajy Atlas 6.4** — signed with a new key of its own, so it does not install over 6.3 or older: uninstall the old app, then install this APK. Later versions update in place from the app.
+**Mikajy Atlas 6.5** — updates 6.4 in place: tap *Get Mikajy Atlas 6.5* in the menu, your history and settings stay. On 6.3 or older, uninstall the old app first, then install this APK (6.4 changed the signing key).
 
-## What changed since 6.3
+## What changed since 6.4
+
+**New**
+- **New icon:** four white chevrons between two bars, on the black / red tile.
 
 **Fixed**
-- **Erasing is exact.** A scribble removes only the characters the pen passed over, whole; the rest of the line stays exactly as read (erasing `÷` from `24 ÷ 97` no longer brings it back as `×`).
-- **Writing into a finished reading works.** A character written over a glyph replaces it, one written between glyphs is inserted, one written after the last glyph is appended. An 8, 3, 5 or S written over a glyph is no longer taken for a scribble.
-- **Writing on past the end of a line is not erased.** A 6 or an 8 written where the previous answer is shown used to erase it instead of being written.
-- **Smoother ink:** the stroke follows the pen tip, jitter is smoothed, and the board is sharp on high-density screens.
+- **Writing into a line lands where you wrote it.** A character added between or after earlier characters is placed by where your pen was, and read together with the rest of the line; the other characters stay exactly as they were.
+- **Fewer accidental erasures.** A 6, 8 or 3 written next to an earlier reading no longer erases the handwriting hidden under it, and a doubtful scribble that touches nothing is kept as writing.
+- One unreadable stroke no longer switches the handwriting recogniser off until the app is restarted.
 
 Full list: `CHANGELOG.md`.
 
