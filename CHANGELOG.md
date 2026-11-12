@@ -5,6 +5,10 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 
 ## [Unreleased]
 
+## [6.5] - 2026-11-12
+
+Updates 6.4 in place from the app (same key). `versionCode` 21.
+
 ### Branding
 - **New Atlas logo:** four identical solid white chevrons between two white bars, on a rounded tile split black / red (`branding/logo-atlas.svg`, launcher icon `android/res/drawable/icon.png`). It replaces the M in a white disc. Same red / black / white.
 
