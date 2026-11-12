@@ -91,7 +91,7 @@ are prefixed `≈`; fraction/mixed display is used only for known exact rational
 
 ## Look
 Black-red-white identity with a **Dark / Light** option in Settings, saved locally. Dark mode shows white handwriting on a black canvas; Light mode shows black handwriting on a white canvas. Answers, active controls and selection rings remain red in both.
-Logo: **complete and solid**: a heavy black **M** cut out of a white disc, held by a red ring, on a black tile. Source: `branding/logo-atlas.svg` (plain paths, no font); `node branding/render_logo.cjs` (needs Playwright + Chromium) renders `branding/logo-atlas-512.png`, `logo-atlas-1024.png` and the 192 px launcher icon `android/res/drawable/icon.png`. The former Mikajy Free emblem (`logo-free-*.png`, `make_free_icon.py`) is kept only for the historical releases; do not run it, it would overwrite the launcher icon.
+Logo: **the full edition**: three solid white chevrons stacked upward, like rank stripes, on a rounded tile split black / red. Source: `branding/logo-atlas.svg` (plain paths, no font); `node branding/render_logo.cjs` (needs Playwright + Chromium) renders `branding/logo-atlas-512.png`, `logo-atlas-1024.png` and the 192 px launcher icon `android/res/drawable/icon.png`. The former Mikajy Free emblem (`logo-free-*.png`, `make_free_icon.py`) is kept only for the historical releases; do not run it, it would overwrite the launcher icon.
 Package id is `com.mikajy.app.free`, so it installs next to Mikajy (`com.mikajy.app`) and never replaces it. Its updates come only from this repository's releases.
 
 

@@ -1,12 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
-  <title>Mikajy Atlas</title>
-  <!-- Mikajy Atlas logo: complete and solid. Red / black / white only.
-       A heavy black M cut out of a white disc, held by a red ring, on a black tile. -->
-  <defs><clipPath id="tile"><rect width="1024" height="1024" rx="205"/></clipPath></defs>
-  <g clip-path="url(#tile)">
-    <rect width="1024" height="1024" fill="#181818"/>
-    <circle cx="512" cy="512" r="410" fill="none" stroke="#EF3125" stroke-width="20"/>
-    <circle cx="512" cy="512" r="370" fill="#fff"/>
-    <path d="M300,730 V290 H432 L512,430 L592,290 H724 V730 H600 V480 L512,620 L424,480 V730 Z" fill="#181818" transform="translate(0,-4)"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><title>Mikajy Atlas</title>
+  <!-- Mikajy Atlas logo: the full edition. Red / black / white only.
+       Same family as Mikajy Spark: the same rounded tile, the same black / red split, the same white mitred chevron stroke (96).
+       Spark's three chevrons fade in from left to right (light and fast); Atlas's three are all solid and stacked upward,
+       like rank stripes (complete, a step up). Plain paths, no font. -->
+  <defs><clipPath id="t"><rect width="1024" height="1024" rx="205"/></clipPath></defs>
+  <g clip-path="url(#t)">
+    <rect width="1024" height="1024" fill="#EF3125"/>
+    <path d="M0,0 H560 L330,1024 H0 Z" fill="#181818"/>
+    <g fill="none" stroke="#fff" stroke-width="96" stroke-linejoin="miter" stroke-miterlimit="10">
+      <path d="M252,440 L512,250 L772,440"/>
+      <path d="M252,630 L512,440 L772,630"/>
+      <path d="M252,820 L512,630 L772,820"/>
+    </g>
   </g>
 </svg>
