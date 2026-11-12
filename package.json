@@ -1,6 +1,6 @@
 {
   "name": "mikajy-atlas",
-  "version": "6.5.0",
+  "version": "6.6.0",
   "private": true,
   "description": "Offline handwriting calculator for Android (HTML5 canvas in a WebView shell).",
   "license": "SEE LICENSE IN LICENSE",
