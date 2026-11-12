@@ -5,6 +5,10 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 
 ## [Unreleased]
 
+## [6.6] - 2026-11-12
+
+Updates 6.5 in place from the app. `versionCode` 22.
+
 ### Fixed
 - **Writing into a fraction lands where you wrote it.** A digit written before or after a symbol of the numerator, the denominator or a root goes into that row, next to that symbol; one written over a symbol replaces it. Before, it was lost, or added after the whole fraction (`2/√3` with a 1 after the 3 became `2/√3 − 1`). A fraction's handwriting cannot be matched to the symbols on screen character by character, so the edit is made on the reading itself: the new character is read alone and its token put beside the nearest symbol of the same row (`structSlot` in `web/app.js`); a character not clearly in a row is read with the line as before.
 - **Erasing inside a fraction** removes the symbols you scribbled over, by what is on screen, and the rest of the reading stays as it was.
