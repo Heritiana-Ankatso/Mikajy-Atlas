@@ -193,19 +193,19 @@ function cusps(s){const p=resamp(s,8);let n=0;for(let i=0;i+6<p.length;){const a
  const c=(a[0]*b[0]+a[1]*b[1])/(Math.hypot(...a)*Math.hypot(...b)||1);if(c<-.5){n++;i+=4}else i++}return n}
 function coverage(pts,b,r=18){const gx=7,gy=4;let hit=0;for(let i=0;i<gx;i++)for(let j=0;j<gy;j++){const cx=b.x0+(i+.5)*(b.x1-b.x0)/gx,cy=b.y0+(j+.5)*(b.y1-b.y0)/gy;
  for(const p of pts){if(Math.abs(p[0]-cx)<r&&Math.abs(p[1]-cy)<r&&Math.hypot(p[0]-cx,p[1]-cy)<r){hit++;break}}}return hit/(gx*gy)}
-function allBoxes(){const bs=[];for(const L of lines){L.syms.concat(L.ans).forEach(g=>bs.push(gbox(g)));L.ink.forEach(t=>{const q=bb(t);bs.push({x0:q.x0-6,y0:q.y0-6,x1:q.x1+6,y1:q.y1+6})})}return bs}
+function allBoxes(visible){const bs=[];for(const L of lines){L.syms.concat(L.ans).forEach(g=>bs.push(gbox(g)));L.ink.forEach(t=>{if(visible&&t.read)return;const q=bb(t);bs.push({x0:q.x0-6,y0:q.y0-6,x1:q.x1+6,y1:q.y1+6})})}return bs}   // visible: leave out ink that a reading has replaced on screen
 function revs(v,amp){let d=0,ext=v[0],n=0;for(const x of v){if(d==0){if(Math.abs(x-ext)>amp){d=x>ext?1:-1;ext=x}}else if(d==1){if(x>ext)ext=x;else if(ext-x>amp){d=-1;ext=x;n++}}else{if(x<ext)ext=x;else if(x-ext>amp){d=1;ext=x;n++}}}return n}
 function scribStats(s){const b=bb(s),m=Math.max(b.w,b.h);let len=0;for(let i=1;i<s.length;i++)len+=Math.hypot(s[i][0]-s[i-1][0],s[i][1]-s[i-1][1]);
- const pts=resamp(s,6);return{m,ratio:len/Math.max(m,1),c:cusps(s),over:allBoxes().some(q=>coverage(pts,q)>=.15)}}
+ const pts=resamp(s,6);return{m,ratio:len/Math.max(m,1),c:cusps(s),over:allBoxes(true).some(q=>coverage(pts,q)>=.15)}}
 /* Over existing writing, any zigzag erases: up-down-up (two turns) is enough, whether the turns are sharp or a shallow wave. Elsewhere it takes a real wiggle to be a scribble rather than a letter. */
 function zigzag(s){const b=bb(s),ax=b.w<b.h?0:1;return Math.max(cusps(s),s.length<8?0:revs(s.map(p=>p[ax]),Math.max(8,.4*(ax?b.h:b.w))))}   // sharp turns, or reversals across the shorter axis
-function overText(s){const b=bb(s);return allBoxes().some(q=>ovl(q,b)>=.6)}   // the stroke's box covers most of something already there (a neighbour written close by does not)
+function overText(s){const b=bb(s);return allBoxes(true).some(q=>ovl(q,b)>=.6)}   // the stroke's box covers most of something already there (a neighbour written close by does not)
 /* A stroke that stays within one glyph (of a reading or of its answer) is as likely a character written over it (an 8, a 3, an S, a 6 all zigzag) as a scribble: it is 'maybe', settled by what the recogniser reads in it. */
 function oneGlyph(s){const b=bb(s),cx=(b.x0+b.x1)/2,cy=(b.y0+b.y1)/2,bs=[];for(const L of lines){L.syms.concat(L.ans).forEach(g=>bs.push(gbox(g)));L.ink.forEach(t=>{if(!t.read)bs.push(bb(t))})}   // an answer glyph too: writing on past the end of a line lands on the old answer
  return bs.some(q=>cx>=q.x0-4&&cx<=q.x1+4&&cy>=q.y0-6&&cy<=q.y1+6&&b.w<=1.35*(q.x1-q.x0)+6&&b.h<=1.6*(q.y1-q.y0)+8)}
 function isScribble(s){if(s.length<8)return false;const k=scribStats(s);if(k.m<18)return false;const pts=resamp(s,6);
  if(zigzag(s)>=2&&overText(s))return seqOn()&&oneGlyph(s)?'maybe':true;   // up-down-up across a reading or a glyph
- if(seqOn()){const strict=(k.c>=8&&k.ratio>=1.8)||(k.c>=5&&k.ratio>=3.5)||(k.c>=4&&k.ratio>=7),loose=k.c>=3&&k.ratio>=7;if(!strict&&!loose)return false;return allBoxes().some(q=>coverage(pts,q)>=(strict?.4:.7))}   // a looser wiggle must cover a whole reading to erase it   // ink stays on the board: only a real wiggle over existing ink erases (a looped 2 or a cursive x overlaps a neighbour)
+ if(seqOn()){const strict=(k.c>=8&&k.ratio>=1.8)||(k.c>=5&&k.ratio>=3.5)||(k.c>=4&&k.ratio>=7),loose=k.c>=3&&k.ratio>=7;if(!strict&&!loose)return false;return allBoxes(true).some(q=>coverage(pts,q)>=(strict?.4:.7))}   // a looser wiggle must cover a whole reading to erase it   // ink stays on the board: only a real wiggle over existing ink erases (a looped 2 or a cursive x overlaps a neighbour)
  return k.over?((k.c>=3&&k.ratio>=2.2)||(k.c>=2&&k.ratio>=2.6)||k.ratio>=4.2):((k.c>=4&&k.ratio>=3.5)||k.ratio>=6)}
 /* Erasing is exact: only what the pen passed over goes. "Passed over" means the stroke itself (or, for a typeset glyph, its box) lies within a pen's
    width of the scribble's path; a neighbour written close by is not touched. A character is erased whole (all its strokes), never in part, so no
@@ -227,8 +227,9 @@ function inkHit(L,s,near){const cl=inkChars(L.ink),byInk=()=>cl.filter(c=>inkCov
  const gs=L.syms.slice().sort((a,b)=>a.tx-b.tx),ti=new Set(gs.filter(g=>hitG(s,g)).map(g=>g.ti));
  if(cl.length!==gs.length)return{ss:byInk(),ti};
  cl.sort((a,b)=>a.b.x0+a.b.x1-b.b.x0-b.b.x1);return{ss:gs.flatMap((g,i)=>ti.has(g.ti)?cl[i].ss:[]),ti}}
-function scribble(s){const now=performance.now();ghosts.push({pts:s,t0:now});const near=polyNear(s,eraseR());
+function scribble(s,soft){let hit=false;const now=performance.now();ghosts.push({pts:s,t0:now});const near=polyNear(s,eraseR());
  for(const L of lines.slice()){const nIn=L.ink.length,{ss,ti}=inkHit(L,s,near),gone=new Set(ss);
+  if(gone.size||ti&&ti.size)hit=true;
   if(gone.size)L.ink=L.ink.filter(t=>{if(gone.has(t)){ghosts.push({pts:t,t0:now});return false}return true});
   if(L.seq){
    if(ti&&ti.size){const nt=L.toks.filter((_,i)=>!ti.has(i));   // the other characters stay exactly as read: nothing is read again, so nothing new can appear
@@ -236,13 +237,14 @@ function scribble(s){const now=performance.now();ghosts.push({pts:s,t0:now});con
     else{applyReading(L,nt,L.alts&&L.alts.filter((_,i)=>!ti.has(i)));L.sk=L.ink.length+':'+L.ink.map(t=>t.length).join(',')}}
    else if(L.ink.length!==nIn){L.sk=null;if(!L.ink.length){clearReading(L);lines.splice(lines.indexOf(L),1);boardChanged(null)}}
    continue}
-  if(L.ans.some(g=>hitG(s,g))){L.syms.forEach(kill);L.syms=[];L.ans.forEach(kill);L.ans=[];L.at=null}
+  if(L.ans.some(g=>hitG(s,g))){hit=true;L.syms.forEach(kill);L.syms=[];L.ans.forEach(kill);L.ans=[];L.at=null}
   else{const rem=L.syms.filter(g=>hitG(s,g));for(let i=0;i<rem.length;i++){const bar=rem[i];if(bar.fp=='bar')L.syms.forEach(s=>{if((s.fid===bar.fid||s.pfid===bar.fid)&&!rem.includes(s))rem.push(s)})}   // erasing a bar takes its parts and any fraction nested in them
-   if(rem.length){rem.forEach(kill);L.syms=L.syms.filter(g=>!rem.includes(g));if(L.syms.length){layout(L);updateAns(L)}else{L.ans.forEach(kill);L.ans=[];L.at=null}}}
-  if(!L.syms.length&&!L.ink.length){lines.splice(lines.indexOf(L),1);boardChanged(null)}}}
+   if(rem.length){hit=true;rem.forEach(kill);L.syms=L.syms.filter(g=>!rem.includes(g));if(L.syms.length){layout(L);updateAns(L)}else{L.ans.forEach(kill);L.ans=[];L.at=null}}}
+  if(!L.syms.length&&!L.ink.length){lines.splice(lines.indexOf(L),1);boardChanged(null)}}
+ if(!hit&&soft)ghosts=ghosts.filter(g=>g.pts!==s);return hit}   // a doubtful scribble that touched nothing was writing after all
 /* Letters a scribble reads as (wide zigzags: W, M, n, H ...): a stroke read as one of them is a scribble; read as anything else, it is writing. */
 const SCRIBBLY=new Set(['W','w','M','m','n','N','H','u','U','Z','\\ln','\\overline']),hold=[];
-function settleMaybe(s){hold.push(s);const done=erase=>{const i=hold.indexOf(s);if(i>=0)hold.splice(i,1);if(erase)scribble(s);else attach(s);clearTimeout(rt);rt=setTimeout(recognize,400);kick()};
+function settleMaybe(s){hold.push(s);const done=erase=>{const i=hold.indexOf(s);if(i>=0)hold.splice(i,1);if(!erase||!scribble(s,true))attach(s);clearTimeout(rt);rt=setTimeout(recognize,400);kick()};
  seqRun([s]).then(t=>done(!t||t.length!==1||SCRIBBLY.has(t[0])||!SYMTOK.test(t[0])),()=>done(true))}
 function radical(s){const n=s.length;if(n<8)return null;let v=0;for(let i=0;i<n;i++)if(s[i][1]>s[v][1])v=i;if(v<2||v>n-3)return null;
  let m=v;for(let i=v;i<n;i++)if(s[i][1]<s[m][1])m=i;const H=s[v][1]-s[m][1];if(H<28)return null;let a=v;for(let i=v;i<n;i++)if(s[i][1]<=s[m][1]+.08*H){a=i;break}
@@ -325,27 +327,49 @@ function applyReading(L,tokens,alts){const key=tokens.join(' ');if(L.seq&&L.tk==
  const baseOf=k=>y0+(k+.5)*(y1-y0)/R+.32*F;
  L.seq=true;L.rt=SeqCore.unfuse(rows[0]).join(' ');placeRow(L,mkGlyphs(rows[0],null,0,alts),x0,baseOf(0),F);
  let off=rows[0].length+1;rows.slice(1).forEach((r,k)=>{const o0=off;off+=r.length+1;const K={syms:[],ans:[],ink:[],x0,base:baseOf(k+1),F,at:null,kidOf:L,rt:SeqCore.unfuse(r).join(' ')};lines.push(K);L.kids.push(K);placeRow(K,mkGlyphs(r,null,o0,alts),x0,K.base,F)});boardChanged(L)}
-/* Writing into a plain reading (digits, letters, operators in one row): only the new strokes are read, and the reading is edited in place. A new character
-   written over a glyph replaces it; written between or after glyphs it is inserted there. The old ink is not read again, so it cannot disturb the new
-   character (the reading and the handwriting under it only roughly line up) and the rest of the reading stays exactly as it was. */
+/* Writing into a finished reading: a new character over a glyph, between glyphs, or after the last one. The reading you see and the handwriting under it
+   only roughly line up, so the new strokes are first carried into the handwriting's own frame: over a glyph they take the place of its ink character,
+   between glyphs the ink to the right moves aside to make room, after the last one they follow it. The whole line is then read in context (a character
+   read alone is read badly). For a plain reading that result is trusted only if every other character came out unchanged; otherwise the new character
+   is read alone and put in by position, so what was already there is never altered. */
+const inkBox=ss=>ss.map(bb).reduce(un),med=a=>{a=a.slice().sort((p,q)=>p-q);return a[a.length>>1]};
+function interp(A,v){const n=A.length-1;if(v<=A[0][0])return A[0][1]+v-A[0][0];if(v>=A[n][0])return A[n][1]+v-A[n][0];for(let i=0;i<n;i++)if(v<=A[i+1][0]){const d=A[i+1][0]-A[i][0];return d>0?A[i][1]+(A[i+1][1]-A[i][1])*(v-A[i][0])/d:A[i][1]}return A[n][1]}
+const inkKey=ss=>ss.length+':'+ss.map(t=>t.length).join(',');
 async function seqEdit(L){
- const fresh=L.ink.filter(t=>!t.read);if(!fresh.length||!seqFlat(L))return false;
- const plan=[];for(const g of group(fresh)){const r=await seqRun(g.s);if(!lines.includes(L)||fresh.some(t=>!L.ink.includes(t))||!seqFlat(L))return false;
-  if(r.length!==1||!SYMTOK.test(r[0]))return false;plan.push({g,t:r[0],a:(r.alts||[])[0]})}
- const E=L.toks.map((t,i)=>({t,a:(L.alts&&L.alts[i])||[],b:gbox(L.syms[i]),i})),old=L.ink.filter(t=>t.read),oc=inkChars(old).sort((p,q)=>p.b.x0+p.b.x1-q.b.x0-q.b.x1),gone=new Set();
- for(const {g,t,a} of plan){const b=g.b,cx=(b.x0+b.x1)/2;let k=-1,best=.5;
-  E.forEach((e,j)=>{const ov=Math.min(b.x1,e.b.x1)-Math.max(b.x0,e.b.x0),f=ov/Math.max(10,b.x1-b.x0);if(f>best){best=f;k=j}});
-  const ne={t,a:a||[],b,i:-1};
-  if(k>=0){const e=E[k];if(e.i>=0){const c=oc.length===L.toks.length?oc[e.i]:oc.filter(c=>ovl(c.b,b)>=.5||ovl(b,c.b)>=.5).sort((p,q)=>ovl(q.b,b)-ovl(p.b,b))[0];if(c)c.ss.forEach(x=>gone.add(x))}E[k]=ne}
-  else{let j=E.findIndex(e=>(e.b.x0+e.b.x1)/2>cx);if(j<0)j=E.length;E.splice(j,0,ne)}}
- L.ink=L.ink.filter(t=>!gone.has(t));fresh.forEach(t=>{t.read=true});
- if(!E.length||!L.ink.length){L.ink=[];clearReading(L);lines.splice(lines.indexOf(L),1);boardChanged(null);return true}
- applyReading(L,E.map(e=>e.t),E.map(e=>e.a));L.sk=L.ink.length+':'+L.ink.map(t=>t.length).join(',');return true}
+ const fresh=L.ink.filter(t=>!t.read&&!t.ctx),old=L.ink.filter(t=>t.read);if(!fresh.length||!old.length||!L.F)return false;
+ const rows=[L].concat(L.kids||[]),Gb=rows.flatMap(R=>R.syms).map(gbox);if(!Gb.length)return false;
+ const flat=seqFlat(L),gl=flat?L.syms.slice().sort((a,b)=>a.tx-b.tx):[],gbs=gl.map(gbox),oc=flat?inkChars(old).sort((a,b)=>a.b.x0+a.b.x1-b.b.x0-b.b.x1):[],pairs=flat&&oc.length===gl.length;
+ const hs=old.map(t=>bb(t).h).filter(h=>h>=12),s=Math.max(.5,Math.min(1.4,hs.length?med(hs)/(.7*L.F):.92)),Ib=inkBox(old);
+ const Gx0=Math.min(...Gb.map(b=>b.x0)),Gx1=Math.max(...Gb.map(b=>b.x1)),anchors=pairs?gbs.flatMap((b,i)=>[[b.x0,oc[i].b.x0],[b.x1,oc[i].b.x1]]):[[Gx0,Ib.x0],[Gx1,Ib.x1]];
+ const Yvis=flat?L.base-.35*L.F:(Math.min(...Gb.map(b=>b.y0))+Math.max(...Gb.map(b=>b.y1)))/2,Yink=pairs?med(oc.map(c=>(c.b.y0+c.b.y1)/2)):(Ib.y0+Ib.y1)/2;
+ const liveBox=c=>inkBox(c.ss),groups=group(fresh).sort((a,b)=>b.b.x0+b.b.x1-a.b.x0-a.b.x1);   // right to left: a shift never disturbs a character still to come
+ const E=flat?L.toks.map(t=>({t})):null,removed=new Set(),edits=[];let placed=[];
+ for(const g of groups){const b=g.b,cx=(b.x0+b.x1)/2,w=Math.max(10,b.x1-b.x0),wi=w*s,X0=interp(anchors,cx);let k=-1,X;
+  if(flat)gbs.forEach((q,i)=>{const gw=q.x1-q.x0,ov=Math.min(b.x1,q.x1)-Math.max(b.x0,q.x0);if(cx>=q.x0+.2*gw&&cx<=q.x1-.2*gw&&ov>=.5*Math.min(w,gw))k=i});
+  if(k>=0&&pairs){oc[k].ss.forEach(t=>removed.add(t));const q=liveBox(oc[k]);X=(q.x0+q.x1)/2}
+  else if(k>=0){old.forEach(t=>{const q=bb(t);if(Math.min(q.x1,X0+wi/2)-Math.max(q.x0,X0-wi/2)>=.5*Math.min(wi,Math.max(q.w,1)))removed.add(t)});X=X0}
+  else{let B=X0;if(pairs){const j=gbs.filter(q=>(q.x0+q.x1)/2<cx).length;B=j>=oc.length?liveBox(oc[oc.length-1]).x1+1:j==0?liveBox(oc[0]).x0-1:(liveBox(oc[j-1]).x1+liveBox(oc[j]).x0)/2}
+   const d=wi+10;for(const t of old.concat(placed))if(!removed.has(t)&&(bb(t).x0+bb(t).x1)/2>=B)for(const p of t)p[0]+=d;X=B+5+wi/2}
+  const st=g.s.map(t=>{const n=t.map(p=>[X+(p[0]-cx)*s,Yink+(p[1]-Yvis)*s]);n.t0=t.t0;n.t1=t.t1;n.ctx=true;return n});placed=placed.concat(st);
+  if(flat)edits.push(k>=0?{k,st:g.s}:{j:gbs.filter(q=>(q.x0+q.x1)/2<cx).length,st:g.s})}
+ const exp=flat?E.slice():null;if(flat)for(const e of edits){if(e.k!==undefined)exp[e.k]={n:1,g:e.st};else exp.splice(e.j,0,{n:1,g:e.st})}   // edits are right to left, so the indices hold
+ const keep=L.ink.filter(t=>!removed.has(t)&&!fresh.includes(t));L.ink=keep.concat(placed);
+ if(!keep.length&&!placed.length){clearReading(L);lines.splice(lines.indexOf(L),1);boardChanged(null);return true}
+ const snap=L.ink.slice(),done=(toks,alts)=>{if(!lines.includes(L))return;L.ink.forEach(t=>{t.read=true;delete t.ctx});if(toks&&toks.length)applyReading(L,toks,alts);L.sk=inkKey(L.ink)};
+ let r=null;try{r=await seqRun(snap)}catch(e){}
+ if(!lines.includes(L))return true;
+ if(L.ink.length!==snap.length||L.ink.some((t,i)=>t!==snap[i])){L.sk=null;return true}   // more was written meanwhile: the next pass reads it all
+ if(!flat){done(r,r&&r.alts);return true}
+ const same=r&&r.length===exp.length&&exp.every((e,i)=>e.n?SYMTOK.test(r[i]):r[i]===e.t);
+ if(same){done(r,r.alts);return true}
+ const toks=[],alts=[];                                                                  // the context reading altered others or dropped the new character: read it alone
+ for(const e of exp){if(!e.n){toks.push(e.t);alts.push(L.alts&&L.alts[E.findIndex(x=>x===e.t)]||[])}else{let a=null;try{a=await seqRun(e.g)}catch(x){}if(!a||a.length!==1||!SYMTOK.test(a[0])){done(r,r&&r.alts);return true}toks.push(a[0]);alts.push((a.alts||[])[0]||[])}}
+ done(toks,alts);return true}
 async function doRecognizeSeq(){
  for(const L of lines.slice()){if(L.kidOf||!L.ink.length||!lines.includes(L))continue;
   if(L.seq&&L.ink.some(t=>!t.read)){let ok=false;try{ok=await seqEdit(L)}catch(e){console.error(e)}if(ok)continue}
   const snap=L.ink.slice(),key=snap.length+':'+snap.map(s=>s.length).join(',');if(L.sk===key)continue;
-  const toks=await seqRun(snap);
+  let toks;try{toks=await seqRun(snap)}catch(e){if(sw&&!swDead){L.sk=key;continue}throw e}   // a stroke the model cannot read is skipped, it does not switch the recogniser off
   if(!lines.includes(L)||L.ink.length!==snap.length||L.ink.some((s,k)=>s!==snap[k]))continue;
   if(toks.length){applyReading(L,toks);snap.forEach(t=>{t.read=true})}L.sk=key}
  kick()}
