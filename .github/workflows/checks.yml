@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version: '22'
@@ -40,11 +40,13 @@ jobs:
         run: python3 tests/browser_seq.py
       - name: Scribble erase and writing into a finished reading
         run: python3 tests/browser_scribble.py
+      - name: Tap a symbol to correct it
+        run: python3 tests/browser_tapfix.py
   android:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install Android build tools
         run: |
           sudo apt-get update
