@@ -220,10 +220,21 @@ function inkCover(near,ss){let n=0,h=0;for(const s of ss)for(const p of s.length
 const inkChars=ink=>group(ink).map(g=>({ss:g.s,b:g.b}));
 /* A reading of plain symbols, one glyph per token, in a single row: erasing is then done on the reading itself, token by token. */
 function seqFlat(L){return L.seq&&!(L.kids&&L.kids.length)&&L.toks&&L.syms.length===L.toks.length&&L.toks.every(t=>SYMTOK.test(t))&&L.syms.every((g,i)=>g.ti===i)}
+/* The plain symbols of a reading (digits, letters, operators), each glyph with its token index. */
+const symGlyphs=L=>L.toks?L.syms.filter(g=>g.ti!=null&&SYMTOK.test(L.toks[g.ti]||'')):[];
+/* Writing into a structured reading (a fraction, a root ...): its handwriting is not one row, so it cannot be matched to the symbols on screen
+   character by character. The edit is made on the reading itself: a new character next to a symbol of the same row (same height) is put before or
+   after that symbol's token, one over a symbol takes its place. Returns null when the new character is not clearly in a row (after a whole fraction,
+   say): the line is then read again as before. */
+function structSlot(L,b){const cx=(b.x0+b.x1)/2,cy=(b.y0+b.y1)/2,w=Math.max(8,b.x1-b.x0);let n=null,nd=1e9;
+ for(const g of symGlyphs(L)){const q=gbox(g),h=q.y1-q.y0;if(cy<q.y0-.15*h||cy>q.y1+.15*h)continue;const d=Math.max(q.x0-cx,0,cx-q.x1)+.5*Math.abs(cy-(q.y0+q.y1)/2);if(d<nd){nd=d;n=g}}   // nearest across, then level with it (a tall = beside a denominator is not its row)
+ if(!n)return null;const q=gbox(n),nw=q.x1-q.x0,nh=q.y1-q.y0;if(Math.max(q.x0-cx,0,cx-q.x1)>1.5*nh)return null;
+ const ov=Math.min(b.x1,q.x1)-Math.max(b.x0,q.x0);if(cx>=q.x0+.2*nw&&cx<=q.x1-.2*nw&&ov>=.5*Math.min(w,nw))return{ti:n.ti,over:true};
+ return{ti:cx>(q.x0+q.x1)/2?n.ti+1:n.ti,over:false}}
 /* What the scribble erased in a line: the ink (whole characters) and, for a flat reading, the tokens. A reading replaces the handwriting on screen,
    so the glyph you scribbled over decides: its token goes, and so does the ink character in the same place in the row. */
 function inkHit(L,s,near){const cl=inkChars(L.ink),byInk=()=>cl.filter(c=>inkCover(near,c.ss)>=.4).flatMap(c=>c.ss);
- if(!seqFlat(L))return{ss:byInk(),ti:null};
+ if(!seqFlat(L)){const gs=L.seq?symGlyphs(L).filter(g=>hitG(s,g)):[];return gs.length?{ss:[],ti:new Set(gs.map(g=>g.ti))}:{ss:byInk(),ti:null}}   // structured: the symbols you scribbled over
  const gs=L.syms.slice().sort((a,b)=>a.tx-b.tx),ti=new Set(gs.filter(g=>hitG(s,g)).map(g=>g.ti));
  if(cl.length!==gs.length)return{ss:byInk(),ti};
  cl.sort((a,b)=>a.b.x0+a.b.x1-b.b.x0-b.b.x1);return{ss:gs.flatMap((g,i)=>ti.has(g.ti)?cl[i].ss:[]),ti}}
@@ -338,6 +349,11 @@ const inkKey=ss=>ss.length+':'+ss.map(t=>t.length).join(',');
 async function seqEdit(L){
  const fresh=L.ink.filter(t=>!t.read&&!t.ctx),old=L.ink.filter(t=>t.read);if(!fresh.length||!old.length||!L.F)return false;
  const rows=[L].concat(L.kids||[]),Gb=rows.flatMap(R=>R.syms).map(gbox);if(!Gb.length)return false;
+ if(!seqFlat(L)&&L.toks&&!(L.kids&&L.kids.length)){const gs=group(fresh),slots=gs.map(g=>structSlot(L,g.b));
+  if(slots.every(Boolean)){const reads=[];for(const g of gs){let a=null;try{a=await seqRun(g.s)}catch(e){}if(!lines.includes(L))return true;if(!a||a.length!==1||!SYMTOK.test(a[0])){reads.length=0;break}reads.push({a,slot:slots[gs.indexOf(g)]})}
+   if(reads.length===gs.length){const toks=L.toks.slice(),alts=(L.alts||[]).slice();reads.sort((p,q)=>q.slot.ti-p.slot.ti);   // right to left: earlier indices hold
+    for(const{a,slot}of reads){if(slot.over){toks[slot.ti]=a[0];alts[slot.ti]=(a.alts||[])[0]||[]}else{toks.splice(slot.ti,0,a[0]);alts.splice(slot.ti,0,(a.alts||[])[0]||[])}}
+    L.ink.forEach(t=>{t.read=true;delete t.ctx});applyReading(L,toks,alts);L.sk=inkKey(L.ink);return true}}}
  const flat=seqFlat(L),gl=flat?L.syms.slice().sort((a,b)=>a.tx-b.tx):[],gbs=gl.map(gbox),oc=flat?inkChars(old).sort((a,b)=>a.b.x0+a.b.x1-b.b.x0-b.b.x1):[],pairs=flat&&oc.length===gl.length;
  const hs=old.map(t=>bb(t).h).filter(h=>h>=12),s=Math.max(.5,Math.min(1.4,hs.length?med(hs)/(.7*L.F):.92)),Ib=inkBox(old);
  const Gx0=Math.min(...Gb.map(b=>b.x0)),Gx1=Math.max(...Gb.map(b=>b.x1)),anchors=pairs?gbs.flatMap((b,i)=>[[b.x0,oc[i].b.x0],[b.x1,oc[i].b.x1]]):[[Gx0,Ib.x0],[Gx1,Ib.x1]];
