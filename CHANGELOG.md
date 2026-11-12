@@ -5,6 +5,9 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 
 ## [Unreleased]
 
+### Fixed
+- **Insertions are placed by where you wrote them, and read in context.** The new strokes are carried into the handwriting's own frame (the reading and the ink under it drift apart), the ink to the right makes room, and the whole line is read; the result is kept only if the other characters came out unchanged, otherwise the new character is read alone and inserted by position. Characters with turns written next to an earlier reading no longer erase the invisible ink under them, a doubtful scribble that touches nothing is kept as writing, and one unreadable stroke no longer switches the sequence recogniser off for the session.
+
 ## [6.4] - 2026-11-11
 
 ### Fixed
