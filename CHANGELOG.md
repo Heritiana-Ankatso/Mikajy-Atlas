@@ -5,6 +5,9 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 
 ## [Unreleased]
 
+### Branding
+- **New Atlas logo:** three solid white chevrons stacked upward, like rank stripes, on a rounded tile split black / red (`branding/logo-atlas.svg`, launcher icon `android/res/drawable/icon.png`). It replaces the M in a white disc. Same red / black / white.
+
 ### Fixed
 - **Insertions are placed by where you wrote them, and read in context.** The new strokes are carried into the handwriting's own frame (the reading and the ink under it drift apart), the ink to the right makes room, and the whole line is read; the result is kept only if the other characters came out unchanged, otherwise the new character is read alone and inserted by position. Characters with turns written next to an earlier reading no longer erase the invisible ink under them, a doubtful scribble that touches nothing is kept as writing, and one unreadable stroke no longer switches the sequence recogniser off for the session.
 
