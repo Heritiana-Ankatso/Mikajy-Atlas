@@ -8,7 +8,7 @@ This document describes the **current Mikajy Atlas** repository. It supersedes e
 
 - **First-party application source:** [PolyForm Noncommercial 1.0.0](../LICENSE). This is source-available, **not** an unrestricted commercial or OSI open-source grant. Selling the app or using it for commercial purposes is not permitted by that grant.
 - **Research handwriting model** (`web/model/seq1-research.json`): **CC BY-NC-SA 4.0**. It includes training on MathWriting (Google LLC, CC BY-NC-SA 4.0), whose expression labels also require Wikipedia attribution (CC BY-SA 4.0). See [FREE.md](FREE.md) and [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md).
-- **Kalam Bold font** (`web/fonts/hand.woff2`): **SIL Open Font License 1.1**.
+- **Patrick Hand font (thickened, subset)** (`web/fonts/hand.woff2`): **SIL Open Font License 1.1**.
 - **Bundled Nerdamer CAS 2.0.1:** **Apache-2.0**; the bundled **decimal.js 10.6.0** is **MIT**. Their copyright and licence notices must be retained. See [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) and `licenses/`.
 - Other original project files and assets must be assessed separately where noted; the non-commercial code grant does not replace their individual rights or notices.
 

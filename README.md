@@ -109,7 +109,7 @@ web/                       the app (one HTML page, HTML5 canvas, no dependencies
   app.js                   canvas, animation, interaction, editing, history, memory, settings sheet
   model/seq1.json          shipped int8 weights of the stroke-sequence model (training/pack_seq.py)
   model/model4.f16.json    shipped float16 weights (packed from training/model4.json by training/pack_model.py)
-  fonts/hand.woff2         Kalam Bold subset (SIL OFL) used to typeset the handwriting
+  fonts/hand.woff2         Patrick Hand subset, thickened (SIL OFL) used to typeset the handwriting
   build_web.py             assembles android/assets/index.html
 android/                   WebView shell (MainActivity, UpdateChecker, ShareProvider, manifest, icon)
 training/                  how the recogniser was trained
@@ -246,7 +246,7 @@ See [docs/AUDIT.md](docs/AUDIT.md) for the full review and the remaining known d
 > and its model weights are trained on non-commercial datasets (weights: CC BY-NC-SA 4.0). You may use, share and modify it,
 > but not sell it or use it commercially. See [docs/FREE.md](docs/FREE.md). The sibling project [Mikajy Spark](https://github.com/ARHeritiana/Mikajy-Spark) has MIT-licensed main-branch code.
 
-The app bundles third-party code: Nerdamer (Apache-2.0) with decimal.js (MIT), and the Kalam font (SIL OFL 1.1). Their licence notices are in `licenses/`. The research handwriting weights have separate non-commercial attribution obligations.
+The app bundles third-party code: Nerdamer (Apache-2.0) with decimal.js (MIT), and the Patrick Hand font (SIL OFL 1.1). Their licence notices are in `licenses/`. The research handwriting weights have separate non-commercial attribution obligations.
 Mikajy Atlas's code is under the PolyForm Noncommercial licence (LICENSE) and the trained weights under CC BY-NC-SA 4.0.
 See [docs/FREE.md](docs/FREE.md) for what is allowed and [docs/LICENSING.md](docs/LICENSING.md) for the complete licensing history, including the original Mikajy `v5.0` GPL release and subsequent MIT change to its `main` branch.
 See also [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
