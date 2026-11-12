@@ -5,6 +5,12 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 
 ## [Unreleased]
 
+### Changed
+- Typeface: the interface and the ink now use a thickened Patrick Hand (SIL OFL 1.1) instead of Caveat, for a heavier, steadier look at the same glyph widths (a wider face made the typeset reading overlap the next stroke, which broke `tests/browser_seq.py`). Licence text in `licenses/OFL-PatrickHand.txt`; the build script is `tools/embolden_font.py`.
+
+### Fixed
+- The settings sheet no longer overflows to the right when an update is available: the update button gets its own row and its label wraps.
+
 ## [6.6] - 2026-11-12
 
 Updates 6.5 in place from the app. `versionCode` 22.
