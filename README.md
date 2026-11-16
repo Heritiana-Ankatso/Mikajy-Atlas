@@ -1,6 +1,6 @@
 # Mikajy Atlas — full handwriting calculator for Android
 
-> **Naming:** Mikajy Atlas was previously called Mikajy Free. The GitHub repository is now `Heritiana-Ankatso/Mikajy-Atlas` (old URLs redirect). The Android package ID `com.mikajy.app.free` and signing identity remain unchanged; new builds use the renamed update endpoint. Existing signed releases retain their historical names. The Atlas logo is installed.
+> **Naming:** Mikajy Atlas was previously called Mikajy Free. The GitHub repository is now `Heritiana-Ankatso/Mikajy-Atlas` (old URLs redirect). The Android package ID `com.mikajy.app.free` is unchanged, but since 6.4 Atlas is signed with its own key, and new builds use the renamed update endpoint. Existing signed releases retain their historical names. The Atlas logo is installed.
 
 *The full-featured, non-commercially licensed sibling of [Mikajy Spark](https://github.com/ARHeritiana/Mikajy-Spark), with a separate handwriting model and extended mathematical engine. The original's current `main` branch code is MIT; its existing `v5.0` release was published under GPL-3.0-or-later.*
 
@@ -14,10 +14,13 @@ app. When the phone happens to be online it checks GitHub (at most once a day, o
 tells you.
 
 ## Install and update
-1. Download the APK (currently `Mikajy-Free-6.2.apk`; future releases use the Atlas name) from the [latest release](https://github.com/Heritiana-Ankatso/Mikajy-Atlas/releases/latest) and open it
+1. Download the APK (`Mikajy-Atlas-X.Y.apk`) from the [latest release](https://github.com/Heritiana-Ankatso/Mikajy-Atlas/releases/latest) and open it
    (allow installing from your browser when Android asks). Check it with `SHA256SUMS.txt` if you like.
 2. Later versions announce themselves: a red dot appears on the menu button and Settings shows **Get Mikajy Atlas x.y**.
    *Settings → Updates → Off* disables the automatic check; *Check for updates* does it on demand.
+3. **On 6.3 or older (including any *Mikajy Free*), the app cannot update itself:** it still asks the pre-rename repository, whose
+   redirect it refuses, and 6.4 changed the signing key, so Android would refuse the update anyway. Export your history (History → *Export*),
+   uninstall the old app, and install the latest APK once; from then on updates arrive in the app.
    The download opens in your browser and is installed by Android's installer — the app never installs anything itself.
 
 Updates install over the old version only if both are signed with the same key (every release from 5.0 on is).

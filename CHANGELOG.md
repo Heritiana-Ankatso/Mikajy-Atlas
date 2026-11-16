@@ -5,6 +5,10 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 
 ## [Unreleased]
 
+## [6.7] - 2026-11-16
+
+Updates 6.6 in place from the app. `versionCode` 23.
+
 ### Fixed
 - **Erasing is reliable.** Scribbling over a reading now works on what you see, never on the hidden handwriting under it.
   - *Erased characters no longer come back.* In a fraction, a root or a two-row reading, the handwriting of an erased character was kept, and the

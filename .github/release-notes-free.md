@@ -1,12 +1,16 @@
 **Non-commercial use only.** Free to download and share, never to sell (code: PolyForm Noncommercial 1.0.0; trained model: CC BY-NC-SA 4.0).
 
-**Mikajy Atlas 6.6** — updates 6.5 in place: tap *Get Mikajy Atlas 6.6* in the menu, your history and settings stay. On 6.3 or older, uninstall the old app first, then install this APK (6.4 changed the signing key).
+**Mikajy Atlas 6.7** — updates 6.4, 6.5 and 6.6 in place: tap *Get Mikajy Atlas 6.7* in the menu, your history and settings stay. On 6.3 or older (including any *Mikajy Free*), the app cannot update itself: export your history, uninstall the old app, then install this APK (6.4 changed the signing key).
 
-## What changed since 6.5
+## What changed since 6.6
 
 **Fixed**
-- **Writing into a fraction lands where you wrote it.** A digit written before or after a symbol of the numerator, the denominator or under a root goes into that row, next to that symbol; one written over a symbol replaces it. Before, it could be lost or added after the whole fraction (`2/√3` with a 1 after the 3 became `2/√3 − 1`).
-- **Erasing inside a fraction works:** a scribble over a symbol of a fraction removes that symbol, and the rest stays as it was.
+- **Erasing is reliable.** A scribble acts on what you see. Erased characters no longer come back when you write on the line again; a scribble over a fraction bar or a root sign is no longer read as writing (it erases the fraction, or the root sign alone); a scribble over an answer erases the calculation; a coarse zigzag across a line erases every glyph it passes through.
+- **No more freezes on huge powers.** `x^99999 = 2`, `sin(x)^200 = 1` or `(1/3)^9999999` could freeze or crash the app; they now answer at once.
+- **No incomplete answers.** `sin x + cos x = 1` listed 20 decimals as if they were every solution; it now says *unsupported* rather than guess.
+- **Steep limits are right.** `lim (1+x)^400` at 0 said *undefined*; it is 1.
+- **Statements in degrees:** `sin(30) = 0.5` in degree mode now says *True*.
+- **Updates are only installed when their checksum is verified.**
 
 Full list: `CHANGELOG.md`.
 
