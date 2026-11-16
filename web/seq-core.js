@@ -282,16 +282,20 @@ const SeqCore = (() => {
    fractions inside exponents are written inline as (a)/(b). */
   const WORD_OF = {bmod: 'mod', mod: 'mod', pmod: 'mod'};
   function toGlyphs(tokens) {
-    let i = 0, fids = 0;
+    let i = 0, fids = 0, owner;                                      // owner: the token whose glyphs are being made (a fraction's bar belongs to \frac)
     const flat = [], peek = () => tokens[i], next = () => tokens[i++];
-    const glyph = (c, ctx, extra) => { const g = Object.assign({c}, extra); if (ctx.sup) g.sup = ctx.sup === 2 ? 2 : true; if (ctx.fid) { g.fp = ctx.fp; g.fid = ctx.fid; } flat.push(g); ctx.cnt.n++; return g; };
+    const glyph = (c, ctx, extra) => { const g = Object.assign({c}, extra); if (g.ti === undefined && owner !== undefined) g.si = owner; if (ctx.sup) g.sup = ctx.sup === 2 ? 2 : true; if (ctx.fid) { g.fp = ctx.fp; g.fid = ctx.fid; } flat.push(g); ctx.cnt.n++; return g; };
     function item(ctx) {
       if (peek() === '{') { next(); run(ctx, '}'); if (peek() === '}') next(); } else if (i < tokens.length) one(ctx, next());
     }
     function run(ctx, stop) { while (i < tokens.length && peek() !== stop) one(ctx, next()); }
     function word(w, ctx) { [...w].forEach((c, k) => glyph(c, ctx, k ? undefined : {wb: true})); }
     function one(ctx, t) {
-      const ti = i - 1;                                              // index of this token, so a glyph can be traced back to it (tap-to-correct)
+      const ti = i - 1, outer = owner;                               // index of this token, so a glyph can be traced back to it (tap-to-correct)
+      owner = ti;                                                    // glyphs without a token of their own (§, √, ▦, ≤, the letters of sin) carry it as si (erasing)
+      try { oneToken(ctx, t, ti); } finally { owner = outer; }
+    }
+    function oneToken(ctx, t, ti) {
       if (t === '{') { run(ctx, '}'); if (peek() === '}') next(); }
       else if (t === '}' || t === '<nl>' || t === '\\left' || t === '\\right' || t === '\\quad') { /* structure only */ }
       else if (t === '^') item(Object.assign({}, ctx, {sup: ctx.sup ? 2 : true}));   // sup 2: a power inside an exponent, x^2 in e^(x^2/2)
@@ -356,9 +360,46 @@ const SeqCore = (() => {
     return flat;
   }
 
+  const group = (tokens, at) => {                                    // end (exclusive) of the item at `at`: a {group} or one token
+    if (tokens[at] !== '{') return Math.min(at + 1, tokens.length);
+    for (let k = at, d = 0; k < tokens.length; k++) { if (tokens[k] === '{') d++; else if (tokens[k] === '}' && --d === 0) return k + 1; }
+    return tokens.length;
+  };
+  /** Token indices that go when the glyph owned by token k (its si) is erased: a fraction's bar takes the whole fraction, a matrix's
+   * brackets the whole matrix; a root sign or an overline goes alone and leaves what was under it; any other token goes by itself. */
+  function eraseSpan(tokens, k) {
+    const t = tokens[k], range = (a, b) => Array.from({length: Math.max(0, b - a)}, (_, j) => a + j);
+    if (t === '\\frac') return range(k, group(tokens, group(tokens, k + 1)));
+    if (t === '\\begin') {
+      let e = k + 1;
+      while (e < tokens.length && tokens[e] !== '\\end') e++;
+      return range(k, e < tokens.length ? group(tokens, e + 1) : tokens.length);
+    }
+    if ((t === '\\sqrt' || t === '\\overline') && tokens[k + 1] === '{') return [k, k + 1, group(tokens, k + 1) - 1];
+    return [k];
+  }
+  /** The indices of `tokens` kept once `gone` (a set of indices) is deleted and the wrappers left empty are dropped too: ^ { },
+   * \sqrt { }, \frac { } { }, a { } of nothing. Returned as indices so a caller keeps its per-token data (alternatives) in step. */
+  function eraseTokens(tokens, gone) {
+    let keep = tokens.map((_, k) => k).filter(k => !gone.has(k));
+    for (let changed = true; changed;) {
+      changed = false;
+      const t = keep.map(k => tokens[k]);
+      for (let j = 0; j < t.length && !changed; j++) {
+        const empty = at => t[at] === '{' && t[at + 1] === '}';
+        let drop = null;
+        if ((t[j] === '^' || t[j] === '_' || t[j] === '\\sqrt' || t[j] === '\\overline') && (empty(j + 1) || j + 1 >= t.length)) drop = [j, j + 1, j + 2];
+        else if (t[j] === '\\frac' && empty(j + 1) && empty(j + 3)) drop = [j, j + 1, j + 2, j + 3, j + 4];
+        else if (empty(j) && t[j - 1] !== '\\frac' && t[j - 3] !== '\\frac' && t[j - 1] !== '}' ) drop = [j, j + 1];
+        if (drop) { keep = keep.filter((_, at) => !drop.includes(at)); changed = true; }
+      }
+    }
+    return keep;
+  }
+
   /** the model's fused bracket tokens as the bare pair every consumer expects: \left( -> \left (  ([ ] are read as round brackets) */
   const FUSED = {'\\left(': ['\\left', '('], '\\left[': ['\\left', '('], '\\right)': ['\\right', ')'], '\\right]': ['\\right', ')']};
   const unfuse = tokens => tokens.flatMap(t => FUSED[t] || [t]);
-  return Object.freeze({K, featurise, load, encode, decode, recognise, recogniseAlts, toLatex, toMathTokens, toGlyphs, unfuse});
+  return Object.freeze({K, featurise, load, encode, decode, recognise, recogniseAlts, toLatex, toMathTokens, toGlyphs, unfuse, eraseSpan, eraseTokens});
 })();
 if (typeof module !== 'undefined' && module.exports) module.exports = SeqCore;

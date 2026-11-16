@@ -97,3 +97,17 @@ test('an exponent with a fraction of powers: x^2/2 is inline with a slash and a 
 test('unfuse: the fused bracket tokens become the bare pairs', () => {
   assert.deepStrictEqual(SeqCore.unfuse(['f', '\\left(', '3', '\\right)']), ['f', '\\left', '(', '3', '\\right', ')']);
 });
+
+test('erasing a glyph removes its tokens: a bar takes its fraction, a root sign goes alone, emptied wrappers go too', () => {
+  const T = s => s.split(' ');
+  const erase = (s, owner) => { const t = T(s), k = SeqCore.eraseTokens(t, new Set(SeqCore.eraseSpan(t, owner))); return k.map(i => t[i]).join(' '); };
+  const own = (s, c) => SeqCore.toGlyphs(T(s)).find(g => g.c === c);
+  const F = '\\frac { 2 1 } { \\sqrt { 3 } } =';
+  assert.equal(own(F, '§').si, 0); assert.equal(own(F, '√').si, 6); assert.equal(own(F, '2').si, undefined);   // structure glyphs carry their token
+  assert.equal(erase(F, 0), '=');
+  assert.equal(erase(F, 6), '\\frac { 2 1 } { 3 } =');
+  assert.equal(erase('2 ^ { 1 } + 1', 3), '2 + 1');                               // an emptied exponent goes with its ^
+  assert.equal(erase('\\begin { p m a t r i x } 1 & 2 \\end { p m a t r i x } + 1', 0), '+ 1');
+  assert.equal(erase('\\sin x', 0), 'x');                                        // the letters of a word share its token
+  assert.deepEqual(SeqCore.toGlyphs(T('\\sin x')).map(g => g.si), [0, 0, 0, undefined]);
+});

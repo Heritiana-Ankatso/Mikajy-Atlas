@@ -6,6 +6,19 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 ## [Unreleased]
 
 ### Fixed
+- **Erasing is reliable.** Scribbling over a reading now works on what you see, never on the hidden handwriting under it.
+  - *Erased characters no longer come back.* In a fraction, a root or a two-row reading, the handwriting of an erased character was kept, and the
+    next time the line was read again (after any new stroke) the character returned. Now, when the handwriting cannot be matched exactly to what
+    you erased, the reading becomes the truth: the line is never read again from its old handwriting, and new strokes are read on their own and
+    put where you wrote them.
+  - *Nothing appears from nowhere.* A scribble over a fraction bar or a root sign was read as handwriting (the line became `2/1 - 1/3`, a `W`
+    appeared under the root), and some erases re-read the whole line. A bar now erases its fraction, a root sign goes alone (what was under it
+    stays), and an erase never re-reads the line.
+  - *Scribbling over an answer erases the calculation*, as on a line read glyph by glyph; it used to do nothing.
+  - *Rows of a two-row reading* are erased in the reading itself, not only on screen.
+  - A coarse zigzag across a line erases every glyph it passes through, even when its turns do not clear the top and bottom of each one.
+  `web/app.js`, `web/seq-core.js` (glyphs of a fraction bar, root, matrix or word now carry their token, `eraseSpan`, `eraseTokens`);
+  new browser test `tests/browser_erase.py`.
 - **The app no longer freezes or crashes on very large powers.** The bundled CAS runs on the page's thread and expanded powers without limit:
   `x^99999 = 2` ran out of memory, `sin(x)^200 = 1` ran for minutes and `(1/3)^9999999` for 15 seconds, all while you were writing.
   Expressions that would need such an expansion are now refused at once (degree in x above 16, a power of a function of x above 6, or any
