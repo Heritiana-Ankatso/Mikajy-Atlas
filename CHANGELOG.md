@@ -5,6 +5,20 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 
 ## [Unreleased]
 
+### Fixed
+- **The app no longer freezes or crashes on very large powers.** The bundled CAS runs on the page's thread and expanded powers without limit:
+  `x^99999 = 2` ran out of memory, `sin(x)^200 = 1` ran for minutes and `(1/3)^9999999` for 15 seconds, all while you were writing.
+  Expressions that would need such an expansion are now refused at once (degree in x above 16, a power of a function of x above 6, or any
+  constant exponent above 4096). Every answer found below those bounds is unchanged, e.g. `sin(x)^6 = 1` and `(x²-3)^8 = 1 → ±2, ±√2`.
+  Derivatives and limits do not expand and are not capped. `web/calculus.js`.
+- **No incomplete solution lists.** `sin x + cos x = 1` showed 20 long decimals found in a window and presented them as the answer (it even
+  skipped -π). A periodic equation's numeric scan is now refused (*unsupported*) instead of shown as its solution set.
+- **A steep limit is no longer called undefined.** `lim (1+x)^400` at 0 said *undefined*; it is 1. A side that closes in on the CAS value
+  step by step now counts as converging; `|x|/x` and `sin(1/x)` at 0 are still refused.
+- **Statements in degrees are decided.** `sin(30) = 0.5` in degree mode said *unsupported*; it now says *True* (decided exactly).
+- **An update is installed only when its checksum is verified.** If the release's `SHA256SUMS.txt` could not be read, the APK used to be
+  installed unchecked; the download is now refused instead, as the README already promised. `UpdateInstaller.java`.
+
 ## [6.6] - 2026-11-12
 
 Updates 6.5 in place from the app. `versionCode` 22.

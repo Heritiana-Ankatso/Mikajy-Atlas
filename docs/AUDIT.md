@@ -49,8 +49,9 @@ Tests: 18 -> 27 unit tests; `tests/build_check.py` also fails if the shipped mod
 2. **Model size.** Halved by the float16 packing above. Further reduction (int8) changes the recogniser's alternative
    candidates and needs real handwriting validation first.
 3. ~~The same model is stored twice~~ — resolved: `training/model4.json` is the float32 checkpoint, `web/model/model4.f16.json` the shipped file.
-4. **Compiled against API 23** (the only platform package in Ubuntu). Newer callbacks such as `onRenderProcessGone`
-   (API 26) therefore cannot be overridden; with a newer `android.jar` it should be added.
+4. ~~Compiled against API 23~~ — outdated: the shell now calls API 26–33 methods behind `SDK_INT` checks, so it needs a newer
+   `android.jar`; `build_apk.sh` takes the newest platform in `$ANDROID_SDK_ROOT` (GitHub's `ubuntu-latest` image ships one).
+   `onRenderProcessGone` (API 26) could now be overridden but is not yet.
 5. **No on-device verification** of performance, battery or the share sheet. The PNG is not deleted right after sharing
    (cleared on next start instead), which is the safe choice when the receiving app reads it asynchronously.
 6. `user-scalable=no` is a deliberate choice for a drawing surface but is an accessibility trade-off.

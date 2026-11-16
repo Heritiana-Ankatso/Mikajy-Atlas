@@ -83,7 +83,7 @@ final class UpdateInstaller {
     throw new IOException("too many redirects");
   }
 
-  /** The release's checksum for this APK, or null when the release has no usable SHA256SUMS.txt. */
+  /** The release's checksum for this APK, or null when the release has no usable SHA256SUMS.txt (the download is then refused). */
   private static String expectedDigest(String apkUrl) {
     HttpsURLConnection http = null;
     try {
@@ -117,7 +117,9 @@ final class UpdateInstaller {
     File dir = apk.getParentFile();
     if (!dir.isDirectory() && !dir.mkdirs()) throw new IOException("no cache directory");
     clear(context);
+    // Every release publishes SHA256SUMS.txt (release.yml). Without a digest the download cannot be checked, so it is not installed.
     String expected = expectedDigest(apkUrl);
+    if (expected == null) throw new IOException("no checksum for this release");
     MessageDigest sha;
     try { sha = MessageDigest.getInstance("SHA-256"); } catch (NoSuchAlgorithmException e) { throw new IOException(e); }
     HttpsURLConnection http = open(apkUrl);
@@ -142,7 +144,7 @@ final class UpdateInstaller {
     }
     StringBuilder hex = new StringBuilder();
     for (byte b : sha.digest()) hex.append(String.format(Locale.ROOT, "%02x", b));
-    if (expected != null && !expected.equals(hex.toString())) { clear(context); throw new IOException("checksum mismatch"); }
+    if (!expected.equals(hex.toString())) { clear(context); throw new IOException("checksum mismatch"); }
     return apk;
   }
 

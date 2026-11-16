@@ -47,3 +47,26 @@ test('symbolic results come first (decimal is secondary)', () => {
   assert.match(calc('x ^ ( 2 ) = 2').text, /^x=-√2, √2$/);
   assert.equal(calc('x ^ ( 5 ) + x = 1').text.includes('√'), false);              // no closed form: numeric only
 });
+test('a steep but convergent limit is not called undefined', () => {
+  assert.equal(Calculus.limit(T('( x + 1 ) ^ ( 400 )'), ['0']).value, 1);   // moves by 4e-3 between the last two samples
+  assert.equal(Calculus.limit(T('x ^ ( 50 )'), ['1']).value, 1);
+  assert.throws(() => Calculus.limit(T('abs ( x ) / x'), ['0']), e => e.code === 'undefined');
+});
+test('a numeric scan of a window is never shown as the solution set of a periodic equation', () => {
+  assert.equal(calc('sin ( x ) + cos ( x ) = 1').text, '= unsupported');   // the CAS listed 20 decimals and skipped -π
+  assert.equal(calc('cos ( x ) = 0.5').text, 'x=(1/3)π+2·nπ, (-1/3)π+2·nπ,  n∈ℤ');
+});
+test('inputs the CAS would expand without bound are refused at once, answers below the bounds are kept', () => {
+  const quick = (s, want) => { const t0 = Date.now(); const r = calc(s); assert.ok(Date.now() - t0 < 500, s + ' took ' + (Date.now() - t0) + ' ms'); if (want) assert.equal(r.text, want); };
+  quick('x ^ ( 99999 ) = 2', '= unsupported');                 // exhausted the heap
+  quick('x ^ ( 999999 ) - 1 = 0', '= unsupported');
+  quick('sin ( x ) ^ ( 200 ) = 1', '= unsupported');           // ran for minutes
+  quick('( sin ( x ) + cos ( x ) ) ^ ( 16 ) = 1', '= unsupported');
+  quick('( 1 / 3 ) ^ ( 9999999 )', '=≈0');                     // seconds of exact arithmetic
+  assert.equal(calc('sin ( x ) ^ ( 6 ) = 1').text, 'x=(-1/2)π+2·nπ, (1/2)π+2·nπ,  n∈ℤ');
+  assert.equal(calc('( x ^ ( 2 ) - 3 ) ^ ( 8 ) = 1').text, 'x=-2, -√2, √2, 2');
+  assert.equal(Calculus.derivative(T('( x + 1 ) ^ ( 400 )')).text, '400·(1+x)^399');   // differentiation does not expand: not capped
+});
+test('a constant statement in degrees is decided exactly when it can be', () => {
+  assert.equal(calc('sin ( 30 ) = 0.5', {angle: 'deg'}).text, 'True');   // was refused: the CAS (radians only) was asked first
+});

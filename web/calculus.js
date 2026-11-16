@@ -43,10 +43,43 @@ const Calculus = (() => {
     return [n.arg, n.left, n.right].some(hasTrig);
   }
 
-  function parseExpr(tokens, settings) {
+  // The CAS runs synchronously on the page's thread and expands powers: x^99999 = 2 exhausted the heap, sin(x)^200 = 1 ran for
+  // minutes, (1/3)^999999 for seconds. Anything whose expansion could be that large is refused before the CAS sees it.
+  // The bounds were measured: no closed form was ever found past them, and everything below them answers in about a second or less.
+  const MAX_CAS_DEGREE = 16;      // polynomial degree in x ((x²-3)^8 = 1 still gets its radicals)
+  const MAX_CAS_FN_POWER = 6;     // power of an expression holding a function of x (sin(x)^6 = 1 still solves)
+  const MAX_CAS_EXPONENT = 4096;  // any constant exponent, e.g. (1/3)^4096
+  const hasX = n => !!n && typeof n === 'object' && (n.type === 'symbol' ? n.name === 'x' : [n.arg, n.left, n.right].some(hasX));
+  const hasFnOfX = n => !!n && typeof n === 'object' && (n.type === 'function' ? hasX(n.arg) : [n.arg, n.left, n.right].some(hasFnOfX));
+  /** Upper bound on the degree in x the CAS could expand `n` to; Infinity when an exponent is too large to be worth trying. */
+  function casDegree(n) {
+    switch (n && n.type) {
+      case 'symbol': return n.name === 'x' ? 1 : 0;
+      case 'negate': case 'percent': case 'factorial': case 'function': return casDegree(n.arg);
+      case 'binary': {
+        const a = casDegree(n.left), b = casDegree(n.right);
+        if (n.op === '+' || n.op === '-') return Math.max(a, b);
+        if (n.op === '*' || n.op === '/') return a + b;
+        if (hasX(n.right)) return a + b;                       // 2^x, x^x: not a polynomial power, nothing to expand
+        let k;
+        try { k = Math.abs(Core.evaluateAst(n.right, 'rad')); } catch (e) {
+          return e && e.code === 'unsupported' ? a + b : Infinity;   // e^(iπ/3): not a real power, nothing to expand; 9^999 overflowed: far too large
+        }
+        if (Number.isNaN(k)) return a + b;
+        if (k > MAX_CAS_EXPONENT || (k > MAX_CAS_FN_POWER && hasFnOfX(n.left))) return Infinity;
+        return a * Math.ceil(k);
+      }
+      default: return 0;
+    }
+  }
+  const casAffordable = ast => casDegree(ast) <= MAX_CAS_DEGREE;
+
+  /** `expands`: the CAS will expand the expression (solve, integrate, simplify); differentiation and limits do not, and are not capped. */
+  function parseExpr(tokens, settings, expands = true) {
     if (!Array.isArray(tokens) || !tokens.length || tokens.length > MAX_TOKENS) fail('unsupported');
     const ast = Core.parse(tokens);
     if (settings && settings.angle === 'deg' && hasTrig(ast)) fail('unsupported');   // calculus is done in radians
+    if (expands && !casAffordable(ast)) fail('unsupported');
     return ast;
   }
   const numeric = ast => x => { try { return Core.evaluateAst(ast, 'rad', x); } catch (_) { return NaN; } };
@@ -78,7 +111,7 @@ const Calculus = (() => {
   }
 
   function derivative(tokens, settings) {
-    const ast = parseExpr(tokens, settings), f = numeric(ast);
+    const ast = parseExpr(tokens, settings, false), f = numeric(ast);
     const out = run(`diff(${toCas(ast)},x)`);
     let ok = 0;
     for (const x of SAMPLES) {
@@ -141,7 +174,7 @@ const Calculus = (() => {
 
   /** at: tokens of the point, or the strings 'inf' / '-inf'. */
   function limit(tokens, at, settings) {
-    const ast = parseExpr(tokens, settings), f = numeric(ast);
+    const ast = parseExpr(tokens, settings, false), f = numeric(ast);
     const inf = at === 'inf' || at === '-inf';
     const point = inf ? (at === 'inf' ? Infinity : -Infinity) : Core.evaluateAst(parseExpr(at, settings), 'rad');
     const target = inf ? at === 'inf' ? 'Infinity' : '-Infinity' : toCas(parseExpr(at, settings));
@@ -150,9 +183,15 @@ const Calculus = (() => {
     const seq = side => (inf ? [1e3, 1e4, 1e5, 1e6].map(m => (side < 0 ? -m : m)) : [1e-3, 1e-4, 1e-5, 1e-6].map(h => point + side * h)).map(f);
     const sides = inf ? [seq(at === 'inf' ? 1 : -1)] : [seq(-1), seq(1)];
     if (!sides.every(v => v.slice(-2).every(Number.isFinite))) fail('unsupported');
-    const ends = sides.map(v => v[v.length - 1]);
-    // Both sides must settle (last two samples agree) on the CAS value; |x|/x at 0 has two different one-sided limits.
-    if (!sides.every(v => close(v[2], v[3], 1e-3)) || !ends.every(e => close(e, got, 1e-3))) fail('undefined');
+    // Each side must reach the CAS value: either it has settled on it (last two samples agree), or a steep but convergent
+    // function ((1+x)^400 at 0 moves by 4e-3 between the last two samples) closes in on it, the gap shrinking at every step.
+    // |x|/x at 0 has two different one-sided limits and sin(1/x) none: their gap does not shrink, so they stay 'undefined'.
+    const settled = v => close(v[2], v[3], 1e-3) && close(v[3], got, 1e-3);
+    const closesIn = v => {
+      const gap = v.map(y => Math.abs(y - got));
+      return gap[3] <= 1e-2 * (1 + Math.abs(got)) && gap[1] <= gap[0] / 3 && gap[2] <= gap[1] / 3 && gap[3] <= gap[2] / 3;
+    };
+    if (!Number.isFinite(got) || !sides.every(v => settled(v) || closesIn(v))) fail('undefined');
     return {kind: 'limit', text: pretty(out.text), value: got};
   }
 
@@ -167,6 +206,9 @@ const Calculus = (() => {
     const periodic = [];
     for (const s of list) {
       if (/\bi\b/.test(s)) fail('unsupported');   // complex answers belong to the ℂ mode
+      // A decimal is the CAS's numeric scan of a window (sin x + cos x = 1 gave 20 roots in [-32, 18] and skipped -π):
+      // never the whole solution set of a periodic equation, so it is not shown as one.
+      if (looksNumeric(s)) fail('unsupported');
       const ns = /_n/.test(s) ? [-2, -1, 0, 1, 2] : [0];
       for (const n of ns) {
         const x = casValue(s, {_n: n});
@@ -242,12 +284,15 @@ const Calculus = (() => {
 
   /** Constant statement a = b: true / false when it can be decided (exactly or symbolically), else null. */
   function compare(leftTokens, rightTokens, settings) {
-    const L = parseExpr(leftTokens, settings), R = parseExpr(rightTokens, settings);
+    if ([leftTokens, rightTokens].some(t => !Array.isArray(t) || !t.length || t.length > MAX_TOKENS)) fail('unsupported');
+    const L = Core.parse(leftTokens), R = Core.parse(rightTokens);
     const mark = JSON.stringify([L, R]);
     if (mark.includes('"x"')) return null;
     try {
       const a = Core.evaluate(leftTokens, settings), b = Core.evaluate(rightTokens, settings);
       if (a.rational && b.rational) return a.rational.n * b.rational.d === b.rational.n * a.rational.d;
+      if (settings && settings.angle === 'deg' && (hasTrig(L) || hasTrig(R))) return null;   // the CAS works in radians
+      if (!casAffordable(L) || !casAffordable(R)) return null;   // too large for the CAS: left to the ordinary engine
       const diff = CAS(`(${toCas(L)})-(${toCas(R)})`).toString();
       if (diff === '0') return true;
       if (!unevaluated(diff) && !close(a.value, b.value, 1e-9)) return false;
