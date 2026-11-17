@@ -238,8 +238,9 @@ const SeqCore = (() => {
    * anything else (matrices, mod, determinants, ...) is reported through `unsupported` so the caller can show it without an answer. */
   const FUNCTION_WORDS = new Set(['sin', 'cos', 'tan', 'ln', 'log', 'exp', 'cot', 'sec', 'csc', 'sinh', 'cosh', 'tanh', 'arcsin', 'arccos', 'arctan', 'arg']);
   const ARC = {arcsin: 'asin', arccos: 'acos', arctan: 'atan'};
-  function toMathTokens(tokens, {complex = false} = {}) {
-    let i = 0;
+  const RELATION = {'<': '<', '>': '>', '\\le': '≤', '\\leq': '≤', '\\ge': '≥', '\\geq': '≥'};
+  function toMathTokens(tokens, {complex = false, decimalComma = false} = {}) {
+    let i = 0, bars = 0;                     // bars: |…| pairs still open
     const out = [], fail = why => { const e = new Error(why); e.unsupported = true; throw e; };
     const peek = () => tokens[i], next = () => tokens[i++];
     function group() {                       // {...} -> emitted flat; returns nothing
@@ -250,8 +251,20 @@ const SeqCore = (() => {
     function seq(stop) {
       while (i < tokens.length && peek() !== stop) {
         const t = next();
-        if (/^[0-9.]$/.test(t)) { let n = t; while (i < tokens.length && /^[0-9.]$/.test(peek())) n += next(); out.push(n); }
-        else if (t === '{') { i--; group(); }
+        if (/^[0-9.]$/.test(t)) {
+          let n = t;
+          for (;;) {
+            if (i < tokens.length && /^[0-9.]$/.test(peek())) n += next();
+            else if (decimalComma && peek() === ',' && !n.includes('.') && /^[0-9]$/.test(tokens[i + 1] || '')) { next(); n += '.'; }   // 1,5 is one and a half where the comma is the decimal sign
+            else break;
+          }
+          out.push(n);
+        }
+        else if (t === '{') {                  // a group that is the base of a power is bracketed: {2+1}^{2} is (2+1)^2
+          const close = (() => { for (let k = i - 1, d = 0; k < tokens.length; k++) { if (tokens[k] === '{') d++; else if (tokens[k] === '}' && --d === 0) return k; } return -1; })();
+          i--;
+          if (close > 0 && tokens[close + 1] === '^' && close - i > 2) wrapped(() => group()); else group();
+        }
         else if (t === '^') { out.push('^'); wrapped(() => { if (peek() === '{') group(); else out.push(next()); }); }
         else if (t === '\\frac') { wrapped(() => { out.push('('); group(); out.push(')'); out.push('/'); out.push('('); group(); out.push(')'); }); }
         else if (t === '\\sqrt') { out.push('√'); wrapped(() => group()); }
@@ -259,6 +272,12 @@ const SeqCore = (() => {
         else if (t === '\\times') out.push('*');
         else if (t === '\\div') out.push('/');
         else if (t === '\\pi') out.push('π');
+        else if (t === '|') {                  // |a| is abs(a): a bar opens after nothing, an operator or an open bracket, and closes otherwise
+          const prev = out[out.length - 1], side = tokens[i - 2];
+          const opens = side === '\\left' ? true : side === '\\right' ? false : !bars || prev === undefined || ['(', '+', '-', '*', '/', '=', '<', '>', '≤', '≥'].includes(prev);
+          if (opens) { out.push('abs', '('); bars++; } else { if (!bars) fail('syntax'); out.push(')'); bars--; }
+        }
+        else if (Object.prototype.hasOwnProperty.call(RELATION, t)) out.push(RELATION[t]);
         else if (t === '\\left' || t === '\\right') { /* the bracket token follows */ }
         else if (t === '\\left(' || t === '\\left[') out.push('(');       // the model's fused bracket tokens
         else if (t === '\\right)' || t === '\\right]') out.push(')');
@@ -270,6 +289,7 @@ const SeqCore = (() => {
       }
     }
     seq(undefined);
+    if (bars) fail('syntax');
     while (out.length && out[out.length - 1] === '=') out.pop();   // trailing "=" asks for the answer, as on the board
     return out;
   }
@@ -389,6 +409,11 @@ const SeqCore = (() => {
         const empty = at => t[at] === '{' && t[at + 1] === '}';
         let drop = null;
         if ((t[j] === '^' || t[j] === '_' || t[j] === '\\sqrt' || t[j] === '\\overline') && (empty(j + 1) || j + 1 >= t.length)) drop = [j, j + 1, j + 2];
+        else if ((t[j] === '^' || t[j] === '_') && t[j + 1] === '{' && (j === 0 || /^([+\-=<>,(]|<nl>|\{|\\times|\\div|\\le|\\ge|\\left\(|\\left)$/.test(t[j - 1]))) {
+          let e = j + 1;                       // the base of this power is gone: keep what was raised, as plain writing
+          for (let d = 0; e < t.length; e++) { if (t[e] === '{') d++; else if (t[e] === '}' && --d === 0) break; }
+          drop = [j, j + 1, e];
+        }
         else if (t[j] === '\\frac' && empty(j + 1) && empty(j + 3)) drop = [j, j + 1, j + 2, j + 3, j + 4];
         else if (empty(j) && t[j - 1] !== '\\frac' && t[j - 3] !== '\\frac' && t[j - 1] !== '}' ) drop = [j, j + 1];
         if (drop) { keep = keep.filter((_, at) => !drop.includes(at)); changed = true; }

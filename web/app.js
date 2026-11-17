@@ -158,8 +158,11 @@ function reveal(L){if(ptrs.size||gest)return;const gs=L.syms.concat(L.ans).filte
 function computeAns(L) {
   const last=L.syms[L.syms.length-1],trailingEquals=!!(last&&ch(last)=='=');
   if(L.rt){const lx=Calculator.computeLatex(L.rt.split(' '),{...SET,lang:LANG},trailingEquals,storeFor(L));if(lx!==undefined)return lx}   // matrices, mod, congruences: from the model's LaTeX
-  let tokens;
-  try { tokens=tokenize(L); } catch (_) { return null; }
+  let tokens=null;
+  // A reading is computed from its own structure (the recogniser's tokens), which says exactly what is under a root or in an exponent; the glyphs on
+  // screen only say it roughly. They are the fallback for what the structure reader does not know, and the only source on a line without a reading.
+  if(L.rt){try{tokens=SeqCore.toMathTokens(L.rt.split(' '),{complex:SET.domain=='complex',decimalComma:LANG=='fr'})}catch(_){tokens=null}}
+  if(!tokens){try { tokens=tokenize(L); } catch (_) { return null; }}
   return Calculator.compute(tokens,{...SET,lang:LANG},trailingEquals);
 }
 function buildAns(pieces){const now=performance.now();let k=0;const out=[];const d=()=>now+260+(k++)*75;
@@ -284,6 +287,10 @@ function scribble(s,soft){let hit=false;const now=performance.now();ghosts.push(
    if(rem.length){hit=true;rem.forEach(kill);L.syms=L.syms.filter(g=>!rem.includes(g));if(L.syms.length){layout(L);updateAns(L)}else{L.ans.forEach(kill);L.ans=[];L.at=null}}}
   if(!L.syms.length&&!L.ink.length){lines.splice(lines.indexOf(L),1);boardChanged(null)}}
  if(!hit&&soft)ghosts=ghosts.filter(g=>g.pts!==s);return hit}   // a doubtful scribble that touched nothing was writing after all
+/* A straight line drawn right through the middle of two or more symbols strikes them out (as on paper). A minus sits between symbols and a
+   fraction bar under or over them, so neither is mistaken for one. */
+function strike(s){const b=bb(s);if(s.length<4||b.w<40||b.h>.15*b.w)return false;let len=0;for(let i=1;i<s.length;i++)len+=Math.hypot(s[i][0]-s[i-1][0],s[i][1]-s[i-1][1]);if(len>1.25*b.w)return false;
+ let n=0;for(const L of lines)for(const g of L.syms){if(STRUCT.has(ch(g)))continue;const q=gbox(g),h=q.y1-q.y0,cx=(q.x0+q.x1)/2;if(cx>b.x0&&cx<b.x1&&b.y0>=q.y0+.25*h&&b.y1<=q.y1-.2*h)n++}return n>=2}
 /* Letters a scribble reads as (wide zigzags: W, M, n, H ...): a stroke read as one of them is a scribble; read as anything else, it is writing. */
 const SCRIBBLY=new Set(['W','w','M','m','n','N','H','u','U','Z','\\ln','\\overline']),hold=[];
 function settleMaybe(s){hold.push(s);const done=erase=>{const i=hold.indexOf(s);if(i>=0)hold.splice(i,1);if(!erase||!scribble(s,true))attach(s);clearTimeout(rt);rt=setTimeout(recognize,400);kick()};
@@ -359,14 +366,16 @@ function mkGlyphs(row,extra,off,alts){const ids=new Map();return SeqCore.toGlyph
  const g=newG(candidates(o,row,off||0,alts),Object.assign({sup:o.sup===2?2:!!o.sup,sl:!!o.sl,fp:o.fp,fid,pfid:o.pfid?ids.get(o.pfid):undefined,pfp:o.pfp,br:o.br,cover:o.cover||0,wb:!!o.wb,mul:!!o.mul,fresh:false},extra&&extra()));if(o.ti!==undefined)g.ti=(off||0)+o.ti;if(o.si!==undefined)g.si=(off||0)+o.si;return g})}
 function placeRow(L,gs,x0,base,F){L.syms=gs;L.x0=x0;L.base=base;L.F=F;layout(L);
  for(const g of gs){g.x=g.tx;g.y=g.ty+10;g.sz=g.tsz;g.a=0;g.ta=1;if(ch(g)=='√')g.vx=g.tx+.56*g.tsz}updateAns(L)}
-function applyReading(L,tokens,alts){const key=tokens.join(' ');if(L.seq&&L.tk===key)return;alts=alts||tokens.alts;L.alts=alts;L.toks=tokens;
+function applyReading(L,tokens,alts){{const n=EditCore.normalise(tokens,alts||tokens.alts);tokens=n.toks;alts=n.alts}   // one spelling: every edit is then a plain splice
+ const key=tokens.join(' ');if(L.seq&&L.tk===key)return;L.alts=alts;L.toks=tokens;
  const rows=[[]];for(const t of tokens)t==='<nl>'?rows.push([]):rows[rows.length-1].push(t);
  dropReading(L);L.tk=key;
  let x0=1e9,y0=1e9,y1=-1e9;const hs=[];for(const s of L.ink){const b=bb(s);x0=Math.min(x0,b.x0);y0=Math.min(y0,b.y0);y1=Math.max(y1,b.y1);if(b.h>=12)hs.push(b.h)}
  hs.sort((a,b)=>a-b);const h=hs.length?hs[Math.floor(hs.length*.75)]:40,R=rows.length;let F=Math.max(48,Math.min(240,h/.55*.85));
  if(R>1)F=Math.max(40,Math.min(F,(y1-y0)/R/1.45));                                  // every row must fit in its share of the ink's height
  // The reading takes the place of the handwriting: its rows are centred on the ink's rows (the baseline sits .32 F below the centre line).
- const baseOf=k=>y0+(k+.5)*(y1-y0)/R+.32*F;
+ let baseOf=k=>y0+(k+.5)*(y1-y0)/R+.32*F;
+ if(L.place||!L.ink.length){const P=L.place||{x0:L.x0,base:L.base,F:L.F||70};x0=P.x0;F=P.F;baseOf=k=>P.base+k*1.45*F}   // a line with no handwriting of its own (history, a drop) stays where it is
  L.seq=true;L.rt=SeqCore.unfuse(rows[0]).join(' ');placeRow(L,mkGlyphs(rows[0],null,0,alts),x0,baseOf(0),F);
  let off=rows[0].length+1;rows.slice(1).forEach((r,k)=>{const o0=off;off+=r.length+1;const K={syms:[],ans:[],ink:[],x0,base:baseOf(k+1),F,at:null,kidOf:L,rt:SeqCore.unfuse(r).join(' ')};lines.push(K);L.kids.push(K);placeRow(K,mkGlyphs(r,null,o0,alts),x0,K.base,F)});boardChanged(L)}
 /* Writing into a finished reading: a new character over a glyph, between glyphs, or after the last one. The reading you see and the handwriting under it
@@ -387,24 +396,70 @@ function freshSlot(L,b){const cx=(b.x0+b.x1)/2,w=Math.max(8,b.x1-b.x0);
  rows.forEach((R,j)=>{const gs=R.syms.map(gbox);if(!gs.length)return;const y0=Math.min(...gs.map(q=>q.y0)),y1=Math.max(...gs.map(q=>q.y1)),d=cy<y0?y0-cy:cy>y1?cy-y1:0;if(d<kd){kd=d;k=j}});
  const gs=rows[k].syms.map(gbox),start=k?nl[k-1]+1:0,end=k<nl.length?nl[k]:L.toks.length;
  return{ti:gs.length&&cx<Math.min(...gs.map(q=>q.x0))?start:end,over:false}}
+/* ---- Structured editing (EditCore): where a character written into a reading goes is decided from what is on screen. ---- */
+/* The glyphs of a reading at their resting place (not mid-animation), each with the token it came from. */
+function editBoxes(L){const out=[];for(const R of [L].concat(L.kids||[]))for(const g of R.syms){const k=g.ti!==undefined?g.ti:g.si;if(k===undefined)continue;
+  const c=ch(g),r=Object.assign({},g,{x:g.tx,y:g.ty,sz:g.tsz,bw:g.bwt!==undefined?g.bwt:g.bw,mh:g.mht!==undefined?g.mht:g.mh}),q=gbox(r),o={k,c,x0:q.x0,x1:q.x1,y0:q.y0,y1:q.y1};
+  if(c=='√'||c=='‾'){o.vx=g.vtx!==undefined?g.vtx:g.vx;o.sx1=c=='√'?g.tx+.56*g.tsz:g.tx;if(c=='√')o.y0=g.ty-(g.ru||.8)*g.tsz}
+  out.push(o)}return out}
+const flatStroke=t=>{const b=bb(t);return t.length>1&&b.w>=10&&b.h<=.3*b.w};
+/* One character read on its own: a flat stroke is a minus, two stacked ones an equals sign (the model reads a lone dash as anything); otherwise
+   the model's reading, kept only when it is one plain symbol or a root sign. -> {t:[token], a:[alternatives]} | null */
+async function readAlone(ss){
+ if(ss.length==1&&flatStroke(ss[0]))return{t:['-'],a:[[]]};
+ if(ss.length==2&&ss.every(flatStroke)){const a=bb(ss[0]),c=bb(ss[1]);if(Math.min(a.x1,c.x1)-Math.max(a.x0,c.x0)>.5*Math.min(a.w,c.w))return{t:['='],a:[[]]}}
+ let r=null;try{r=await seqRun(ss)}catch(e){return null}
+ if(r&&r.length===1&&SYMTOK.test(r[0]))return{t:r,a:[(r.alts||[])[0]||[]]};
+ if(r&&r[0]==='\\sqrt')return{t:['\\sqrt'],a:[[]]};
+ return null}
+/* The characters of new strokes; a long dash that is a fraction bar or a root's bar drawn further stands alone (the grouper would join it to a
+   digit written under it, as for an =). */
+function editGroups(L,G,fresh){const bars=fresh.filter(t=>flatStroke(t)&&bb(t).w>=40&&EditCore.barOp(L.toks,G,bb(t)));
+ return bars.map(t=>({s:[t],b:bb(t),bar:true})).concat(group(fresh.filter(t=>!bars.includes(t))).map(g=>({s:g.s,b:g.b})))}
+const stillFresh=(L,fresh)=>lines.includes(L)&&fresh.every(t=>L.ink.includes(t)&&!t.read);
+function commitEdits(L,fresh,edits){const res=EditCore.apply(L.toks,L.alts,edits);fresh.forEach(t=>{t.read=true;delete t.ctx});applyReading(L,res.toks,res.alts);L.sk=inkKey(L.ink);kick();return true}
+/* Every character placed by where it was written, read on its own: into a fraction's numerator or denominator, under a root's bar or past its end,
+   up into an exponent, over a symbol (replacing it) or between symbols. A dash drawn on from a root's bar makes the root reach further; one drawn
+   under (or over) symbols makes them a numerator (denominator). Returns false when a character has no clear place or cannot be read alone. */
+async function structEdit(L,fresh){
+ const G=editBoxes(L),toks=L.toks;if(!G.length)return false;const gs=editGroups(L,G,fresh).map(g=>Object.assign(g,{x:(g.b.x0+g.b.x1)/2}));
+ for(const g of gs)if(g.bar)g.op=EditCore.barOp(toks,G,g.b);
+ for(const f of gs.filter(g=>g.op&&g.op.kind=='frac')){f.part=[];const by=(f.b.y0+f.b.y1)/2;
+  for(const g of gs){if(g.op||g.into)continue;const cy=(g.b.y0+g.b.y1)/2;if(g.x>=f.b.x0-10&&g.x<=f.b.x1+10&&(f.op.part=='n'?cy>by:cy<by)){g.into=f;f.part.push(g)}}}
+ for(const g of gs)if(!g.op&&!g.into)g.sl=EditCore.slot(toks,G,g.b);
+ if(gs.some(g=>!g.op&&!g.into&&!g.sl))return false;
+ for(const g of gs){if(g.op)continue;g.r=await readAlone(g.s);if(!stillFresh(L,fresh))return true;if(!g.r)return false}
+ const edits=[],byX=(p,q)=>p.x-q.x;
+ for(const g of gs){
+  if(g.op&&g.op.kind=='extend'){edits.push({at:g.op.to,toks:['}'],x:g.x},{at:g.op.from,del:1,toks:[],x:g.x});continue}
+  if(g.op){const inner=g.part.sort(byX).flatMap(q=>q.r.t),ia=g.part.flatMap(q=>q.r.a);
+   if(g.op.part=='n')edits.push({at:g.op.s,toks:['\\frac','{'],x:-1e9},{at:g.op.e,toks:['}','{',...inner,'}'],alts:[[],[],...ia,[]],x:1e9});
+   else edits.push({at:g.op.s,toks:['\\frac','{',...inner,'}','{'],alts:[[],[],...ia,[],[]],x:-1e9},{at:g.op.e,toks:['}'],x:1e9});continue}
+  if(g.into)continue;
+  if(g.r.t[0]==='\\sqrt'){const sp=EditCore.span(toks,G,g.b.x0+.3*g.b.h,g.b.x1);
+   if(sp)edits.push({at:sp.s,toks:['\\sqrt','{'],x:-1e9},{at:sp.e,toks:['}'],x:1e9});else edits.push({at:g.sl.at,del:g.sl.del,toks:['\\sqrt','{','}'],x:g.x});continue}
+  edits.push({at:g.sl.at,del:g.sl.del,toks:g.r.t,alts:g.r.a,x:g.x,sup:!!g.sl.sup})}
+ const out=[];for(const e of edits.sort(byX)){const p=e.sup&&out.find(q=>q.sup&&q.at===e.at);if(p){p.t.push(...e.toks);p.a.push(...(e.alts||[[]]))}else out.push(e.sup?Object.assign(e,{t:e.toks.slice(),a:(e.alts||[[]]).slice()}):e)}
+ for(const e of out)if(e.sup){e.toks=['^','{',...e.t,'}'];e.alts=[[],[],...e.a,[]]}   // characters written up into a new exponent together
+ return commitEdits(L,fresh,out)}
+/* The fresh strokes read together as a block and put in where they were written (or after the nearest row). */
+async function blockEdit(L,fresh,ss=fresh,box=inkBox(fresh)){let r=null;try{r=await seqRun(ss)}catch(e){}
+ if(!stillFresh(L,fresh))return true;
+ if(!r||!r.length){fresh.forEach(t=>{t.read=true;delete t.ctx});L.sk=inkKey(L.ink);return true}
+ let sl=EditCore.slot(L.toks,editBoxes(L),box);if(!sl){const f=freshSlot(L,box);sl={at:f.ti,del:f.over?1:0}}
+ return commitEdits(L,fresh,[{at:sl.at,del:sl.del,toks:r.slice(),alts:r.map((_,i)=>r.alts&&r.alts[i]||[])}])}
+/* Does writing on this plain row need the structured path (an exponent, a root reaching further, a new fraction bar)? */
+function needsStruct(L,fresh){const G=editBoxes(L);return editGroups(L,G,fresh).some(g=>g.bar||(EditCore.slot(L.toks,G,g.b)||{}).sup)}
 /* Writing into a stale line (see seqErase): the old handwriting no longer matches the reading, so it is never read again. The new strokes are read
    on their own and put into the reading where they were written. */
 async function staleEdit(L,fresh){
- let r=null;try{r=await seqRun(fresh)}catch(e){}
- if(!lines.includes(L))return true;
- const cur=L.ink.filter(t=>!t.read&&!t.ctx);if(cur.length!==fresh.length||cur.some((t,i)=>t!==fresh[i]))return true;   // written or erased meanwhile: the next pass takes it all
- fresh.forEach(t=>{t.read=true});
- if(r&&r.length){const slot=freshSlot(L,inkBox(fresh)),n=slot.over?1:0,toks=L.toks.slice(),alts=L.toks.map((_,i)=>L.alts&&L.alts[i]||[]);
-  toks.splice(slot.ti,n,...r);alts.splice(slot.ti,n,...r.map((_,i)=>r.alts&&r.alts[i]||[]));applyReading(L,toks,alts)}
- L.sk=inkKey(L.ink);return true}
+ if(await structEdit(L,fresh))return true;if(!stillFresh(L,fresh))return true;
+ return blockEdit(L,fresh)}
 async function seqEdit(L){
  const fresh=L.ink.filter(t=>!t.read&&!t.ctx),old=L.ink.filter(t=>t.read);if(L.stale&&fresh.length)return staleEdit(L,fresh);if(!fresh.length||!old.length||!L.F)return false;
+ if(L.toks&&(!seqFlat(L)||needsStruct(L,fresh))){if(await structEdit(L,fresh))return true;if(!stillFresh(L,fresh))return true}
+ const fbox=inkBox(fresh),nNew=group(fresh).length;
  const rows=[L].concat(L.kids||[]),Gb=rows.flatMap(R=>R.syms).map(gbox);if(!Gb.length)return false;
- if(!seqFlat(L)&&L.toks&&!(L.kids&&L.kids.length)){const gs=group(fresh),slots=gs.map(g=>structSlot(L,g.b));
-  if(slots.every(Boolean)){const reads=[];for(const g of gs){let a=null;try{a=await seqRun(g.s)}catch(e){}if(!lines.includes(L))return true;if(!a||a.length!==1||!SYMTOK.test(a[0])){reads.length=0;break}reads.push({a,slot:slots[gs.indexOf(g)]})}
-   if(reads.length===gs.length){const toks=L.toks.slice(),alts=(L.alts||[]).slice();reads.sort((p,q)=>q.slot.ti-p.slot.ti);   // right to left: earlier indices hold
-    for(const{a,slot}of reads){if(slot.over){toks[slot.ti]=a[0];alts[slot.ti]=(a.alts||[])[0]||[]}else{toks.splice(slot.ti,0,a[0]);alts.splice(slot.ti,0,(a.alts||[])[0]||[])}}
-    L.ink.forEach(t=>{t.read=true;delete t.ctx});applyReading(L,toks,alts);L.sk=inkKey(L.ink);return true}}}
  const flat=seqFlat(L),gl=flat?L.syms.slice().sort((a,b)=>a.tx-b.tx):[],gbs=gl.map(gbox),oc=flat?inkChars(old).sort((a,b)=>a.b.x0+a.b.x1-b.b.x0-b.b.x1):[],pairs=flat&&oc.length===gl.length;
  const hs=old.map(t=>bb(t).h).filter(h=>h>=12),s=Math.max(.5,Math.min(1.4,hs.length?med(hs)/(.7*L.F):.92)),Ib=inkBox(old);
  const Gx0=Math.min(...Gb.map(b=>b.x0)),Gx1=Math.max(...Gb.map(b=>b.x1)),anchors=pairs?gbs.flatMap((b,i)=>[[b.x0,oc[i].b.x0],[b.x1,oc[i].b.x1]]):[[Gx0,Ib.x0],[Gx1,Ib.x1]];
@@ -426,14 +481,28 @@ async function seqEdit(L){
  let r=null;try{r=await seqRun(snap)}catch(e){}
  if(!lines.includes(L))return true;
  if(L.ink.length!==snap.length||L.ink.some((t,i)=>t!==snap[i])){L.sk=null;return true}   // more was written meanwhile: the next pass reads it all
- if(!flat){done(r,r&&r.alts);return true}
+ if(!flat){if(r&&r.length&&EditCore.keeps(L.toks,r,nNew)){done(r,r.alts);return true}   // the whole line read again kept what was there
+  return blockEdit(L,placed,placed,fbox)}                                              // otherwise only the new characters are read, and put where they were written
  const same=r&&r.length===exp.length&&exp.every((e,i)=>e.n?SYMTOK.test(r[i]):r[i]===e.t);
  if(same){done(r,r.alts);return true}
  const toks=[],alts=[];                                                                  // the context reading altered others or dropped the new character: read it alone
  for(const e of exp){if(!e.n){toks.push(e.t);alts.push(L.alts&&L.alts[E.findIndex(x=>x===e.t)]||[])}else{let a=null;try{a=await seqRun(e.g)}catch(x){}if(!a||a.length!==1||!SYMTOK.test(a[0])){done(r,r&&r.alts);return true}toks.push(a[0]);alts.push((a.alts||[])[0]||[])}}
  done(toks,alts);return true}
+/* The reading of a line typed from glyphs (reopened from history, dropped from the memory bar): its LaTeX tokens, or null for what it cannot say. */
+const GLYPH_TOK={'*':'\\times','/':'\\div','π':'\\pi','≤':'\\le','≥':'\\ge','≠':'\\ne'},WORD_TOK=['sinh','cosh','tanh','sin','cos','tan','cot','sec','csc','ln','log','exp'];
+function symsToToks(L){const conv=A=>{const out=[];let k=0;
+  while(k<A.length){const g=A[k],c=ch(g);
+   if(g.sup){const run=[];while(k<A.length&&A[k].sup){run.push(Object.assign(Object.create(A[k]),{sup:A[k].sup>1}));k++}const t=conv(run);if(!t)return null;out.push('^','{',...t,'}');continue}
+   if(c=='§'){const n=conv(partsOf(L,g,'n')),d=conv(partsOf(L,g,'d'));if(!n||!d)return null;out.push('\\frac','{',...n,'}','{',...d,'}');k++;continue}
+   if(c=='√'){const n=coverN(A,k),t=conv(A.slice(k+1,k+1+n));if(!t)return null;out.push('\\sqrt','{',...t,'}');k+=1+n;continue}
+   if(c=='▦'||c=='‾')return null;
+   if(/[a-z]/.test(c)){let w='';for(let j=k;j<A.length&&!A[j].sup&&/[a-z]/.test(ch(A[j]));j++)w+=ch(A[j]);const f=WORD_TOK.find(f=>w.startsWith(f));if(f){out.push('\\'+f);k+=f.length;continue}}
+   out.push(GLYPH_TOK[c]||c);k++}
+  return out};
+ try{return conv(seqs(L)[0])}catch(e){return null}}
 async function doRecognizeSeq(){
  for(const L of lines.slice()){if(L.kidOf||!L.ink.length||!lines.includes(L))continue;
+  if(!L.seq&&L.syms.length&&L.ink.every(t=>!t.read)){const t=symsToToks(L);if(t&&t.length){L.place={x0:L.x0,base:L.base,F:L.F};const ink=L.ink;L.ink=[];applyReading(L,t);L.ink=ink;L.stale=true}}   // writing on a typed line edits its reading
   if(L.seq&&L.ink.some(t=>!t.read)){let ok=false;try{ok=await seqEdit(L)}catch(e){console.error(e)}if(ok)continue}
   if(L.stale&&L.seq&&L.ink.every(t=>t.read))continue;   // a stale line is never read again from its handwriting (seqErase)
   const snap=L.ink.slice(),key=snap.length+':'+snap.map(s=>s.length).join(',');if(L.sk===key)continue;
@@ -538,6 +607,7 @@ cv.onpointermove=e=>{if(ptrs.has(e.pointerId))ptrs.set(e.pointerId,spt(e));if(ge
  for(const ev of es){const q=pt(ev),l=cur[cur.length-1];const d=Math.hypot(q[0]-l[0],q[1]-l[1])*V.k;if(d<1.5)continue;down.len+=d;cur.raw=q;cur.push([l[0]*.35+q[0]*.65,l[1]*.35+q[1]*.65])}if(down.len>=8)clearTimeout(lp)};
 cv.onpointerup=cv.onpointercancel=e=>{const wasGest=!!gest;ptrEnd(e);if(wasGest||e&&e.isPrimary===false)return;clearTimeout(lp);if(drag){dragEnd();return}let s=cur;cur=null;if(!s)return;if(s.raw&&s.length>1)s.push(s.raw);s.t0=down.t;s.t1=performance.now();
  if(down.len<8&&performance.now()-down.t<350&&tapCycle(down.p)){return}
+ if(strike(s)&&scribble(s)){rt=setTimeout(recognize,650);kick();return}
  const v=isScribble(s);if(v==='maybe')settleMaybe(s);else if(v)scribble(s);else{const r=seqOn()?null:radical(s);attach(r||s)}
  rt=setTimeout(recognize,650);kick()};
 /* The zoom pill brings you back to what you wrote: all of it centred, at 100% when it fits (otherwise the zoom that fits it). */
@@ -572,8 +642,15 @@ const typed=t=>[...t].filter(c=>/[0-9.\-+πe]/.test(c)).map(c=>newG([{c,p:1}],{f
 function drop(d){if(d.y>SH-70){if(!d.fromMem)memAdd(d.text);return}const [x,y]=toW(d.x,d.y);
  const gs=typed(d.text);if(!gs.length)return;let tgt=null;for(const L of lines){if(!L.syms.length)continue;const[a,z]=lineBox(L);if(y>=a-30&&y<=z+30){tgt=L;break}}
  if(d.src&&d.src.run){const r=d.src.run,b0=gbox(r[0]),b1=gbox(r[r.length-1]);if(Math.abs(x-(b0.x0+b1.x1)/2)<30&&Math.abs(y-(b0.y0+b0.y1)/2)<60)return;
-  const SL=d.src.L;r.forEach(kill);SL.syms=SL.syms.filter(s=>!r.includes(s));
-  if(SL.syms.length){layout(SL);SL.at='\0';updateAns(SL)}else{SL.ans.forEach(kill);SL.ans=[];lines.splice(lines.indexOf(SL),1)}}
+  const SL=d.src.L,SR=SL.kidOf||SL;
+  if(SR.seq&&SR.toks&&r.every(g=>g.ti!==undefined)){const keep=SeqCore.eraseTokens(SR.toks,new Set(r.map(g=>g.ti))),nt=keep.map(i=>SR.toks[i]);   // dragged out of a reading: its tokens go
+   if(nt.length){SR.stale=true;applyReading(SR,nt,SR.alts&&keep.map(i=>SR.alts[i]||[]))}else{dropReading(SR);lines.splice(lines.indexOf(SR),1);boardChanged(null)}}
+  else{r.forEach(kill);SL.syms=SL.syms.filter(s=>!r.includes(s));
+  if(SL.syms.length){layout(SL);SL.at='\0';updateAns(SL)}else{SL.ans.forEach(kill);SL.ans=[];lines.splice(lines.indexOf(SL),1)}}}
+ if(tgt&&tgt.kidOf)tgt=tgt.kidOf;
+ if(tgt&&lines.includes(tgt)&&tgt.seq&&tgt.toks){const tk=[...d.text].filter(c=>/[0-9.\-+πe]/.test(c)).map(c=>c=='π'?'\\pi':c);   // dropped into a reading: its tokens, where it was dropped
+  const sl=EditCore.slot(tgt.toks,editBoxes(tgt),{x0:x-4,x1:x+4,y0:y-.5*tgt.F,y1:y})||{at:tgt.toks.length,del:0};const res=EditCore.apply(tgt.toks,tgt.alts,[{at:sl.at,toks:tk}]);
+  tgt.stale=true;applyReading(tgt,res.toks,res.alts);kick();return}
  if(tgt&&lines.includes(tgt)){let k=tgt.syms.findIndex(s=>!isPart(s)&&s.tx+s.w/2>x);if(k<0)k=tgt.syms.length;tgt.syms.splice(k,0,...gs);
   gs.forEach(g=>{g.sz=tgt.F;g.x=x;g.y=y;g.a=0;g.ta=1});layout(tgt);tgt.at='\0';updateAns(tgt)}
  else{const F=d.src&&d.src.L?d.src.L.F:70,L={syms:gs,ans:[],ink:[],x0:Math.max(12,x-.3*F*gs.length),base:y,F,at:null};gs.forEach(g=>{g.sz=F;g.x=x;g.y=y;g.a=0;g.ta=1});lines.push(L);layout(L);updateAns(L)}}

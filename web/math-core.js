@@ -70,7 +70,8 @@ const MathCore = (() => {
       if (t === '(') return group();
       if (isNumber(t)) { next(); return nodes('number', {raw: t}); }
       if (t === 'π' || t === 'e' || t === 'x' || t === 'i') { next(); return nodes('symbol', {name: t}); }
-      if (t === '√') { next(); return nodes('function', {name: 'sqrt', arg: postfix()}); }
+      // √(9)! is (√9)!: a bracketed radicand is the whole argument, what is written after the bracket applies to the root
+      if (t === '√') { next(); return nodes('function', {name: 'sqrt', arg: peek() === '(' ? group() : postfix()}); }
       if (FUNCTIONS.has(t)) {
         next();
         let fnExponent = null;
@@ -788,6 +789,18 @@ const MathCore = (() => {
       (() => { const a = literal(displayed.replace(/^\+/, '')); return a.n === r.n && a.d === r.d; })(); }
     catch (_) { return false; }
   }
-  return Object.freeze({parse, evaluate, evaluateComplex, solve, inequality, MathError, exactDecimal, evaluateAst});
+  /** The exact decimal writing of a rational ("17179869184", "0.0009765625", "-12.5") when it has one of at most `maxDigits` digits, else null. */
+  function exactText(r, maxDigits = 21) {
+    if (!r || !terminating(r)) return null;
+    let k = 0, d = r.d;
+    while (d % 10n === 0n) { d /= 10n; k++; }
+    while (d % 2n === 0n) { d /= 2n; k++; }
+    while (d % 5n === 0n) { d /= 5n; k++; }
+    const digits = (abs(r.n) * 10n ** BigInt(k) / r.d).toString();
+    if (Math.max(digits.length, k + 1) > maxDigits) return null;
+    const padded = digits.padStart(k + 1, '0'), whole = padded.slice(0, padded.length - k), frac = k ? padded.slice(padded.length - k) : '';
+    return (r.n < 0n ? '-' : '') + whole + (frac ? '.' + frac : '');
+  }
+  return Object.freeze({parse, evaluate, evaluateComplex, solve, inequality, MathError, exactDecimal, exactText, evaluateAst});
 })();
 if (typeof module !== 'undefined' && module.exports) module.exports = MathCore;

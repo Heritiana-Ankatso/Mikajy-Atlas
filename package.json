@@ -1,6 +1,6 @@
 {
   "name": "mikajy-atlas",
-  "version": "6.7.0",
+  "version": "6.8.0",
   "private": true,
   "description": "Offline handwriting calculator for Android (HTML5 canvas in a WebView shell).",
   "license": "SEE LICENSE IN LICENSE",
@@ -10,7 +10,7 @@
     "test": "node --test tests/*.test.cjs",
     "build:web": "python3 web/build_web.py",
     "check:build": "python3 tests/build_check.py",
-    "test:browser": "python3 tests/browser_smoke.py && python3 tests/browser_strokes.py && python3 tests/browser_updates.py && python3 tests/browser_canvas.py && python3 tests/browser_seq.py && python3 tests/browser_scribble.py && python3 tests/browser_tapfix.py && python3 tests/browser_struct_edit.py && python3 tests/browser_erase.py",
+    "test:browser": "python3 tests/browser_smoke.py && python3 tests/browser_strokes.py && python3 tests/browser_updates.py && python3 tests/browser_canvas.py && python3 tests/browser_seq.py && python3 tests/browser_scribble.py && python3 tests/browser_tapfix.py && python3 tests/browser_struct_edit.py && python3 tests/browser_erase.py && python3 tests/browser_write_struct.py",
     "test:java": "bash scripts/test-update-checker.sh",
     "check": "npm test && npm run check:build && npm run test:browser"
   }

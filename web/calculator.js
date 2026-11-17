@@ -31,10 +31,12 @@ const Calculator = (() => {
         return [...sign, {f: [String(p), String(d)]}];
       }
     }
-    const exactDisplay = rational && Core.exactDecimal(rational);
-    // Never quietly turn a numeric approximation into an exact claim.
-    const prefix = exactDisplay ? '' : '≈';
-    return [textPiece(prefix + niceNumber(value))];
+    // An exact value is written exactly, every digit of it (2^34 is 17179869184, not ≈17179869180); only one too long to read is rounded.
+    const exactDisplay = rational && Core.exactText(rational, rational.d === 1n ? 36 : 21);
+    if (exactDisplay) return [textPiece(exactDisplay)];
+    // Never quietly turn a numeric approximation into an exact claim. A power of ten is written ×10ⁿ: "e+30" on the board reads as Euler's e.
+    const text = niceNumber(value), sci = /^(-?[\d.]+)e([+-])(\d+)$/.exec(text);
+    return sci ? [textPiece('≈' + sci[1] + '×10'), {s: (sci[2] === '-' ? '-' : '') + sci[3], sup: true}] : [textPiece('≈' + text)];
   }
   /** a+bi for a complex number {re, im, eRe, eIm} (eRe/eIm: exact rationals or null); one leading ≈ when anything is approximate. */
   function complexPieces(c, format) {

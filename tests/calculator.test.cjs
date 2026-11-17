@@ -30,3 +30,11 @@ test('equation rendering and no false exactness', () => {
   assert.equal(compute(['x','^','(','2',')','+','1','=','0']).text,'S=∅');
   assert.equal(compute(['x','/','x','=','1']).text,'= unsupported');
 });
+test('exact results keep every digit; huge approximations are written with ×10ⁿ, never e+', () => {
+  assert.equal(compute(['2','^','(','34',')']).text,'=17179869184');
+  assert.equal(compute(['123456789','*','987654321']).text,'=121932631112635269');
+  assert.equal(compute(['10','^','(','20',')']).text,'=100000000000000000000');
+  const big = compute(['2','^','(','150',')']);
+  assert.equal(big.text,'=≈1.427247693×10^(45)');
+  assert.deepEqual(big.pieces[big.pieces.length - 1], {s: '45', sup: true});
+});

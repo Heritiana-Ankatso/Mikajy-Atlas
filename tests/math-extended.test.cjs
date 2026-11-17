@@ -95,3 +95,18 @@ test('calculator displays inverted equations honestly', () => {
   assert.equal(calc('sin ( x ) = 0').text, 'x=nπ,  n∈ℤ');   // periodic answers are shown, verified by substitution
   assert.equal(calc('4 ^ ( 1 / 2 )').text, '2');
 });
+
+test('a bracketed radicand is the whole argument: √(9)! is (√9)!', () => {
+  const MathCore = require('../web/math-core.js');
+  assert.equal(MathCore.evaluate(['√', '(', '9', ')', '!']).value, 6);
+  assert.equal(MathCore.evaluate(['√', '(', '4', ')', '^', '(', '3', ')']).value, 8);
+  assert.equal(MathCore.evaluate(['√', '9', '!']).value > 600, true);              // without brackets the factorial is under the root, as before
+});
+test('exactText: every digit of an exact value', () => {
+  const MathCore = require('../web/math-core.js'), q = (n, d = 1n) => ({n: BigInt(n), d: BigInt(d)});
+  assert.equal(MathCore.exactText(q(17179869184)), '17179869184');
+  assert.equal(MathCore.exactText(q(1, 1024)), '0.0009765625');
+  assert.equal(MathCore.exactText(q(-25, 2)), '-12.5');
+  assert.equal(MathCore.exactText(q(1, 3)), null);
+  assert.equal(MathCore.exactText(q('123456789012345678901234567890')), null);   // too long to read: rounded instead
+});

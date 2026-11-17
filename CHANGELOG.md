@@ -5,6 +5,31 @@ and versions follow `MAJOR.MINOR` (the Android `versionName`).
 
 ## [Unreleased]
 
+## [6.8] - 2026-11-17
+
+Updates 6.4–6.7 in place from the app. `versionCode` 24.
+
+### Fixed
+- **A calculation is computed from what was read, not from where the glyphs landed.** A reading's answer now comes from the recogniser's own
+  structure (what is under a root, in an exponent, in a fraction), with the glyphs only as a fallback. Before, `√(2²)³` gave `2√3` (the
+  exponent was pulled under the root), `√9!` was `√(9!)` ≈ 602 instead of `3! = 6`, and `|−3|`, `arcsin 1`, `arctan 1` gave no answer.
+  `web/app.js`, `web/math-core.js` (a bracketed radicand is the whole argument), `web/seq-core.js` (`|…|`, `≤ ≥` from the model,
+  `{2+1}^2` keeps its brackets, `1,5` is a decimal in French, `2 x 3` is a product).
+- **Exact answers keep every digit.** `2^34` showed `≈17179869180` and `123456789 × 987654321` `≈121932631100000000`; both are now written
+  exactly (up to 36 digits). Larger approximations are written `≈1.43×10⁴⁵` instead of `1.43e+45`, which read as Euler's e.
+- **Writing into a root, a power or a fraction goes where you wrote it** (new `web/edit-core.js`):
+  - `=` written after a root went under it (`√(12+35=)`, and the answer lost its `=`); `+7` written past a root's bar went inside as `127+`;
+    a `3` written in front of a root went under it. The root's bar on screen now says what is inside it.
+  - A small character written up after a symbol is its exponent (it was read as a digit on the line: `5` then `²` became `52`).
+  - Drawing the root's bar further takes what it now covers under the root; a bar drawn under (or over) symbols makes them a numerator
+    (denominator). A lone dash is a minus: the model alone used to read it as `−a/b`.
+  - Characters that cannot be read alone fall back to reading the line in context, which is kept only if nothing already there changed.
+- **Erasing:** erasing the base of a power leaves its exponent on the line as plain writing (it left a dangling `^3` and no answer); a
+  straight line drawn through two or more symbols strikes them out (it was read as a minus).
+- **Writing on a line reopened from history** (or dropped from the memory bar) edits it: the whole line used to be replaced by what you wrote.
+  Dropping a number into a reading, or dragging digits out of one, now changes the reading itself, so they no longer come back.
+- New tests: `tests/edit-core.test.cjs`, `tests/browser_write_struct.py` (in CI), cases added to the maths, calculator and sequence tests.
+
 ## [6.7] - 2026-11-16
 
 Updates 6.6 in place from the app. `versionCode` 23.

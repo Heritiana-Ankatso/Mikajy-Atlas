@@ -111,3 +111,20 @@ test('erasing a glyph removes its tokens: a bar takes its fraction, a root sign 
   assert.equal(erase('\\sin x', 0), 'x');                                        // the letters of a word share its token
   assert.deepEqual(SeqCore.toGlyphs(T('\\sin x')).map(g => g.si), [0, 0, 0, undefined]);
 });
+test('toMathTokens: absolute value, relations, decimal comma, a bracketed power base', () => {
+  const tm = (l, o) => SeqCore.toMathTokens(l.split(' '), o).join(' ');
+  assert.equal(tm('| - 3 | + | 2 - 5 |'), 'abs ( - 3 ) + abs ( 2 - 5 )');
+  assert.equal(tm('\\left | x \\right | = 3'), 'abs ( x ) = 3');
+  assert.throws(() => SeqCore.toMathTokens('| 3'.split(' ')));
+  assert.equal(tm('x ^ { 2 } \\le 4'), 'x ^ ( 2 ) ≤ 4');
+  assert.equal(tm('1 , 5 + 2', {decimalComma: true}), '1.5 + 2');
+  assert.throws(() => SeqCore.toMathTokens('1 , 5'.split(' ')));               // without the French setting a comma is not a decimal sign
+  assert.equal(tm('{ 2 + 1 } ^ { 2 }'), '( 2 + 1 ) ^ ( 2 )');
+  assert.equal(tm('{ 2 } ^ { 2 }'), '2 ^ ( 2 )');
+});
+test('eraseTokens: erasing the base of a power leaves what was raised on the line', () => {
+  const er = (s, g) => { const t = s.split(' '); return SeqCore.eraseTokens(t, new Set(g)).map(k => t[k]).join(' '); };
+  assert.equal(er('2 ^ { 3 } + 1', [0]), '3 + 1');
+  assert.equal(er('1 + 2 ^ { 3 4 }', [2]), '1 + 3 4');
+  assert.equal(er('2 ^ { 3 } + 1', [3]), '2 + 1');
+});

@@ -1,16 +1,15 @@
 **Non-commercial use only.** Free to download and share, never to sell (code: PolyForm Noncommercial 1.0.0; trained model: CC BY-NC-SA 4.0).
 
-**Mikajy Atlas 6.7** — updates 6.4, 6.5 and 6.6 in place: tap *Get Mikajy Atlas 6.7* in the menu, your history and settings stay. On 6.3 or older (including any *Mikajy Free*), the app cannot update itself: export your history, uninstall the old app, then install this APK (6.4 changed the signing key).
+**Mikajy Atlas 6.8** — updates 6.4, 6.5, 6.6 and 6.7 in place: tap *Get Mikajy Atlas 6.8* in the menu, your history and settings stay. On 6.3 or older (including any *Mikajy Free*), the app cannot update itself: export your history, uninstall the old app, then install this APK (6.4 changed the signing key).
 
-## What changed since 6.6
+## What changed since 6.7
 
 **Fixed**
-- **Erasing is reliable.** A scribble acts on what you see. Erased characters no longer come back when you write on the line again; a scribble over a fraction bar or a root sign is no longer read as writing (it erases the fraction, or the root sign alone); a scribble over an answer erases the calculation; a coarse zigzag across a line erases every glyph it passes through.
-- **No more freezes on huge powers.** `x^99999 = 2`, `sin(x)^200 = 1` or `(1/3)^9999999` could freeze or crash the app; they now answer at once.
-- **No incomplete answers.** `sin x + cos x = 1` listed 20 decimals as if they were every solution; it now says *unsupported* rather than guess.
-- **Steep limits are right.** `lim (1+x)^400` at 0 said *undefined*; it is 1.
-- **Statements in degrees:** `sin(30) = 0.5` in degree mode now says *True*.
-- **Updates are only installed when their checksum is verified.**
+- **Answers follow what you wrote.** A calculation is computed from the structure that was read (what is under a root, in an exponent, in a fraction). `√(2²)³` is 8 (it said 2√3), `√9!` is 6, and `|−3|`, `arcsin 1`, `arctan 1` now have answers.
+- **Exact answers keep every digit:** `2^34 = 17179869184` (it showed ≈17179869180). Very large approximations are written `≈1.43×10⁴⁵`, not `1.43e+45`.
+- **Writing into a root, a power or a fraction lands where you wrote it.** An `=` or `+7` written after a root stays outside it, a number written in front of a root multiplies it, a small raised character is an exponent, drawing a root's bar further takes in what it covers, and a bar drawn under a number makes it a numerator.
+- **Erasing:** erasing the base of a power keeps its exponent as plain writing; a straight line through symbols strikes them out.
+- **Writing on a line reopened from history** edits it instead of replacing it. Numbers dropped into (or dragged out of) a calculation stay changed.
 
 Full list: `CHANGELOG.md`.
 
